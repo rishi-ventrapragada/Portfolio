@@ -10,6 +10,8 @@ Increment 1 (PRD §10.1) complete: repo, Astro 7 scaffold, tokens, BaseLayout, N
 Hero with scroll dissolve, projects placeholder, footer, dev accent toggle, Vercel deploy.
 
 - Repo: https://github.com/rishi-ventrapragada/Portfolio
+- Live (public): https://portfolio-gamma-lake-gtndl2ey0m.vercel.app
+- Vercel project: `rishiventra/rishi-ventrapragada`, framework preset Astro, output `dist`.
 - Build: `astro check` clean — 0 errors, 0 warnings, 0 hints.
 - Client JS on `/`: 5.6 KB gzipped (ClientRouter only) against the 40 KB budget in PRD §8.
   The React runtime chunk is emitted but never referenced, since no island exists yet.
@@ -34,7 +36,19 @@ PRD §7 lists both as `[TODO]`.
   using the dev toggle. The toggle is removed once decided.
 - **Résumé**: footer links to `/resume.pdf`, which does not exist yet. The link is
   labelled `[TODO]` until the file lands in `public/`.
-- **Custom domain** (PRD §11): not touched. Owner adds it in the Vercel dashboard.
+- **Deployment Protection is ON** (`ssoProtection: all_except_custom_domains`), so every
+  newly created `*.vercel.app` URL returns Vercel's login page instead of the site. Only the
+  original alias `portfolio-gamma-lake-gtndl2ey0m.vercel.app` predates it and is public.
+  Turn it off at Vercel → Project → Settings → Deployment Protection → Vercel Authentication
+  → Disabled. I could not run `vercel project protection disable` — it was blocked here as a
+  security-weakening action, so it needs the owner.
+- **Pretty free URL**: blocked by the above, not by naming. Once protection is off, run
+  `vercel alias set <latest-deployment-url> rishi-ventrapragada.vercel.app` and re-check that
+  the page title is the portfolio, not "Login – Vercel" — an alias can report success without
+  actually serving your site while protection is on.
+- **Custom domain** (PRD §11): not touched, and no domain was purchased or registered. The
+  `.vercel.app` URLs are Vercel's free auto-generated ones. Owner adds any custom domain
+  in the dashboard.
 - **Hamburger menu**: the button is rendered `disabled` with `aria-expanded="false"`
   per PRD §5.1; behaviour is increment 6.
 - **Firefox**: `animation-timeline: scroll()` is still behind a flag as of Firefox 152,
