@@ -1,13 +1,13 @@
 ---
-// Temporary scaffold check — replaced by BaseLayout + Hero in later milestones.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import ProjectsPlaceholder from "../components/ProjectsPlaceholder.astro";
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Portfolio</title>
-  </head>
-  <body>
-    <h1>Scaffold</h1>
-  </body>
-</html>
+<BaseLayout
+  title="Sai Rishi Ventrapragada — Building for the web"
+  description="Portfolio of Sai Rishi Ventrapragada, CSE Data Science student building with React, Astro and Supabase."
+>
+  <Hero />
+  <ProjectsPlaceholder />
+</BaseLayout>

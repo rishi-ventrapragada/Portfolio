@@ -1,0 +1,203 @@
+---
+import { Image } from "astro:assets";
+import heroSubject from "../assets/hero-subject.png";
+---
+
+<section class="hero" data-hero>
+  {/* Layer A — wordmark, sticky so it dissolves in place. */}
+  <div class="wordmark-wrap">
+    <h1 class="wordmark">Rishi</h1>
+  </div>
+
+  {/* Layer B — real cutout, bottom-anchored, LCP element. */}
+  <div class="subject">
+    <Image
+      src={heroSubject}
+      alt="Sai Rishi Ventrapragada"
+      widths={[560, 923]}
+      sizes="(min-width: 768px) 560px, 92vw"
+      loading="eager"
+      fetchpriority="high"
+      decoding="sync"
+    />
+  </div>
+
+  {/* Layer C — caption. */}
+  <div class="caption">
+    <p class="label accent-line">Building for the web</p>
+    <p class="meta">React &middot; Astro &middot; Supabase</p>
+    <p class="meta">KalaCart &middot; Life OS &middot; AEGIS</p>
+  </div>
+</section>
+
+<script>
+  // Fallback only where scroll-driven CSS is unavailable (Firefox as of 152).
+  if (!CSS.supports("animation-timeline: scroll()")) {
+    const hero = document.querySelector<HTMLElement>("[data-hero]");
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+
+    if (hero) {
+      let ticking = false;
+
+      const update = () => {
+        ticking = false;
+        const range = hero.offsetHeight * 0.4;
+        const progress = range > 0 ? Math.min(Math.max(window.scrollY / range, 0), 1) : 0;
+        hero.style.setProperty("--hero-progress", progress.toFixed(3));
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      };
+
+      const start = () => {
+        hero.dataset.fallback = "on";
+        update();
+        addEventListener("scroll", onScroll, { passive: true });
+        addEventListener("resize", onScroll, { passive: true });
+      };
+
+      const stop = () => {
+        delete hero.dataset.fallback;
+        hero.style.removeProperty("--hero-progress");
+        removeEventListener("scroll", onScroll);
+        removeEventListener("resize", onScroll);
+      };
+
+      if (!reduced.matches) start();
+      reduced.addEventListener("change", (e) => (e.matches ? stop() : start()));
+    }
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    min-height: 100dvh;
+    overflow: clip;
+    background-color: var(--bg);
+  }
+
+  /* --- Layer A: wordmark ------------------------------------------------ */
+  .wordmark-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    pointer-events: none;
+  }
+
+  .wordmark {
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--size-wordmark);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--heading);
+    text-transform: uppercase;
+  }
+
+  /* --- Layer B: subject -------------------------------------------------- */
+  .subject {
+    position: relative;
+    z-index: 2;
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: center;
+    width: min(92vw, 560px);
+  }
+
+  /* Bottom-anchored: the frame ends exactly at the hero's edge, so the
+     cutout reads as standing on it rather than being cropped. */
+  .subject :global(img) {
+    width: 100%;
+    height: auto;
+    max-height: 88dvh;
+    object-fit: contain;
+    object-position: bottom center;
+  }
+
+  /* --- Layer C: caption -------------------------------------------------- */
+  .caption {
+    position: relative;
+    z-index: 3;
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: start;
+    max-width: min(80vw, 28rem);
+    padding: 0 var(--gutter) calc(var(--gutter) + env(safe-area-inset-bottom));
+  }
+
+  .caption p {
+    margin: 0;
+  }
+
+  .accent-line {
+    color: var(--accent);
+  }
+
+  /* --- Scroll dissolve over the first 40% (PRD 5.2) ---------------------- */
+  @keyframes wordmark-dissolve {
+    to {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(-8%);
+    }
+  }
+
+  @keyframes caption-fade {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .wordmark {
+      animation: wordmark-dissolve linear forwards;
+      animation-timeline: scroll(root block);
+      animation-range: 0 40dvh;
+    }
+
+    .caption {
+      animation: caption-fade linear forwards;
+      animation-timeline: scroll(root block);
+      animation-range: 0 40dvh;
+    }
+  }
+
+  /* Script fallback drives the same visuals from --hero-progress. */
+  .hero[data-fallback="on"] .wordmark {
+    opacity: calc(1 - var(--hero-progress, 0));
+    filter: blur(calc(var(--hero-progress, 0) * 8px));
+    transform: translateY(calc(var(--hero-progress, 0) * -8%));
+  }
+
+  .hero[data-fallback="on"] .caption {
+    opacity: calc(1 - var(--hero-progress, 0));
+  }
+
+  /* --- Reduced motion: opacity only, no blur or movement ----------------- */
+  @media (prefers-reduced-motion: reduce) {
+    @keyframes wordmark-dissolve {
+      to {
+        opacity: 0;
+      }
+    }
+
+    .hero[data-fallback="on"] .wordmark {
+      filter: none;
+      transform: none;
+    }
+  }
+</style>
