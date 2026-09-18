@@ -1,33 +1,21 @@
 ---
-// PRD 5.1 — fixed bar. Menu behaviour is [next]; the button exists now but is inert.
+// PRD 5.1 — a single fixed hamburger, top right. Menu behaviour is [next];
+// the button exists now and stays inert until then.
 ---
 
 <header class="nav" data-nav>
   <div class="nav-inner">
-    <a class="label brand" href="/">Rishi &copy;</a>
-
-    <div class="center meta" aria-hidden="true">
-      <span>Portfolio 01</span>
-      <span>MMXXVI</span>
-    </div>
-
-    <div class="right">
-      <div class="meta stack">
-        <span>CSE &middot; Data Science</span>
-        <span>Hyderabad, IN</span>
-      </div>
-      <button
-        type="button"
-        class="burger"
-        aria-expanded="false"
-        aria-controls="site-menu"
-        aria-label="Open menu"
-        disabled
-      >
-        <span></span>
-        <span></span>
-      </button>
-    </div>
+    <button
+      type="button"
+      class="burger"
+      aria-expanded="false"
+      aria-controls="site-menu"
+      aria-label="Open menu"
+      disabled
+    >
+      <span></span>
+      <span></span>
+    </button>
   </div>
 </header>
 
@@ -66,49 +54,27 @@
   }
 
   .nav-inner {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
     height: 100%;
     max-width: var(--max-width);
     margin-inline: auto;
+    /* Gutter keeps the button on the same line as page content rather than
+       floating at the very edge. */
     padding-inline: var(--gutter);
-    gap: 1rem;
   }
 
-  .brand {
-    color: var(--fg);
-  }
-
-  .center {
-    display: none;
-    justify-self: center;
-    text-align: center;
-    line-height: 1.35;
-  }
-
-  .center span,
-  .stack span {
-    display: block;
-  }
-
-  .right {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-  }
-
-  .stack {
-    display: none;
-    text-align: right;
-    line-height: 1.35;
-  }
-
+  /* 64px square hit area; the bars themselves stay 28px wide, right-aligned
+     inside it so they sit on the gutter line. */
   .burger {
     display: grid;
+    align-content: center;
+    justify-items: end;
     gap: 5px;
-    width: 28px;
-    padding: 6px 0;
+    width: var(--nav-height);
+    height: var(--nav-height);
+    padding: 0;
     background: none;
     border: 0;
     cursor: not-allowed;
@@ -116,6 +82,7 @@
 
   .burger span {
     display: block;
+    width: 28px;
     height: 1px;
     background-color: var(--fg);
     transition: background-color 160ms ease;
@@ -123,20 +90,5 @@
 
   .burger:hover:not(:disabled) span {
     background-color: var(--accent);
-  }
-
-  @media (min-width: 768px) {
-    .nav-inner {
-      grid-template-columns: 1fr auto 1fr;
-    }
-
-    .center,
-    .stack {
-      display: block;
-    }
-
-    .right {
-      justify-self: end;
-    }
   }
 </style>
