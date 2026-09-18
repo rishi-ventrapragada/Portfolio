@@ -4,17 +4,16 @@ import heroSubject from "../assets/hero-subject.png";
 ---
 
 <section class="hero" data-hero>
-  {/* Layer A — wordmark. Sticky so it dissolves in place; the SVG spans edge
-      to edge at every viewport while the visually hidden <h1> keeps the
-      semantics.
+  {/* Layer A — wordmark. Sticky so it dissolves in place; the visually hidden
+      <h1> carries the semantics while the SVG does the typography.
 
       The viewBox is the glyphs' painted ink box, measured off a real render
       rather than taken from font metrics (getBBox and getExtentOfChar both
       report advance boxes, which are wider and much taller than the paint).
-      Cropping to it is what lets the strokes touch the viewport edges.
-      preserveAspectRatio stays at the default so the letterforms scale
-      uniformly, and lengthAdjust="spacing" only redistributes the gaps
-      between glyphs — it never stretches the letters themselves. */}
+      Cropping to it is what removes the dead space around the letters, so the
+      capped width below is all glyph. preserveAspectRatio stays at the default
+      so the letterforms scale uniformly, and lengthAdjust="spacing" only
+      redistributes the gaps between glyphs — never the letters themselves. */}
   <div class="wordmark-wrap">
     <h1 class="visually-hidden">Rishi</h1>
     <svg
@@ -49,12 +48,6 @@ import heroSubject from "../assets/hero-subject.png";
     />
   </div>
 
-  {/* Layer C — caption. */}
-  <div class="caption">
-    <p class="label accent-line">Building for the web</p>
-    <p class="meta">React &middot; Astro &middot; Supabase</p>
-    <p class="meta">KalaCart &middot; Life OS &middot; AEGIS</p>
-  </div>
 </section>
 
 <script>
@@ -110,16 +103,16 @@ import heroSubject from "../assets/hero-subject.png";
   }
 
   /* --- Layer A: wordmark ------------------------------------------------ */
-  /* Sticky wrapper spans the viewport; the SVG is pinned just under the nav
-     so the subject's shoulders cross the lower third of the letters. */
+  /* Sticky wrapper spans the viewport; the SVG inside it is centred and capped,
+     pinned just under the nav so the head and shoulders cross the lower half of
+     the letters. */
   .wordmark-wrap {
     position: sticky;
     top: 0;
     z-index: 1;
     grid-area: 1 / 1;
     height: 100dvh;
-    /* Letters start just under the nav; the subject then crosses their lower
-       third. Overflow stays visible so the dissolve's 8px blur is not clipped;
+    /* Overflow stays visible so the dissolve's 8px blur is not clipped;
        .hero already clips anything that leaves the section. */
     padding-top: calc(var(--nav-height) + 0.5rem);
     pointer-events: none;
@@ -127,12 +120,12 @@ import heroSubject from "../assets/hero-subject.png";
 
   .wordmark {
     display: block;
-    width: 100%;
-    /* Ratio matches the ink-box viewBox, so width drives height: the strokes
-       stay flush to both edges and the glyphs are never stretched. On a wide,
-       short window the caps can outgrow the hero; the wrapper clips that
-       overflow rather than letting the SVG letterbox, which would reintroduce
-       gaps at the edges. */
+    /* 72vw centred: ~14% margin each side at 1440px. Sits between the original
+       22vw type and the edge-to-edge version. */
+    width: clamp(320px, 72vw, 1100px);
+    margin-inline: auto;
+    /* Ratio matches the ink-box viewBox, so width drives height and the glyphs
+       are never stretched. */
     height: auto;
     aspect-ratio: 2055 / 735;
   }
@@ -154,38 +147,19 @@ import heroSubject from "../assets/hero-subject.png";
     grid-area: 1 / 1;
     align-self: end;
     justify-self: center;
-    /* Sized so the shoulders cross the lower third of the letters rather than
-       riding up over the whole wordmark. */
+    /* Sized so the head and shoulders cross the lower half of the letters
+       rather than riding up over the whole wordmark. */
     width: min(88vw, 470px);
   }
 
   /* Bottom-anchored. The PNG's built-in fade lands at the hero's bottom edge,
-     roughly at the caption's baseline, so nothing below the vest reads as cut. */
+     so nothing below the vest reads as a cut. */
   .subject :global(img) {
     width: 100%;
     height: auto;
     max-height: 86dvh;
     object-fit: contain;
     object-position: bottom center;
-  }
-
-  /* --- Layer C: caption -------------------------------------------------- */
-  .caption {
-    position: relative;
-    z-index: 3;
-    grid-area: 1 / 1;
-    align-self: end;
-    justify-self: start;
-    max-width: min(80vw, 28rem);
-    padding: 0 var(--gutter) calc(var(--gutter) + env(safe-area-inset-bottom));
-  }
-
-  .caption p {
-    margin: 0;
-  }
-
-  .accent-line {
-    color: var(--accent);
   }
 
   /* --- Scroll dissolve over the first 40% (PRD 5.2) ---------------------- */
@@ -211,34 +185,19 @@ import heroSubject from "../assets/hero-subject.png";
     }
   }
 
-  @keyframes caption-fade {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-
   @supports (animation-timeline: scroll()) {
-    .wordmark-wrap {
+    /* Longhands, never the `animation` shorthand: if the timeline is allowed to
+       fold into it, the minifier emits `animation: ... scroll(root)` and every
+       browser drops the declaration, silently killing the dissolve. The
+       :where(.hero) prefix keeps this rule from merging with the one below. */
+    :where(.hero) .wordmark-wrap {
       animation-name: wordmark-dissolve;
-      animation-duration: 1ms; /* Overridden by the timeline; keeps the shorthand unmerged. */
+      animation-duration: 1ms; /* Overridden by the timeline. */
       animation-timing-function: linear;
       animation-fill-mode: both;
     }
 
-    .caption {
-      animation-name: caption-fade;
-      animation-duration: 1ms;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-    }
-
-    /* Separate rules: if these land in the `animation` shorthand, the minifier
-       folds scroll() into it and browsers drop the whole declaration. */
-    .wordmark-wrap,
-    .caption {
+    .wordmark-wrap {
       animation-timeline: scroll(root block);
       animation-range: 0 40dvh;
     }
@@ -251,17 +210,17 @@ import heroSubject from "../assets/hero-subject.png";
     transform: translateY(calc(var(--hero-progress, 0) * -8%));
   }
 
-  .hero[data-fallback="on"] .caption {
-    opacity: calc(1 - var(--hero-progress, 0));
-  }
+  /* 640px rather than the project's usual 768px: below this the 72vw cap makes
+     the wordmark too small to carry the composition, so it goes near-full-bleed. */
+  @media (max-width: 639px) {
+    .wordmark {
+      width: 88vw;
+    }
 
-  @media (max-width: 767px) {
-    /* 24px inset on the wrapper, never on the SVG, so the glyphs still run the
-       full width of what remains. Pushed down from the nav so the short mobile
-       wordmark meets the figure instead of floating above it. */
+    /* Pushed further down than on desktop: the mobile wordmark is short, so the
+       figure has to reach well up into it for the overlap to read. */
     .wordmark-wrap {
-      padding-inline: var(--gutter);
-      padding-top: calc(var(--nav-height) + 11dvh);
+      padding-top: calc(var(--nav-height) + 16dvh);
     }
 
     /* Taller subject so the shoulders still reach up into the letters; at this
@@ -272,13 +231,6 @@ import heroSubject from "../assets/hero-subject.png";
 
     .subject :global(img) {
       max-height: 82dvh;
-    }
-
-    .caption {
-      max-width: none;
-      /* A short scrim keeps the mono lines legible where they cross the shirt. */
-      background: linear-gradient(to top, var(--bg) 55%, transparent);
-      padding-top: 3rem;
     }
   }
 
