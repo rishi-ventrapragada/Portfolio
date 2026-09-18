@@ -1,0 +1,79 @@
+---
+import { Font } from "astro:assets";
+import { ClientRouter } from "astro:transitions";
+import "../styles/global.css";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import AccentToggle from "../components/AccentToggle.astro";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+---
+
+<!doctype html>
+<html lang="en" data-accent="crimson">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#111214" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-display-src" preload />
+    <Font cssVariable="--font-mono-src" />
+
+    <ClientRouter />
+
+    {/* Set the accent before first paint so the toggle never flashes. */}
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem("accent");
+        if (saved === "violet" || saved === "crimson") {
+          document.documentElement.dataset.accent = saved;
+        }
+      } catch {
+        /* localStorage unavailable — keep the crimson default. */
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link label" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    {import.meta.env.DEV && <AccentToggle />}
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-raised);
+    color: var(--fg);
+    transform: translateY(-120%);
+    transition: transform 160ms ease;
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+</style>
