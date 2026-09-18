@@ -75,33 +75,32 @@ Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, li
 ## 5. Component spec
 
 ### 5.1 Nav `[now]`
-Fixed top bar, three-column grid on desktop, two on mobile.
-- Left: `RISHI ©` (mono label, `--fg`)
-- Center (desktop only): two stacked mono labels `PORTFOLIO 01` / `MMXXVI`
-- Right: stacked `CSE · DATA SCIENCE` / `HYDERABAD, IN`, then a two-line hamburger `<button aria-expanded aria-controls>`. Menu behaviour is `[next]`; the button exists now.
-- Active route label uses `--accent`.
+Fixed top bar, 64px tall, transparent over the hero and `--bg-raised` with a 1px `--line` bottom border after scrolling past it (§4.4).
+
+- A single two-line hamburger `<button aria-expanded aria-controls>`, top right, aligned to the content gutter. 64px square hit area; the bars are 28px wide. Hover tints the bars `--accent`.
+- Nothing else: no wordmark, no label blocks. The bar is otherwise empty so the hero reads uninterrupted.
+- Menu behaviour is `[next]`; the button ships `disabled` until then.
 
 ### 5.2 Hero `[now]`
-100dvh, background `--bg`, three layers.
+100dvh, background `--bg`, two layers.
 
-Layer A, wordmark: `RISHI` in `--font-display` 700, full-width per §4.3, color `--heading`. Wrapper is `position: sticky; top: 0` inside the hero, z-index 1.
+Layer A, wordmark: `RISHI` in `--font-display` 700, color `--heading`, z-index 1. Rendered as inline SVG rather than a text node, because only `textLength` can pin the glyphs to an exact width at every viewport. A visually hidden `<h1>RISHI</h1>` carries the semantics.
 
-Layer B, subject: transparent-background PNG cutout at `src/assets/hero-subject.png`, z-index 2, centered horizontally, bottom-aligned to the hero, sized so its top overlaps the lower half of the wordmark. Loaded via `<Image>`, eager, explicit dimensions. Placeholder: generated abstract silhouette until the real cutout is supplied `[TODO asset]`.
+- The `viewBox` is the glyphs' painted ink box, measured from a real render (`getBBox`/`getExtentOfChar` report advance boxes, which are wider and much taller than the paint). Cropping to it removes the dead space around the letters.
+- `preserveAspectRatio` stays at its default so the letterforms scale uniformly — never `none`, which visibly stretches them. `lengthAdjust="spacing"` only redistributes inter-glyph gaps.
+- Width: `clamp(320px, 72vw, 1100px)`, centred — about 14% margin each side at 1440px. Under 640px it goes to 88vw so it still reads big.
+- Wrapper is `position: sticky; top: 0` inside the hero, letters starting just under the nav.
 
-Layer C, caption: bottom-left, three mono lines, first line in `--accent`, rest `--fg-muted`:
-```
-BUILDING FOR THE WEB
-REACT · ASTRO · SUPABASE
-KALACART · LIFE OS · AEGIS
-```
+Layer B, subject: transparent-background PNG cutout at `src/assets/hero-subject.png` (923x1192), z-index 2, centered horizontally, bottom-aligned to the hero. The PNG's own bottom ~4% fades to transparent, so it dissolves into the page with no cut edge. Sized so the head and shoulders cross the lower 40-50% of the wordmark. Loaded via `<Image>`, eager, explicit dimensions.
 
 Scroll behaviour over the first 40% of the hero's height:
 - Wordmark: opacity 1 → 0, translateY 0 → -8%, blur 0 → 8px. Dissolves in place.
-- Caption: opacity 1 → 0, scrolls naturally.
 - Subject: no transform, scrolls naturally.
 - Implementation: `animation-timeline: scroll()` / `view()` with `animation-range`; fallback script sets `--hero-progress` (0-1) via `requestAnimationFrame`, enabled only when `CSS.supports('animation-timeline: scroll()')` is false.
-- Reduced motion: opacity fade only.
-- Mobile: wordmark still full width, subject scaled to fit height, caption clear of the safe area.
+- The timeline must be declared as longhands in a rule of its own. Folded into the `animation` shorthand, the minifier emits `animation: ... scroll(root)`, which every browser drops — silently disabling the dissolve.
+- Animate the wrapper, not the SVG, and keep the resting frame at `filter: none` / `transform: none`; a `blur(0)` layer softens the glyph edges.
+- Reduced motion: opacity fade only, no blur or movement.
+- Mobile: wordmark at 88vw, pushed down from the nav so the figure still reaches into it; subject scaled to fit height.
 
 ### 5.3 Project tiles `[next]`
 Three large tiles on Home, one per project, each with: eyebrow (`--accent`, project type), title, one-line summary, stack labels, a muted looping demo video (WebM + MP4, poster image, autoplay muted playsinline, paused under reduced motion), and a link to the case study. Data comes from the projects collection.

@@ -2,7 +2,39 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
-## 2026-09-19
+## 2026-09-19 — increment 1.5
+
+### Last milestone completed
+
+Hero and nav simplification, on top of increment 1.
+
+- Nav reduced to a single inert hamburger, top right, 64px hit area. The brand label,
+  `PORTFOLIO 01 / MMXXVI` block and `CSE · DATA SCIENCE / HYDERABAD, IN` stack are gone.
+- Hero Layer C (the three-line caption) removed entirely, along with its CSS, its
+  `caption-fade` keyframes and the mobile scrim.
+- Wordmark capped at `clamp(320px, 72vw, 1100px)` centred, 88vw under 640px. Measured
+  72.0% width / 14.0% margins at 1440px.
+- Hair crosses the lower 40.4% of the letters at 1440px and 40.6% at 375px.
+- Hero image deliberately untouched: same binary, same rendered box (470x607 at 1440px).
+
+Verified after the resize: dissolve still 1 → 0.689 → 0.378 → 0 over the first 40% with
+blur 0 → 8px; reduced motion still opacity-only; no horizontal overflow at 375px.
+
+### Watch out for
+
+`animation-timeline` must stay in its own CSS rule. When it sits beside `animation` (or
+in a rule the minifier can merge with that one), Lightning CSS folds it into the shorthand
+as `animation: ... scroll(root)`, which browsers reject — the dissolve then silently stops
+working with no build error. This already happened once. The `:where(.hero)` prefix on the
+longhand rule in `Hero.astro` exists solely to prevent that merge.
+
+### Doc edits this session
+
+- PRD.md §5.1 rewritten for the hamburger-only nav.
+- PRD.md §5.2 rewritten: two layers instead of three, the SVG wordmark approach and its
+  ink-box viewBox, the 72vw/88vw caps, and the minifier constraint above.
+
+## 2026-09-18 — increment 1
 
 ### Last milestone completed
 
