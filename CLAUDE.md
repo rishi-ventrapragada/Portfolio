@@ -22,7 +22,7 @@ Governing rules for Claude Code in this repository. Read fully before any action
 
 ## 2. Stack constraints
 
-- Astro 6, TypeScript strict, static output. No adapter unless PRD.md adds a server feature.
+- Astro 7 (latest stable), TypeScript strict, static output. No adapter unless PRD.md adds a server feature.
 - Tailwind v4 via `@tailwindcss/vite`. Tailwind for layout and spacing. Distinctive visual work (gradients, blur, clip-path, animation) lives in scoped `<style>` blocks in the component that owns it.
 - @astrojs/react is installed for islands only. Default to plain `.astro` + a small `<script>`. Use a React island only when the component holds real state across interactions. Every island must justify its `client:*` directive in a one-line comment.
 - Fonts via Astro's Fonts API. No `<link>` to Google Fonts.
