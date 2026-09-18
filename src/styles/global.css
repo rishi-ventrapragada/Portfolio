@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Design tokens — single source of truth (PRD 4.2).
+   Components never hardcode a hex or a font-family.
+   --------------------------------------------------------------- */
+
+:root {
+  /* Surfaces and text */
+  --bg: #111214;
+  --bg-raised: #1a1b1e;
+  --fg: #ffffff;
+  --fg-muted: #9a9ca3;
+  --line: #2a2b30;
+  --heading: #f2f2f2;
+
+  /* Accent — crimson default, switched by data-accent on <html> */
+  --accent: #ff3b5c;
+  --accent-soft: rgba(255, 59, 92, 0.18);
+
+  /* Type families. The *-src variables are emitted by Astro's Fonts API. */
+  --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-src), ui-monospace, SFMono-Regular, monospace;
+
+  /* Type scale (PRD 4.3) */
+  --size-wordmark: clamp(6rem, 22vw, 20rem);
+  --size-h1: clamp(2.5rem, 6vw, 5rem);
+  --size-h2: clamp(1.75rem, 3.5vw, 2.75rem);
+  --size-label: 0.75rem;
+  --size-meta: 0.6875rem;
+
+  /* Layout (PRD 4.4) */
+  --max-width: 1280px;
+  --gutter: 1.5rem;
+  --rhythm: 4rem;
+  --nav-height: 4rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 3rem;
+    --rhythm: 6rem;
+  }
+}
+
+:root[data-accent="violet"] {
+  --accent: #a78bfa;
+  --accent-soft: rgba(167, 139, 250, 0.18);
+}
+
+/* ---------------------------------------------------------------
+   Base
+   --------------------------------------------------------------- */
+
+html {
+  background-color: var(--bg);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Shared utility classes (PRD 4.3) */
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--size-label);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--size-meta);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.shell {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
