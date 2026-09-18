@@ -1,0 +1,63 @@
+---
+// PRD 5.9 — dev only. BaseLayout renders this behind import.meta.env.DEV.
+// Removed once a final accent is chosen (PRD 11).
+---
+
+<button type="button" class="accent-toggle label" data-accent-toggle aria-pressed="false">
+  <span class="dot" aria-hidden="true"></span>
+  <span data-accent-name>crimson</span>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>("[data-accent-toggle]");
+  const name = document.querySelector<HTMLElement>("[data-accent-name]");
+  const root = document.documentElement;
+
+  const paint = (accent: string) => {
+    root.dataset.accent = accent;
+    if (name) name.textContent = accent;
+    button?.setAttribute("aria-pressed", String(accent === "violet"));
+  };
+
+  paint(root.dataset.accent === "violet" ? "violet" : "crimson");
+
+  button?.addEventListener("click", () => {
+    const next = root.dataset.accent === "violet" ? "crimson" : "violet";
+    paint(next);
+    try {
+      localStorage.setItem("accent", next);
+    } catch {
+      /* Preference just will not persist. */
+    }
+  });
+</script>
+
+<style>
+  .accent-toggle {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 28px;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background-color: var(--bg-raised);
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+
+  .accent-toggle:hover {
+    color: var(--fg);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--accent);
+  }
+</style>
