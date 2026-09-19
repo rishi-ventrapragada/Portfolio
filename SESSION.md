@@ -145,6 +145,10 @@ preloader self-removes and scrolls are instant:
 - Full-page screenshots: `captureBeyondViewport` resizes the viewport, which
   balloons `100dvh` sections. `cdp-verify.mjs` stitches viewport-sized captures
   with sharp instead (sharp resolved from the project cwd via `createRequire`).
+- `vercel ls` prints the status table to **stderr** and bare URLs to stdout. Poll
+  with `2>&1`; a `2>/dev/null` loop never sees `Ready` and times out blind.
+- For a few seconds after `vercel alias set`, requests can still hit the previous
+  deployment. Re-check before concluding a redirect rule is broken.
 - Kill the harness Chrome by PID with its own `--user-data-dir`, never
   `taskkill /IM chrome.exe` — that takes the owner's browser down too.
 
@@ -152,8 +156,11 @@ preloader self-removes and scrolls are instant:
 
 - `public/resume.pdf` still missing; footer link 404s.
 - About photo still a CSS placeholder.
-- Live redirect verification (`/about`, `/projects/kalacart` → 301) is recorded
-  in a follow-up commit once the deploy is aliased.
+- Live redirects — **done, 71e68fe.** All six old-route forms (`/about`, `/about/`,
+  `/projects`, `/projects/`, `/projects/kalacart`, `/projects/kalacart/`) 308 on
+  the vanity URL and land 200 on `/#about` / `/#projects`. The first deploy
+  missed the trailing-slash forms — `:path*` does not match a trailing slash
+  — and those were exactly the URLs the old nav emitted. Explicit sources fixed it.
 - Final accent, custom domain (PRD §11).
 
 ## 2026-09-20 — increment 5.4
