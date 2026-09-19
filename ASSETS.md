@@ -41,6 +41,34 @@ it has to be remembered.
 
 ---
 
+## `src/content/projects/recurzn-cover.png` `[PLACEHOLDER]`
+
+| | |
+| --- | --- |
+| Source | Generated locally, not obtained externally |
+| Licence | None required — no third-party material |
+| Date | 2026-09-20 |
+| Size | 1272 × 700 (1.82:1, matching the KalaCart cover), 13 KB |
+
+Solid `--bg-raised` (`#1a1b1e`) ground with centred `--fg-muted` (`#9a9ca3`)
+text reading "RECURZN". Generated one-off with the `sharp` Astro already
+ships, from a script kept outside the repo — it is not part of the build.
+
+The rasteriser could not use the site's JetBrains Mono file, so the text
+falls back to a generic monospace face rather than `--font-mono` — the same
+deviation the original KalaCart placeholder had, acceptable for a placeholder.
+
+Token values are baked in because a PNG cannot reference a CSS custom property.
+If the surface or muted-text tokens change, regenerate this file to match.
+
+It is the cover of the **planned** Recurzn card (PRD §5.3), which renders at
+half opacity with no summary, stack or links. Rebranding the deployed Life OS
+app to Recurzn is a separate task in a different repo, not this portfolio.
+
+**[TODO: replace with a real Recurzn screenshot once there is one.]**
+
+---
+
 ## `src/content/projects/kalacart-cover.jpeg`
 
 | | |
