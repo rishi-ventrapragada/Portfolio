@@ -1,0 +1,59 @@
+---
+// Home projects section (PRD §5.3). Reads the collection, so adding an entry
+// is the only work needed to add a tile.
+import { getCollection } from "astro:content";
+import ProjectTile from "./ProjectTile.astro";
+
+// Loader order is not `order`, so sort explicitly even with one entry.
+const projects = (await getCollection("projects")).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<section class="projects shell" aria-labelledby="projects-heading">
+  <p class="label eyebrow">Selected work</p>
+  <h2 id="projects-heading" class="heading">Projects</h2>
+
+  {/* auto-fit means one entry fills the row and later entries form columns
+      with no rewrite. The tile itself splits when it is the only child. */}
+  <div class="grid">
+    {projects.map((entry) => <ProjectTile entry={entry} />)}
+  </div>
+</section>
+
+<style>
+  .projects {
+    padding-block: var(--rhythm);
+    border-top: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: var(--size-h2);
+  }
+
+  .grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+  }
+
+  /* A lone tile stretched across the full width reads as a banner, so it
+     splits into cover + text instead. Self-disabling: the moment a second
+     project lands :only-child stops matching and the grid takes over. The
+     rule lives here because this component owns the grid; :global reaches
+     the child component's scoped root. */
+  @media (min-width: 768px) {
+    .grid > :global(.tile:only-child) {
+      grid-template-columns: 3fr 2fr;
+      align-items: center;
+      gap: 2.5rem;
+      padding: 2rem;
+    }
+  }
+</style>
