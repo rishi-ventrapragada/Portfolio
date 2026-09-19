@@ -11,4 +11,37 @@ cover: "./kalacart-cover.png"
 order: 1
 ---
 
-[TODO: case study body — increment 3]
+## Context
+
+KalaCart is a Smart India Hackathon 2026 entry against problem statement SIH26090 for the Ministry of Social Justice & Empowerment: AI-driven market linkage and smart cataloging for marginalized artisans. Two apps share one Supabase backend — a buyer-facing marketplace with an admin dashboard, and a mobile app for artisans. I built and own the website; a teammate built the mobile app.
+
+The dominant model — Amazon Karigar, Flipkart Samarth — bolts an artisan lane onto standard e-commerce, which assumes sellers hold inventory. Most artisans work made-to-order, one piece at a time. The gap shows in the numbers: roughly a dozen of an estimated 6,000 artisans in Kutch actively sell on Karigar. Our bet was structural rather than cosmetic — skip the mismatch instead of patching it.
+
+## What I built
+
+A marketplace with no cart and no checkout: browse by craft and region, then contact the artisan directly, closer to how these sales already happen. An admin dashboard for ministry review — a verification queue for new artisan and product submissions, artisan management, impact analytics. And a provenance system: every approved listing gets a public, independently checkable code tied to its specific approval event, resolving to maker, craft, district and status.
+
+Stack: React 19, TypeScript, Tailwind CSS, Supabase, Vercel.
+
+## Decisions and trade-offs
+
+**No cart, on purpose.** The trade-off is real — no commission infrastructure, no logistics, no payments — in exchange for a shape that fits how artisans already sell.
+
+**AI does the listing work, not the artisan.** A photo goes in; an enhanced image and a drafted title and description come out, with voice input for artisans who prefer speaking to typing. Every other platform I looked at makes the seller photograph, write and list the product themselves.
+
+**The provenance code is honest about what it proves.** It is not a fraud detector. It is a handle onto a review that already happened: the code is minted only when a listing's status flips to approved, meaning a human ministry reviewer looked at it first. A check-digit rejects malformed or invented codes before any database lookup. Duplicate-photo detection flags reused images for human review, never an automatic rejection. The honest limit: it proves a human checked this listing, not that the product is definitely handmade by the person named.
+
+## What broke and what I learned
+
+The approval step has to be tamper-proof before the provenance claim means anything, and right now it isn't. The prototype's database write policies are too permissive for the guarantee the provenance code implies — the review step can be bypassed, which would let a "verified" code exist for something nobody checked. I found this while building the provenance layer, not after. It is an open fix, not a shipped feature, and I would rather say so here than let the case study imply otherwise.
+
+Row-level security more broadly needs an auth migration before per-user policies hold across the two connected apps. Building this taught me that a verification feature is only as trustworthy as the write path underneath it. The interesting problem was never the code generation — it was making sure nothing else could forge the state that generates it.
+
+## Outcome
+
+The website is deployed, the AI pipeline (photo enhancement, multilingual voice-to-listing, AI pricing) is wired end to end, and the mobile side has a working Android APK. It is a working prototype with a known, documented security gap, not a finished product — I would rather it read that way than oversell it.
+
+## Links
+
+{/* Intentionally empty: links.repo is still "[TODO: add if public]" in the
+    frontmatter, so there is nothing real to link yet. */}
