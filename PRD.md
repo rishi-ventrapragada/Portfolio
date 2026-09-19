@@ -135,8 +135,15 @@ As built (increment 3):
 - Two columns at ≥1024px, sidebar second in the DOM so reading and tab order stay content-first. Below that it is one column and the TOC is hidden; the meta panel stays.
 - **Scroll-spy (active-section highlighting) is deliberately not implemented.** §5.5 asks for a sticky TOC, not a position tracker, and it would be the first client JS on this page. Revisit only if the page gets long enough to need it.
 
-### 5.6 About `[next]`
+### 5.6 About `[now]`
 Photo, 3-4 line story, "How I work" (product-owner approach, architecture-first, AI-assisted implementation, security auditing), skills grouped by shipped-with (frontend, backend and data, languages) where each skill links to the project it was used in, "Currently learning" line, GDG one-liner, résumé download button.
+
+As built (increment 5):
+- **Photo is a CSS placeholder**, not an image — a bordered `--bg-raised` box at 3:4 with `[TODO: photo]` in mono. Logged in ASSETS.md.
+- **"How I work" gained a vertical timeline** (`Timeline.astro`, entries passed as a prop so a Community page can reuse it). Mono dates, thin `--line` rule, `--accent` dot on the current entry.
+- **Every linked skill points at `/projects/kalacart/`**, the only case study that exists. Languages are plain text. Revisit per-skill targets once there are more projects, or the grouping will read oddly.
+- **The GDG line is plain text.** It becomes a link when the §5.7 Community page ships.
+- **The résumé button links to `/resume.pdf`, which is not in the repo.** A static build cannot verify link targets, so it 404s silently until the owner adds the file.
 
 ### 5.7 Community `[later]`
 GDG on Campus VJIT production team work, event media, links.
@@ -221,7 +228,7 @@ order: number
 2. `[now]` Projects collection, project tiles on Home, case study route `/projects/[slug]`. **Scoped to KalaCart only** — the other entries need real copy first (CLAUDE.md §7). The `/projects` index page is deferred until there is more than one project to index.
 3. `[now]` Case study template and KalaCart write-up.
 4. `[next]` Life OS and AEGIS case studies, demo videos.
-5. `[next]` About page, résumé, OG images, analytics.
+5. `[now]` About page. Résumé PDF pending from the owner; OG images and analytics still `[next]`.
 6. `[next]` "Currently building" strip (marquee + `now.json`). Nav shipped in increment 4 as links rather than a hamburger menu.
 7. `[later]` Community page, external component adoption (per CLAUDE.md §6), reference-site pattern pass.
 

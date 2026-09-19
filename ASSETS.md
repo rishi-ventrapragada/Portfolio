@@ -6,6 +6,41 @@ material that must be replaced before launch.
 
 ---
 
+## About page photo `[PLACEHOLDER]`
+
+| | |
+| --- | --- |
+| Source | None — CSS only, no file |
+| Licence | N/A |
+| Date | 2026-09-19 |
+
+There is **no image file**. `src/pages/about.astro` renders a bordered
+`--bg-raised` box at `aspect-ratio: 3/4` with centred `[TODO: photo]` in mono
+`--fg-muted`. Unlike the KalaCart cover there is no PNG to optimise, so nothing
+goes through `<Image>` until a real photo arrives.
+
+**[TODO: replace with a real photo.]** When it lands, swap the box for an
+`<Image>` and log the file here.
+
+---
+
+## `public/resume.pdf` `[PENDING — FILE DOES NOT EXIST]`
+
+| | |
+| --- | --- |
+| Source | To be supplied by the owner |
+| Licence | Owner's own material |
+| Date | Not yet added |
+
+`/about` and the footer both link to `/resume.pdf`. **The file is not in the
+repo**, so both links 404 until the owner adds it. A static build cannot verify
+link targets, so this does not fail the build and will not surface as an error —
+it has to be remembered.
+
+**[TODO: owner to add `public/resume.pdf`.]**
+
+---
+
 ## `src/content/projects/kalacart-cover.png` `[PLACEHOLDER]`
 
 | | |

@@ -6,19 +6,25 @@ Handoff notes per CLAUDE.md §8. Newest session at the top.
 
 Things that outlive any one session. Read before refactoring.
 
-### `src/components/Nav.astro` needs revisiting when new pages ship
+### The nav is full at five links — a sixth needs a new approach
 
 The nav lists **only routes that exist**: Home, Work (`/#projects-heading`),
-KalaCart, Contact (`/#contact`). About and Community are deliberately absent
-because those pages do not exist yet (PRD §5.6, §5.7).
+KalaCart, About, Contact (`/#contact`). Community is absent because that page
+does not exist yet (PRD §5.7).
 
-**When About or Community ships, add it to the `links` array in `Nav.astro`.**
-Nothing else references that array, so a new page will not appear in the nav on
-its own and the omission is silent — no build error, no warning.
+**When Community ships, add it to the `links` array in `Nav.astro`.** Nothing
+else references that array, so a new page will not appear in the nav on its own
+and the omission is silent — no build error, no warning.
 
-The same applies to any further project case studies: the nav links to KalaCart
-by name, so a second project needs a decision about whether the bar keeps
-listing them individually or collapses to a single "Work".
+**But it will not simply fit.** Measured at 375px: 312px available inside the
+gutters, and the five current links already take 306px at the `1rem` mobile gap.
+A sixth link overflows. Shrinking the gap further is not the answer — it is
+already tight. A sixth entry needs a real decision: drop or merge something,
+truncate, or reintroduce a toggle for small screens.
+
+The same applies to further case studies: the nav links to KalaCart by name, so
+a second project needs a decision about whether the bar keeps listing projects
+individually or collapses to a single "Work".
 
 ### `#111214` is duplicated outside the token — change every copy together
 
@@ -41,6 +47,73 @@ sanctioned exception. If the background token changes, **both** must change, or
 the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
+
+## 2026-09-19 — increment 5
+
+### Last milestone completed
+
+About page (PRD §5.6) at `/about`, the site's third route.
+
+- `src/pages/about.astro` — story, How I work, skills, GDG line, résumé button.
+- `src/components/Timeline.astro` — reusable; entries come in as a prop.
+- `Nav.astro` — About added, and the mobile gap reduced (see below).
+- `ASSETS.md` — photo placeholder and the pending résumé PDF logged.
+
+All owner copy is used verbatim. Verified programmatically: nine strings —
+story, How I work, GDG line, Currently learning, and all five timeline entries —
+compared character-for-character against the brief, not read by eye.
+
+### Adding a fifth nav link broke the mobile layout
+
+Not anticipated by the brief, and caught by measuring before writing the code:
+
+| | width at 375px |
+| --- | --- |
+| Available inside the gutters | 312px |
+| 5 links at the old `1.25rem` gap | 322px — **overflows** |
+| 5 links at `1rem` | 306px — fits, 6px spare |
+
+The mobile gap is now `1rem`; the ≥768px gap is untouched. Re-verified after
+the change: all three routes have `scrollWidth == clientWidth` at 375px with
+zero overflowing elements.
+
+**This is why the nav is now recorded as full** in the standing constraints
+above. A sixth link does not fit at any sane gap.
+
+### One copy detail worth noting
+
+The first render used typographic apostrophes (`&rsquo;`, U+2019) where the
+brief has straight `'`. The words were identical, but "exactly as written"
+means the character too, so the page now uses straight apostrophes and the
+verbatim check passes on all nine strings.
+
+### Verified
+
+- Build clean: 0 errors, 0 warnings, 0 hints.
+- `dist/about/index.html` exists; exactly one `<h1>`.
+- Nav renders 5 links on all three routes; `aria-current="page"` lands on Home,
+  About and KalaCart respectively. No dead hrefs.
+- Skills links all resolve to `/projects/kalacart/`; résumé link is
+  `/resume.pdf` with `download`.
+- No new client JS.
+
+### Two things adjusted after looking at the render
+
+- Timeline entries were spaced so far apart the connecting rule barely read as
+  a line. Gap tightened from `1.75rem` to `1.25rem`.
+- The photo placeholder filled the width on mobile at 3:4, dominating the
+  screen. Capped at `240px`.
+
+### Still open
+
+- **`public/resume.pdf` does not exist.** Both `/about` and the footer link to
+  it. A static build cannot verify link targets, so this 404s silently — it
+  will not show up as a build error. Logged in ASSETS.md.
+- **GDG line becomes a link** when the Community page (§5.7) ships.
+- **Skills links** all point at the same URL, which is right with one project
+  and will read oddly with several.
+- **Alias** still pinned to an old build; `vercel alias set` remains blocked by
+  this environment's permission classifier.
 
 ## 2026-09-19 — increment 4
 
