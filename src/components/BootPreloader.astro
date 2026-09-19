@@ -27,7 +27,8 @@ const roles = [
 <div class="boot" data-boot aria-hidden="true">
   {/* Lines are stacked in one grid cell so only one occupies the box at a
       time; the script shows exactly one at a time (PRD §5.10). */}
-  <div class="boot-inner">
+  <div class="boot-track">
+    <div class="boot-inner">
     {/* Two stacked rows in one slide: the greeting cycles above, the name is
         static below and visible from the start. No connector punctuation. */}
     <p class="boot-line boot-greeting" data-line="1" data-on>
@@ -58,8 +59,9 @@ const roles = [
     </p>
 
     <p class="boot-status label" data-line="3">
-      Website loading<span class="boot-dots" data-dots aria-hidden="true"></span>
-    </p>
+        Website loading<span class="boot-dots" data-dots aria-hidden="true"></span>
+      </p>
+    </div>
   </div>
 </div>
 
@@ -96,8 +98,8 @@ const roles = [
     inset: 0;
     z-index: 200;
     display: grid;
+    /* Vertically centred; the track inside handles horizontal placement. */
     align-items: center;
-    padding: 0 var(--gutter);
     background-color: var(--bg);
     opacity: 1;
     transition: opacity 400ms ease;
@@ -108,11 +110,20 @@ const roles = [
     pointer-events: none;
   }
 
+  /* Mirrors .shell (max-width track, centred, gutter inside) so the text
+     starts on the same line as every other left-aligned element on the site
+     rather than re-deriving that offset arithmetically. */
+  .boot-track {
+    width: 100%;
+    max-width: var(--max-width);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
   .boot-inner {
     display: grid;
     width: 100%;
     max-width: 600px;
-    margin-inline: auto;
     /* Reserve the tallest line's height (line 1 is two rows at 1.2 line-height)
        so the block never jumps between slides. */
     min-height: 2.6em;
@@ -121,7 +132,7 @@ const roles = [
 
   .boot-line {
     margin: 0;
-    text-align: center;
+    text-align: left;
     font-family: var(--font-display);
     font-size: clamp(1.75rem, 6vw, 3rem);
     line-height: 1.2;
@@ -176,7 +187,7 @@ const roles = [
   .boot-status {
     margin: 0;
     color: var(--fg-muted);
-    text-align: center;
+    text-align: left;
   }
 
   .boot-dots {
@@ -196,7 +207,7 @@ const roles = [
     position: relative;
     display: inline-block;
     vertical-align: baseline;
-    text-align: center;
+    text-align: left;
   }
 
   .boot-role .cycler {

@@ -73,6 +73,52 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-19 — increment 5.1
+
+### Bug fixed: preloader content was centred, not left-aligned
+
+PRD §5.10 specifies a left-aligned block. Three rules had crept in during the
+increment 1.9 restructure and centred it on both axes: `margin-inline: auto` on
+`.boot-inner`, plus `text-align: center` on `.boot-line` and `.boot-status`.
+I introduced them when line 1 became two stacked rows; the spec was right and
+the implementation had drifted.
+
+### The fix, and the false start worth recording
+
+First attempt derived the inset arithmetically —
+`margin-inline: max(0px, calc((100vw - var(--max-width)) / 2))`. It measured
+**128px against the site's 121px**: `100vw` includes the scrollbar, so the
+computed offset was 7px too wide.
+
+Replaced with a `.boot-track` wrapper that *mirrors `.shell`* (`max-width`
+track, `margin-inline: auto`, `padding-inline: var(--gutter)`) rather than
+re-deriving its arithmetic. Any future change to `.shell`'s mechanics now
+carries over instead of silently desynchronising.
+
+### Verified by measurement
+
+Left edge of the preloader's greeting line and status line vs real site content:
+
+| viewport | preloader | footer text | projects eyebrow |
+| --- | --- | --- | --- |
+| 1440px | 121px | 121px | 121px |
+| 375px | 24px | 24px | 24px |
+
+**Word-swap stability unregressed.** Cycling through all five greetings: the
+cycler box stays 213px, "I'm Rishi" stays at 121px, and every word starts at
+121px. The fixed-width container still prevents reflow; the words now start at
+the block's left edge rather than being centred inside it.
+
+All five first-paint cases still pass (first visit, repeat session, reduced
+motion first/repeat, no-JS).
+
+### Testing flag
+
+`replayAlways` had been fully removed in an earlier commit, so it was
+reintroduced temporarily — named flag, loud revert comment, never committed —
+and removed again before committing. The `boot-seen` gate is byte-identical to
+its previous committed state, verified by diff.
+
 ## 2026-09-19 — increment 5
 
 ### Last milestone completed
