@@ -2,6 +2,32 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
+## Standing constraints
+
+Things that outlive any one session. Read before refactoring.
+
+### `#111214` is duplicated outside the token — change every copy together
+
+`--bg` is defined once in `src/styles/global.css:13`, but the literal `#111214`
+also appears **four times** in `src/layouts/BaseLayout.astro`:
+
+- three in the inline critical-paint `<style>` (`:root`, `html, body`, `.boot`)
+- one in `<meta name="theme-color">`, which predates the critical-paint fix
+
+`grep -rn '#111214' src/` lists them all.
+
+The duplicate is deliberate and load-bearing. `global.css` is bundled into an
+external stylesheet, so it is not parsed in time for the first paint; without
+the inline literal the page paints white on every hard reload before the dark
+theme lands (see increment 2.1). It cannot reference `var(--bg)`, because the
+token is defined in the file that has not loaded yet.
+
+This bends CLAUDE.md §3 ("components never hardcode a hex"). It is the one
+sanctioned exception. If the background token changes, **both** must change, or
+the flash returns in the new colour. `global.css` carries a pointer comment
+next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
+entry.
+
 ## 2026-09-19 — increment 2.1
 
 ### Bug fixed: white flash on hard reload
@@ -68,8 +94,8 @@ from the first paint.
 247 B gzipped. No change to client JS (6.94 KB against the 40 KB cap).
 
 **Maintenance note:** `#111214` is now duplicated as a literal, because nothing
-else is parsed at that point. `global.css` carries a comment next to `--bg`
-saying to change both together.
+else is parsed at that point. Recorded as a standing constraint at the top of
+this file, since a code comment alone is easy to miss in a later refactor.
 
 ### Verified
 
