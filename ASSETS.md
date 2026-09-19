@@ -41,31 +41,32 @@ it has to be remembered.
 
 ---
 
-## `src/content/projects/kalacart-cover.png` `[PLACEHOLDER]`
+## `src/content/projects/kalacart-cover.jpeg`
 
 | | |
 | --- | --- |
-| Source | Generated locally, not obtained externally |
-| Licence | None required — no third-party material |
-| Date | 2026-09-19 |
-| Size | 1600 × 900 (16:9), 37 KB |
+| Source | Screenshot of the live KalaCart site, taken by the owner (Sai Rishi Ventrapragada) |
+| Licence | Owner's own material — his own project; no third-party rights |
+| Date | Added 2026-09-20 |
+| Size | 1272 × 700 (1.82:1), 215 KB source |
 
-Solid `--bg-raised` (`#1a1b1e`) ground with centred `--fg-muted` (`#9a9ca3`)
-text reading "KALACART". Generated with `sharp` 0.35.4 (already present as
-Astro's image dependency) from an inline SVG, as a one-off — the script is not
-part of the build.
+The KalaCart homepage hero: wordmark and nav, the "Handmade goods, direct from
+the artisan" headline, and the scattered craft-photo collage.
 
-Token values are baked in because a PNG cannot reference a CSS custom property.
-If the accent or surface tokens change, this file must be regenerated to match.
+**This is real, not a placeholder.** It replaced a generated `[PLACEHOLDER]`
+PNG (1600 × 900, solid `--bg-raised` with "KALACART" in `--fg-muted`), which was
+deleted in the same change and is no longer referenced anywhere.
 
-Two known deviations, both acceptable for a placeholder:
+Two notes for whoever touches the tile next:
 
-- The rasteriser has no access to JetBrains Mono, so the text falls back to a
-  generic sans face rather than the site's `--font-mono`.
-- 16:9 was chosen to match the demo-video aspect PRD §7 specifies, so replacing
-  this with a real screenshot or video poster needs no layout change.
-
-**[TODO: replace with a real KalaCart screenshot or demo poster.]**
+- **The tile no longer forces 16:9.** The old placeholder was generated at 16:9
+  precisely so it needed no layout change; this screenshot is 1.82:1, so
+  `ProjectTile.astro` lets the image set its own ratio instead of cropping
+  ~14px off each side. Demo **video** still uses 16:9 per PRD §7.
+- **Body text in the screenshot is not legible at tile size.** Rendered ~700px
+  wide, the source's 16px body text lands near 8px. The headline stays readable;
+  the rest reads as texture. That is inherent to a full desktop screenshot in a
+  tile, not a crop bug — a cropped detail shot would be the fix if it ever matters.
 
 ---
 

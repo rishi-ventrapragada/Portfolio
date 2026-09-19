@@ -73,6 +73,79 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-20 — increment 5.4
+
+### Last milestone completed
+
+KalaCart cover is now a real screenshot of the live site, replacing the
+generated placeholder PNG. Also silenced the Astro `head-inject` build warning
+in a separate commit, so the build is genuinely 0 warnings / 0 errors again.
+
+### The head-inject warning was never ours
+
+Astro generates `"use astro:head-inject"` in the wrapper module it builds for
+every content-collection entry with propagated assets — so **every MDX entry**
+triggers it (`astro/dist/content/vite-plugin-content-assets.js`). Rolldown (via
+Vite 8) warns it cannot preserve an unknown module-level directive. Astro reads
+the marker at build time and never needs it bundled, so it is noise.
+
+Filtered in `astro.config.mjs` by **module id, not warning code**, so a directive
+warning from our own source still surfaces. Verified by breaking the id match
+and confirming the warning reappears. Astro 7.3.3 is already latest — no
+upgrade was available to take instead.
+
+### The cover file differed from the brief
+
+The owner described `src/assets/projects/kalacart-cover.jpg`. The actual file was
+`src/assets/kalacart-cover.jpeg` — no `projects/` subdirectory, `.jpeg` not
+`.jpg`. Dimensions were exactly as stated (1272 × 700). Moved it to
+`src/content/projects/` to sit beside the entry that references it, matching
+where the old cover lived; the loader's `*.mdx` pattern keeps images out of the
+collection.
+
+### The tile no longer forces 16:9
+
+`ProjectTile.astro` had `aspect-ratio: 16/9` + `object-fit: cover` on the image,
+sized for the old 1600 × 900 placeholder. The screenshot is 1.82:1, so that box
+would have shaved ~14px off each side (2.17%). Small, but on a **screenshot**
+clipped UI chrome reads as a mistake in a way it would not on a photo, so the
+image now sets its own ratio (`height: auto`).
+
+**Video still uses 16:9**, the ratio PRD §7 specifies for demo posters — only the
+`img` rule changed. `widths` went `[592, 1184]` → `[636, 1272]` to match the new
+source width.
+
+### Known, accepted: screenshot text is not legible at tile size
+
+Rendered 647px wide, the source's 16px body text lands near 8px. The headline
+and the "Browse crafts" button read fine; the paragraph reads as texture. That
+is inherent to a full desktop screenshot in a tile, **not a crop bug**. A cropped
+detail shot would be the fix if it ever matters. Flagged to the owner.
+
+### Verified by measurement, not eyeballing
+
+Measured in headless Chrome over CDP (no new dependency — Chrome was already
+installed, driven with Node 24's built-in WebSocket):
+
+- Rendered image ratio **1.8172** vs source **1.8171** — zero crop.
+- Rendered 647 × 356 from a 700 × 385 WebP; `width`/`height` attributes emitted, so
+  no layout shift.
+- "Admin" at the screenshot's right edge survives intact.
+- Build 0/0, `astro check` 0 errors / 0 warnings / 0 hints.
+- Cover optimises to 22—88 KB WebP from a 215 KB source.
+
+### Screenshot gotcha for next time
+
+A plain headless screenshot of `/` captures **the boot preloader**, not the page.
+Pass `--force-prefers-reduced-motion` (the preloader self-removes under it) or
+remove `[data-boot]` over CDP first. An iframe wrapper does **not** work —
+cross-origin rules block the scroll script.
+
+### Still open
+
+- About-page photo is still a CSS `[TODO: photo]` placeholder (unrelated asset).
+- `public/resume.pdf` still does not exist; `/about` and the footer 404 on it.
+
 ## 2026-09-19 — increment 5.3
 
 ### Last milestone completed

@@ -35,7 +35,7 @@ const href = `/projects/${entry.id}/`;
         <Image
           src={cover}
           alt={`${title} project cover`}
-          widths={[592, 1184]}
+          widths={[636, 1272]}
           sizes="(min-width: 768px) 700px, 92vw"
           loading="lazy"
           decoding="async"
@@ -97,7 +97,17 @@ const href = `/projects/${entry.id}/`;
     overflow: hidden;
   }
 
-  .cover :global(img),
+  /* The cover is a screenshot, so it sets its own ratio rather than being
+     cropped to 16/9: at 1272x700 (1.82:1) a forced 16/9 box would shave
+     ~14px off each side, and clipped UI chrome reads as a mistake in a
+     screenshot in a way it would not in a photo. Video keeps 16/9, the
+     ratio PRD §7 specifies for demo posters. */
+  .cover :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
   .cover video {
     width: 100%;
     aspect-ratio: 16 / 9;
