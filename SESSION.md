@@ -6,6 +6,31 @@ Handoff notes per CLAUDE.md §8. Newest session at the top.
 
 Things that outlive any one session. Read before refactoring.
 
+### Set the Vercel alias after every major deployment
+
+The owner approved this as a standing action on 2026-09-19. After a push that
+deploys real user-visible work, wait for the build to reach `Ready`, then:
+
+```
+vercel alias set <latest-deployment-url> rishi-ventrapragada.vercel.app
+```
+
+Get the URL from `vercel ls` (row 1 = newest). Then **verify the vanity URL
+itself**, not the deployment URL — the success message only says the pointer
+moved, not that the right code is behind it.
+
+**Why this is manual:** the project has no Git integration moving the alias, so
+it stays pinned to whichever deployment was last set by hand. A green build and
+a live deployment URL do **not** mean the vanity URL moved. This has gone stale
+twice (increments 1.6 and again through 1.9→5).
+
+The local Vercel CLI is authenticated as `rishi-ventrapragada` and this works.
+(The Vercel **MCP connector** is a different account — `orca-frontend`,
+`aws-sbg-vjit`, `krishisathi` — and cannot see this project. Don't use it here.)
+
+A custom domain added in the dashboard tracks production automatically and would
+retire this whole entry.
+
 ### The nav is full at five links — a sixth needs a new approach
 
 The nav lists **only routes that exist**: Home, Work (`/#projects-heading`),
@@ -112,8 +137,10 @@ verbatim check passes on all nine strings.
 - **GDG line becomes a link** when the Community page (§5.7) ships.
 - **Skills links** all point at the same URL, which is right with one project
   and will read oddly with several.
-- **Alias** still pinned to an old build; `vercel alias set` remains blocked by
-  this environment's permission classifier.
+- ~~**Alias** still pinned to an old build.~~ **Resolved.** The owner approved
+  `vercel alias set` as a standing action; the alias now points at the
+  increment 5 deployment and all three routes were verified on the vanity URL.
+  See the standing constraint at the top of this file.
 
 ## 2026-09-19 — increment 4
 
