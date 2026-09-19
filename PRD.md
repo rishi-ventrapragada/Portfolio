@@ -119,8 +119,13 @@ Two deviations from the original spec, both deliberate:
 
 **Deferred to a later increment:** the horizontal marquee, the `src/content/now.json` source (project, one-line status, date), the pause-on-hover behaviour and the reduced-motion static fallback. A one-entry JSON collection would be overhead with no payoff until the marquee exists.
 
-### 5.5 Case study page `[next]`
+### 5.5 Case study page `[now]`
 MDX with frontmatter: `title, summary, role, stack[], status, year, links{live, repo}, video, cover`. Sections in order: hero (title, meta row, cover video or image), Context, What I built, Decisions and trade-offs, What broke and what I learned, Outcome, Links. Sidebar on desktop with meta and a sticky table of contents.
+
+As built (increment 3):
+- The table of contents is generated at build time from the rendered headings (`render()` returns `headings`), not a hardcoded list, so it cannot drift from the document. Anchors use Astro's auto-injected heading `id`s.
+- Two columns at ≥1024px, sidebar second in the DOM so reading and tab order stay content-first. Below that it is one column and the TOC is hidden; the meta panel stays.
+- **Scroll-spy (active-section highlighting) is deliberately not implemented.** §5.5 asks for a sticky TOC, not a position tracker, and it would be the first client JS on this page. Revisit only if the page gets long enough to need it.
 
 ### 5.6 About `[next]`
 Photo, 3-4 line story, "How I work" (product-owner approach, architecture-first, AI-assisted implementation, security auditing), skills grouped by shipped-with (frontend, backend and data, languages) where each skill links to the project it was used in, "Currently learning" line, GDG one-liner, résumé download button.
@@ -206,7 +211,7 @@ order: number
 
 1. `[now]` Scaffold, tokens, fonts, BaseLayout, Nav, Hero, placeholder section, footer, dev accent toggle, Vercel deploy.
 2. `[now]` Projects collection, project tiles on Home, case study route `/projects/[slug]`. **Scoped to KalaCart only** — the other entries need real copy first (CLAUDE.md §7). The `/projects` index page is deferred until there is more than one project to index.
-3. `[next]` Case study template and KalaCart write-up.
+3. `[now]` Case study template and KalaCart write-up.
 4. `[next]` Life OS and AEGIS case studies, demo videos.
 5. `[next]` About page, résumé, OG images, analytics.
 6. `[next]` Hamburger menu and mobile nav, "currently building" strip.

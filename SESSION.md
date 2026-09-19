@@ -28,6 +28,76 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-19 — increment 3
+
+### Last milestone completed
+
+KalaCart case study body and desktop sidebar (PRD §5.5).
+
+- `kalacart.mdx` body replaced: six `##` sections per §5.5's order.
+- `CaseStudyToc.astro` — sticky TOC, built from `render()`'s `headings`.
+- `CaseStudyMeta.astro` — meta panel (role, stack, links), extracted from the
+  page to stay under the 200-line cap.
+- `[slug].astro` — two-column layout at ≥1024px, plus MDX prose styling.
+
+### Two owner decisions on the copy
+
+The brief said both "exactly as written" and "shorten this entire context".
+Flagged the conflict; the owner chose **shorten**, then read the result and
+confirmed nothing important was lost. Body is ~609 words, down from ~640 of
+source prose, with every section and claim intact.
+
+The owner also chose to **soften the exploit specifics** in "What broke". The
+admission, severity, self-discovery and "open fix, not a shipped feature"
+framing all stay. What changed:
+
+| Source | Published |
+| --- | --- |
+| "wide-open write policy on the **products table**" | "database write policies are too permissive" |
+| "anyone could **flip a listing's status directly**" | "the review step can be bypassed" |
+
+A reader still learns there is a real unfixed auth gap; they do not get the
+mechanism. Verified `products table`, `wide-open` and `flip a listing` appear
+nowhere in `dist/`.
+
+### Verified
+
+- Build clean: 0 errors, 0 warnings, 0 hints.
+- **All six TOC anchors resolve** to real heading `id`s — checked
+  programmatically, not by eye. No dead links.
+- `## Links` renders with no content under it; `[TODO: add if public]` is still
+  text, never an href. No repo URL invented.
+- Exactly one `<h1>`.
+- Mobile (390px): `scrollWidth == clientWidth`, **zero** overflowing elements,
+  TOC `display: none`.
+- Client JS unchanged at 6.43 KB gz (the TOC is build-time only).
+
+### One thing the screenshots caught
+
+MDX content carries no classes, and `.body` only set a `max-width` — so the
+`##` headings rendered at body size with no spacing and were indistinguishable
+from the prose. Added `:global` prose styles (heading scale, paragraph rhythm,
+bold lead-ins in `--heading`, `scroll-margin-top` for TOC anchors).
+
+### Deliberately not built
+
+**Scroll-spy / active-section highlighting.** §5.5 asks for a sticky TOC, not a
+position tracker, and it would be the first client JS on this page. Flagged in
+the plan, approved as an exclusion, and recorded in §5.5.
+
+### Doc edits this session
+
+PRD §5.5 (`[next]` → `[now]`, plus an "as built" note covering the generated
+TOC, the DOM order, the mobile behaviour and the scroll-spy exclusion) and
+§10.3 (`[next]` → `[now]`).
+
+### Still open
+
+- **Nav** remains unmounted. There is now a real case study route, so this is
+  worth revisiting.
+- **Alias** still pinned to an old build; `vercel alias set` is blocked by this
+  environment's permission classifier. The owner's custom domain resolves it.
+
 ## 2026-09-19 — increment 2.1
 
 ### Bug fixed: white flash on hard reload
