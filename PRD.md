@@ -69,7 +69,7 @@ Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, li
 - Max content width 1280px, 24px gutters on mobile, 48px on desktop
 - Grid: 12 columns desktop, 4 columns mobile
 - Section vertical rhythm: 96px desktop, 64px mobile
-- Nav fixed, 64px tall, transparent over hero, `--bg-raised` with 1px `--line` bottom border after scrolling past the hero
+- Nav fixed, 64px tall, transparent over hero, `--bg-raised` after scrolling past the hero; its bottom hairline is the scroll progress track (§5.1)
 
 ### 4.5 Motion principles
 - Motion explains structure or rewards scroll; it never blocks reading.
@@ -80,7 +80,7 @@ Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, li
 ## 5. Component spec
 
 ### 5.1 Nav `[now]`
-Fixed top bar, 64px tall, transparent over the hero and `--bg-raised` with a 1px `--line` bottom border after scrolling past it (§4.4).
+Fixed top bar, 64px tall, transparent over the hero and `--bg-raised` after scrolling past it (§4.4). Its bottom edge is the scroll progress bar below, so the bar carries no border of its own.
 
 Single-page site, so every entry is an anchor. Left: a small `.label` mark, **RISHI**, `href="#top"` — per the HTML spec a `#top` fragment with no matching element scrolls to the document top, so the hero carries no id and nothing reloads. Right: three links, `.label` mono uppercase. **No hamburger, no menu overlay, no responsive collapse**: three short labels fit at every width (measured in SESSION.md, increment 6).
 
@@ -93,6 +93,8 @@ Single-page site, so every entry is an anchor. Left: a small `.label` mark, **RI
 - **No active state.** Anchors are positions on a page, not destinations, so nothing carries `aria-current`. Scroll-spy (highlighting the section in view) is deliberately not implemented — it would be client JS for a four-section page.
 - Anchor targets carry `scroll-margin-top: calc(var(--nav-height) + 1rem)` in `global.css`, so a jump lands 80px below the top edge, clear of the fixed bar — measured, not assumed. `html { scroll-behavior: smooth }` applies under `prefers-reduced-motion: no-preference` only.
 - The scroll observer runs at module scope. There is no client router swapping the DOM, so it is bound once and stays bound.
+
+**Scroll progress** (increment 7). A 2px track across the bar's full width at its bottom edge, `--line` at every scroll position — it *is* the nav's hairline, from the very top of the page rather than only after the hero. Inside it a `--accent` fill grows left to right with document scroll, `scrollY / (scrollHeight − innerHeight)`: 0 at the top, exactly 100% at the bottom, 0 on a page that cannot scroll. Rendered as `transform: scaleX()` from the left edge with no transition — a progress indicator tracks scroll, it never eases toward it. Primary branch is a CSS scroll-driven animation (`animation-timeline: scroll(root)`, longhands in their own rule per CLAUDE.md §4); where that is unsupported, the same `requestAnimationFrame`-throttled script pattern as the hero dissolve writes `--scroll-progress`. It stays on under reduced motion: it follows the visitor's own scroll 1:1 and never moves by itself, so it is state, not decoration. `aria-hidden` — it duplicates the scrollbar.
 
 ### 5.2 Hero `[now]`
 100dvh, background `--bg`, two layers.

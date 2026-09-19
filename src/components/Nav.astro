@@ -27,6 +27,13 @@ const links = [
       }
     </ul>
   </nav>
+
+  {/* Scroll progress (PRD §5.1). The track is the bar's bottom hairline at
+      every scroll position; the fill grows left to right with document
+      scroll. aria-hidden: it duplicates what the scrollbar already says. */}
+  <div class="progress" aria-hidden="true">
+    <span class="fill" data-progress-fill></span>
+  </div>
 </header>
 
 <script>
@@ -45,6 +52,35 @@ const links = [
       { rootMargin: "0px" },
     ).observe(sentinel);
   }
+
+  // Progress fill, script branch: only where scroll-driven CSS is unavailable
+  // (Firefox as of 152). Same shape as the hero fallback — rAF-throttled,
+  // reads only, one style write per frame. Everywhere else the @supports
+  // block in <style> drives the fill with no script at all.
+  if (!CSS.supports("animation-timeline: scroll()")) {
+    const fill = document.querySelector<HTMLElement>("[data-progress-fill]");
+    if (fill) {
+      let ticking = false;
+
+      const update = () => {
+        ticking = false;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
+        fill.style.setProperty("--scroll-progress", progress.toFixed(4));
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      };
+
+      update();
+      addEventListener("scroll", onScroll, { passive: true });
+      addEventListener("resize", onScroll, { passive: true });
+    }
+  }
 </script>
 
 <style>
@@ -54,15 +90,11 @@ const links = [
     z-index: 50;
     height: var(--nav-height);
     background-color: transparent;
-    border-bottom: 1px solid transparent;
-    transition:
-      background-color 200ms ease,
-      border-color 200ms ease;
+    transition: background-color 200ms ease;
   }
 
   .nav.is-scrolled {
     background-color: var(--bg-raised);
-    border-bottom-color: var(--line);
   }
 
   .nav-inner {
@@ -109,6 +141,52 @@ const links = [
 
   .link:hover {
     color: var(--accent);
+  }
+
+  /* --- Scroll progress (PRD §5.1) ---------------------------------------
+     The track doubles as the bar's bottom hairline, so .nav has no border of
+     its own. No transition on the fill: a progress indicator tracks scroll
+     exactly, it never eases toward it. Deliberately on under reduced motion
+     too — it follows the visitor's own scroll 1:1 and never moves by itself. */
+  .progress {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 2px;
+    background-color: var(--line);
+  }
+
+  .fill {
+    display: block;
+    height: 100%;
+    background-color: var(--accent);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--scroll-progress, 0));
+  }
+
+  @keyframes progress-grow {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    /* Longhands in their own rules, never the `animation` shorthand: folded
+       together the minifier emits `animation: ... scroll(root)` and browsers
+       drop the whole declaration (CLAUDE.md §4). The :where(.nav) prefix
+       keeps this rule from merging with the one below. */
+    :where(.nav) .fill {
+      animation-name: progress-grow;
+      animation-duration: 1ms; /* Overridden by the timeline. */
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+    }
+
+    .fill {
+      animation-timeline: scroll(root block);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
