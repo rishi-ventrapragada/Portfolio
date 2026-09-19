@@ -6,6 +6,20 @@ Handoff notes per CLAUDE.md §8. Newest session at the top.
 
 Things that outlive any one session. Read before refactoring.
 
+### `src/components/Nav.astro` needs revisiting when new pages ship
+
+The nav lists **only routes that exist**: Home, Work (`/#projects-heading`),
+KalaCart, Contact (`/#contact`). About and Community are deliberately absent
+because those pages do not exist yet (PRD §5.6, §5.7).
+
+**When About or Community ships, add it to the `links` array in `Nav.astro`.**
+Nothing else references that array, so a new page will not appear in the nav on
+its own and the omission is silent — no build error, no warning.
+
+The same applies to any further project case studies: the nav links to KalaCart
+by name, so a second project needs a decision about whether the bar keeps
+listing them individually or collapses to a single "Work".
+
 ### `#111214` is duplicated outside the token — change every copy together
 
 `--bg` is defined once in `src/styles/global.css:13`, but the literal `#111214`
@@ -27,6 +41,73 @@ sanctioned exception. If the background token changes, **both** must change, or
 the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
+
+## 2026-09-19 — increment 4
+
+### Last milestone completed
+
+Navigation restored (PRD §5.1). `Nav.astro` remounted in `BaseLayout.astro`
+after being unmounted since increment 1.6.
+
+### The brief changed during planning
+
+The brief asked for a hamburger opening a full-screen overlay with focus trap,
+Escape handling and click-outside. While choosing between overlay and dropdown,
+the owner asked why a hamburger is needed when a bar already exists.
+
+It isn't. The bar was empty apart from the button, and four short labels fit at
+every width (measured: ~259px of links against 327px available at 375px). So
+the bar shows the links directly.
+
+**Not built, by that decision:** hamburger, overlay, open/close state, focus
+trap, Escape handler, click-outside, reduced-motion menu transition, and the
+`aria-expanded`/`aria-controls` attributes that described the removed button.
+
+### Verified
+
+- Build clean: 0 errors, 0 warnings, 0 hints.
+- Every nav `href` resolves — routes against the built file list, anchors
+  against real `id`s in the target page. Checked programmatically.
+- Exactly one `aria-current="page"` per page, on the correct link: Home on `/`,
+  KalaCart on `/projects/kalacart/`.
+- No `aria-expanded`, `<button>` or overlay markup left anywhere.
+- 375px: `clientW == scrollW`, links 259px wide, zero overflowing nav elements.
+
+### Two bugs found by measuring rather than assuming
+
+1. **Anchor targets landed behind the fixed bar.** The owner asked for this
+   check specifically. Measured `#projects-heading` at `top: 0` against a 64px
+   nav — fully occluded. Fixed with
+   `scroll-margin-top: calc(var(--nav-height) + 1rem)` on `[id]` in
+   `global.css`; re-measured at `top: 80`, clear. Applied globally so future
+   anchors inherit it.
+
+2. **The scroll observer would have died on the second page.**
+   `detectScriptExecuted` (`astro/dist/transitions/swap-functions.js:29`)
+   deduplicates identical scripts and does not re-run them after a view
+   transition, while ClientRouter swaps the nav DOM. A module-scope observer
+   would have stayed bound to the discarded element: working on first load,
+   silently broken after navigating. Moved to an `astro:page-load` listener
+   that disconnects the previous observer first. Verified the sentinel count
+   stays at 1 after repeated `astro:page-load` events — no accumulation.
+
+   No other script in the repo uses `astro:page-load`; nothing else needed to
+   survive navigation until now. Worth remembering for any future component
+   that attaches listeners.
+
+### Doc edits this session
+
+PRD §5.1 rewritten for the shipped nav (links not hamburger, the link table,
+active-state rule, the `scroll-margin-top` requirement and the
+`astro:page-load` constraint). §10.6 amended since the hamburger it listed is
+no longer planned.
+
+### Still open
+
+- **About/Community nav links** — recorded as a standing constraint at the top
+  of this file, since a new page will not appear in the nav by itself.
+- **Alias** still pinned to an old build; `vercel alias set` remains blocked by
+  this environment's permission classifier.
 
 ## 2026-09-19 — increment 3
 

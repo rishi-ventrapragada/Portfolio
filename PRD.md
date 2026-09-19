@@ -74,14 +74,22 @@ Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, li
 
 ## 5. Component spec
 
-### 5.1 Nav `[deferred]`
-**Unmounted as of increment 1.9.** `Nav.astro` is kept intact and unchanged, but `BaseLayout.astro` no longer renders it, so no page shows the hamburger. It is re-added once increment 2+ gives it somewhere to go. The spec below describes the component as built, for when it returns.
-
+### 5.1 Nav `[now]`
 Fixed top bar, 64px tall, transparent over the hero and `--bg-raised` with a 1px `--line` bottom border after scrolling past it (§4.4).
 
-- A single two-line hamburger `<button aria-expanded aria-controls>`, top right, aligned to the content gutter. 64px square hit area; the bars are 28px wide. Hover tints the bars `--accent`.
-- Nothing else: no wordmark, no label blocks. The bar is otherwise empty so the hero reads uninterrupted.
-- Menu behaviour is `[next]`; the button ships `disabled` until then.
+Four links, right-aligned, `.label` mono uppercase. **No hamburger and no menu overlay**: with this few entries there is nothing worth hiding behind a toggle, so the bar shows them directly at every width. Measured ~259px of links against 327px available at 375px, so there is no responsive collapse.
+
+| Label | Target |
+| --- | --- |
+| Home | `/` |
+| Work | `/#projects-heading` |
+| KalaCart | `/projects/kalacart/` |
+| Contact | `/#contact` |
+
+- **Scope is what exists.** About and Community are not listed because those pages do not exist. They are added here when they ship.
+- **Active state** is resolved at build time from `Astro.url.pathname` — `aria-current="page"` plus an `--accent` colour and underline. Anchor-only links (Work, Contact) are positions on a page rather than destinations, so they are never marked current.
+- Anchor targets carry `scroll-margin-top: calc(var(--nav-height) + 1rem)` in `global.css`. Without it a jump to `#projects-heading` lands at `top: 0`, behind the fixed bar — measured, not assumed.
+- The scroll observer runs on `astro:page-load`, not at module scope: ClientRouter swaps the DOM but does not re-run an identical script, so a module-scope observer would stay bound to the discarded nav and stop working from the second page onward.
 
 ### 5.2 Hero `[now]`
 100dvh, background `--bg`, two layers.
@@ -214,7 +222,7 @@ order: number
 3. `[now]` Case study template and KalaCart write-up.
 4. `[next]` Life OS and AEGIS case studies, demo videos.
 5. `[next]` About page, résumé, OG images, analytics.
-6. `[next]` Hamburger menu and mobile nav, "currently building" strip.
+6. `[next]` "Currently building" strip (marquee + `now.json`). Nav shipped in increment 4 as links rather than a hamburger menu.
 7. `[later]` Community page, external component adoption (per CLAUDE.md §6), reference-site pattern pass.
 
 ## 11. Open decisions
