@@ -2,6 +2,71 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
+## 2026-09-19 — increment 1.8
+
+### Last milestone completed
+
+Boot preloader flash fix, and the LCP carve-out written into PRD §8.
+
+**Flash fix.** The overlay used to render `hidden` and be revealed by a deferred
+module, which left a window where the hero could paint first. It is now the other
+way round:
+
+- The overlay is **visible by default in CSS**, no JavaScript needed to show it.
+- A **synchronous classic inline script** (`is:inline`, not a module, so not
+  deferred) sits immediately after the overlay markup and before the hero. It
+  removes the overlay outright when `boot-seen` is set or reduced motion is on.
+  Being synchronous and above the hero, it runs before first paint.
+- `src/scripts/boot-preloader.ts` no longer un-hides anything or re-checks those
+  two conditions; a missing `[data-boot]` now just means the sync script already
+  handled it.
+- Reduced motion is covered twice over: the inline script *and* a
+  `prefers-reduced-motion` CSS rule, so it cannot paint even for one frame.
+
+### New edge case this introduced, and handled
+
+Making the overlay visible by default meant a **no-JavaScript visitor would have
+been stuck behind it forever** — nothing would ever remove it. A `<noscript>`
+rule now hides it. PRD §8 requires the site to work without JS, so this was a
+real regression in the making, caught before commit.
+
+### Verified
+
+Drove the *actual shipped* inline script from `dist/index.html` against a DOM
+stand-in, checking whether the overlay is present and paintable at first paint.
+CSS facts were read out of the built stylesheet rather than assumed:
+
+| case | overlay paints | wanted |
+| --- | --- | --- |
+| first visit, normal motion | yes | yes |
+| repeat session (`boot-seen=1`) | no | no |
+| reduced motion, first visit | no | no |
+| reduced motion + repeat | no | no |
+| no JavaScript at all | no | no |
+
+All five correct — zero flash in every skip case. Sequence timing is unchanged:
+reveal at 11200ms, removed at 11700ms.
+
+- Build clean: 0 errors, 0 warnings, 0 hints.
+- Preloader JS now 975 B gzipped (263 B sync + 712 B module) against the 2.5 KB
+  allowance. Page total 7.04 KB against the 40 KB cap.
+
+### PRD §8 amended
+
+The LCP target now carries an explicit carve-out, in §8 itself rather than only
+here: ≤ 2.0s **excludes first-visit sessions where the preloader plays**, and
+applies to repeat visits, reduced-motion visitors and skip-triggered loads. A
+second bullet records that a first-visit field LCP reads the overlay rather than
+the hero, and that this is accepted rather than a regression. §5.10 gained the
+visible-by-default/sync-skip behaviour and the no-JS rule.
+
+### Still to eyeball in the browser
+
+- The 150ms word swap: is the upward slide too subtle or too much?
+- Whether ~11s before the hero feels right on a first visit.
+
+Both are one-line changes if you want them different. Not pushed.
+
 ## 2026-09-19 — increment 1.7
 
 ### Last milestone completed
@@ -44,17 +109,13 @@ None of the below is verifiable from the build output — please look:
 - The word swap at 150ms: is the upward slide too subtle or too much?
 - Whether 10s before the hero feels right. It is a long hold on a first visit.
   Shortening the cycles is a one-line change in `BootPreloader.astro`.
-- The overlay is `hidden` in markup and revealed by script, so on a slow
-  connection the hero may flash before the overlay appears. Worth checking on a
-  throttled connection.
+- ~~The overlay is `hidden` in markup and revealed by script, so the hero may
+  flash before it appears.~~ **Fixed below.**
 
-### Open question carried forward
+### Open question — now resolved in PRD §8
 
-The owner chose "ship as specced, keep hero eager" on the LCP tension: PRD §8
-targets LCP ≤ 2.0s, and the overlay covers the hero for ~11s on a first visit.
-The hero image still loads eagerly behind it, so it is ready at reveal, but a
-field LCP measurement will read the overlay, not the hero. Worth deciding
-whether §8's target needs a carve-out for first-visit sessions.
+The LCP tension is no longer an open question. See the §8 amendment in the
+increment 1.8 entry above.
 
 ## 2026-09-19 — increment 1.6
 

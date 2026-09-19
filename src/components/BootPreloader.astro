@@ -6,8 +6,12 @@ const greetings = ["Hello", "Namaste", "Bonjour", "Hola", "Ciao"];
 const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
 ---
 
+{/* Without JS nothing would ever remove the overlay, so hide it for no-JS
+    visitors. PRD §8: the site works without JavaScript. */}
+<noscript><style>.boot { display: none !important; }</style></noscript>
+
 {/* aria-hidden: decorative. The real <h1> already carries the name. */}
-<div class="boot" data-boot aria-hidden="true" hidden>
+<div class="boot" data-boot aria-hidden="true">
   <div class="boot-inner">
     <p class="boot-line boot-greeting">
       <span class="cycler" data-cycle="greeting">
@@ -38,6 +42,26 @@ const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
     </p>
   </div>
 </div>
+
+{/* Synchronous and inline, straight after the overlay: this runs before the
+    browser paints, so a repeat visit or reduced-motion visitor never sees a
+    frame of the overlay. The deferred module below drives the sequence for
+    everyone else. */}
+<script is:inline>
+  (() => {
+    const el = document.querySelector("[data-boot]");
+    if (!el) return;
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem("boot-seen") === "1";
+    } catch {
+      /* sessionStorage unavailable — treat as unseen; it just replays. */
+    }
+    if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.remove();
+    }
+  })();
+</script>
 
 <script>
   import { runBootSequence } from "../scripts/boot-preloader";
@@ -148,6 +172,8 @@ const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
 
   /* --- Reduced motion: the script removes the overlay outright, so this is
      only a guard for the frame before the script runs. ------------------- */
+  /* Belt and braces with the inline script above: reduced motion never paints
+     the overlay even for the frame before script runs. */
   @media (prefers-reduced-motion: reduce) {
     .boot {
       display: none;

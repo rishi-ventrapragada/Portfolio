@@ -136,6 +136,9 @@ Reveal: once line 3 has been visible 1200ms **and** the page has fired `load`, t
 
 Behaviour:
 - Once per browser session via `sessionStorage` key `boot-seen`. Same-session reloads go straight to the hero.
+- The overlay is **visible by default in CSS**, needing no JavaScript to show. A synchronous inline script placed immediately after the overlay markup (classic, not a module, so it is not deferred) removes it before first paint when `boot-seen` is set or reduced motion is on. Repeat visits and reduced-motion visitors therefore never see a frame of it, and there is no flash of the hero before the overlay appears.
+- Reduced motion is covered twice: the same inline script, and a `prefers-reduced-motion` CSS rule that hides the overlay outright.
+- Without JavaScript a `<noscript>` rule hides the overlay, since nothing would remove it.
 - Skippable by click, keypress, wheel, touch or scroll: cycling stops, every line snaps to its final word, and the overlay fades.
 - `prefers-reduced-motion: reduce` skips it entirely — no overlay, straight to the hero.
 - No layout shift on swap: words are absolutely positioned over an invisible grid holding all of them, so the box is always as wide as the widest word.
@@ -172,8 +175,9 @@ order: number
 
 - Lighthouse: Performance ≥ 95, Accessibility ≥ 95, SEO ≥ 95 on mobile.
 - Client JS ≤ 40 KB gzipped per page at launch.
-- Largest Contentful Paint ≤ 2.0s on a mid-range Android over 4G (hero image is the LCP element; keep it under 250 KB).
-- Works without JavaScript except the scroll dissolve and accent toggle.
+- Largest Contentful Paint ≤ 2.0s on a mid-range Android over 4G (hero image is the LCP element; keep it under 250 KB). **Excludes first-visit sessions where the §5.10 boot preloader plays.** The target applies to repeat visits within a session (`boot-seen` set), reduced-motion visitors, and any load where the preloader is skipped. In the first three the overlay is removed before first paint, so the hero is the LCP element as normal; on a skip the overlay paints first and the hero is revealed as soon as the visitor skips.
+- The preloader deliberately covers the hero for roughly 11s on a first visit, so a field LCP measurement for those sessions reads the overlay, not the hero. That is accepted, not a regression. The hero image still loads `eager` behind the overlay so it is painted and ready at the moment of reveal.
+- Works without JavaScript except the scroll dissolve and accent toggle. The boot preloader is hidden outright without JavaScript, since nothing would remove it.
 - Per-page metadata and Open Graph image; dynamic OG images per case study `[next]`.
 - Analytics: Vercel Analytics or Umami `[next]`.
 

@@ -15,30 +15,19 @@ function show(word: HTMLElement): void {
  * @param cycleMs how long each line takes to cycle its whole word array.
  */
 export function runBootSequence(cycleMs: number): void {
+  // The synchronous script in BootPreloader.astro has already removed the
+  // overlay for repeat visits and reduced motion, so a miss here means there is
+  // nothing to animate.
   const root = document.querySelector<HTMLElement>("[data-boot]");
   if (!root) return;
 
   const remove = () => root.remove();
-
-  // Reduced motion, or already seen this session: no overlay at all.
-  let seen = false;
-  try {
-    seen = sessionStorage.getItem("boot-seen") === "1";
-  } catch {
-    /* sessionStorage unavailable — treat as unseen; it just replays. */
-  }
-  if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    remove();
-    return;
-  }
 
   try {
     sessionStorage.setItem("boot-seen", "1");
   } catch {
     /* Non-fatal: the sequence still runs, it may just replay next load. */
   }
-
-  root.hidden = false;
 
   const timers: number[] = [];
   const wait = (fn: () => void, ms: number) => timers.push(window.setTimeout(fn, ms));
