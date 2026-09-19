@@ -2,6 +2,46 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
+## 2026-09-19 — increment 1.9
+
+### Changes
+
+- **Nav unmounted.** `<Nav />` was rendered in `BaseLayout.astro`, not
+  `index.astro`, so removing it there takes it off every page rather than just
+  the homepage. `Nav.astro` itself is untouched.
+- Preloader line 1 is now two stacked rows in one slide: the cycling greeting
+  above, static `I'm Rishi` below, no connector punctuation. The em dash is gone.
+- Cycling words take a fixed per-word colour from five new tokens in
+  `global.css` (`--word-amber`, `--word-coral`, `--word-sky`, `--word-mint`,
+  `--word-periwinkle`). Roles reuse the first four in order. The colour rides
+  the existing 150ms opacity cross-fade rather than animating separately.
+- `I'm Rishi` stays `--fg`; the status line stays `--fg-muted`.
+
+### Caught while screenshotting
+
+Line 2 showed a floating gap between `I AM A` and short roles, because the
+cycler box is sized to the longest word and was centring shorter ones inside it.
+The cycler now aligns left on line 2 (where it follows static text) and stays
+centred on line 1 (where it is its own row).
+
+### Open item
+
+**Nav re-added once increment 2+ gives it somewhere to go.** The component is
+kept for reuse; this is a temporary unmount, not a deletion.
+
+### Note on the brief
+
+There is no `STATUS — READY` text in the preloader — line 3 reads
+`Website loading`. Left untouched, which was the intent.
+
+### Testing flag removed before push
+
+The temporary `replayAlways` flag used to replay the preloader on every refresh
+is gone entirely — not just set to `false`. The `boot-seen` gate is byte-identical
+to what it was before the flag was added. Verified against the five first-paint
+cases with the flag removed: first visit paints, repeat session / reduced motion
+(first and repeat) / no-JS all skip.
+
 ## 2026-09-19 — increment 1.8
 
 ### Last milestone completed

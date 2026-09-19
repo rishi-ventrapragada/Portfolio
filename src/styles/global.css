@@ -18,6 +18,14 @@
   --accent: #ff3b5c;
   --accent-soft: rgba(255, 59, 92, 0.18);
 
+  /* Boot preloader cycling-word palette (PRD §5.10). Fixed per word, so they
+     read the same under both accents. */
+  --word-amber: #ffb454;
+  --word-coral: #ff8f6b;
+  --word-sky: #6ec9f5;
+  --word-mint: #4ade80;
+  --word-periwinkle: #8ea9ff;
+
   /* Type families. The *-src variables are emitted by Astro's Fonts API. */
   --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-src), ui-monospace, SFMono-Regular, monospace;

@@ -31,8 +31,21 @@ export function runBootSequence(cycleMs: number): void {
 
   const timers: number[] = [];
   const wait = (fn: () => void, ms: number) => timers.push(window.setTimeout(fn, ms));
-  const step = (n: number) => root.querySelector<HTMLElement>(`[data-step="${n}"]`);
+  const line = (n: number) => root.querySelector<HTMLElement>(`[data-line="${n}"]`);
   let done = false;
+
+  /** Must match the line transition in BootPreloader.astro. */
+  const lineMs = 450;
+
+  const enter = (el: HTMLElement | null) => {
+    el?.removeAttribute("data-out");
+    el?.setAttribute("data-on", "");
+  };
+
+  const exit = (el: HTMLElement | null) => {
+    el?.removeAttribute("data-on");
+    el?.setAttribute("data-out", "");
+  };
 
   /** Cycle one line's words at an even pace, then call `next`. */
   const cycle = (el: HTMLElement, next: () => void) => {
@@ -71,9 +84,9 @@ export function runBootSequence(cycleMs: number): void {
       const last = words[words.length - 1];
       if (last) show(last);
     });
-    root.querySelectorAll<HTMLElement>("[data-step]").forEach((el) =>
-      el.setAttribute("data-on", "")
-    );
+    // Skipping jumps to the final state: only the status line is on screen.
+    root.querySelectorAll<HTMLElement>("[data-line]").forEach(exit);
+    enter(line(3));
 
     root.setAttribute("data-out", "");
     root.addEventListener("transitionend", remove, { once: true });
@@ -109,7 +122,7 @@ export function runBootSequence(cycleMs: number): void {
   const readyGraceMs = 3000;
 
   const showStatus = () => {
-    step(3)?.setAttribute("data-on", "");
+    enter(line(3));
     const dots = root.querySelector<HTMLElement>("[data-dots]");
     let n = 0;
     const tick = () => {
@@ -133,8 +146,16 @@ export function runBootSequence(cycleMs: number): void {
     return;
   }
 
+  // One line at a time: each cycles, exits, then the next enters. Line 1 is
+  // already on from the markup, so the overlay is never blank before JS runs.
   cycle(greeting, () => {
-    step(2)?.setAttribute("data-on", "");
-    cycle(role, showStatus);
+    exit(line(1));
+    wait(() => {
+      enter(line(2));
+      cycle(role, () => {
+        exit(line(2));
+        wait(showStatus, lineMs);
+      });
+    }, lineMs);
   });
 }

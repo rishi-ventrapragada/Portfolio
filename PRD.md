@@ -74,7 +74,9 @@ Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, li
 
 ## 5. Component spec
 
-### 5.1 Nav `[now]`
+### 5.1 Nav `[deferred]`
+**Unmounted as of increment 1.9.** `Nav.astro` is kept intact and unchanged, but `BaseLayout.astro` no longer renders it, so no page shows the hamburger. It is re-added once increment 2+ gives it somewhere to go. The spec below describes the component as built, for when it returns.
+
 Fixed top bar, 64px tall, transparent over the hero and `--bg-raised` with a 1px `--line` bottom border after scrolling past it (§4.4).
 
 - A single two-line hamburger `<button aria-expanded aria-controls>`, top right, aligned to the content gutter. 64px square hit area; the bars are 28px wide. Hover tints the bars `--accent`.
@@ -126,11 +128,13 @@ Fixed 28px pill bottom-right, rendered only when `import.meta.env.DEV`, flips `d
 ### 5.10 Boot preloader `[now]`
 A word-cycling greeting shown once per browser session before the hero.
 
-Full-viewport overlay, background `--bg`, content vertically centred, left-aligned, max-width 600px. Lines stack top to bottom as each completes.
+Full-viewport overlay, background `--bg`, content vertically and horizontally centred, max-width 600px. One line occupies the box at a time; they do not accumulate.
 
-1. `{GREETING}, I'm Rishi` — `--font-display` 700, `--fg`, uppercased in CSS. `{GREETING}` cycles `["Hello", "Namaste", "Bonjour", "Hola", "Ciao"]` once, 5000ms / 5 = 1000ms each. Swap is a 150ms fade plus a slight upward slide. After the last word has had its full turn the line holds and line 2 begins.
-2. `I am a {ROLE}` — `--font-display` 500, `--fg`. `{ROLE}` cycles `["Developer", "Video Editor", "Problem Solver", "Builder"]` over 5000ms (1250ms each), same transition, then holds and line 3 begins.
+1. Two stacked rows, centred, no connector punctuation: the cycling `{GREETING}` above, static `I'm Rishi` (`--fg`) below, visible from the start. `--font-display` 700, uppercased in CSS. `{GREETING}` cycles `["Hello", "Namaste", "Bonjour", "Hola", "Ciao"]` once, 5000ms / 5 = 1000ms each. Swap is a 150ms fade plus a slight upward slide. Each word carries a fixed colour token — amber, coral, sky, mint, periwinkle in order — and the colour cross-fades with the word rather than animating separately.
+2. `I am a {ROLE}` — `--font-display` 500, static text `--fg`. `{ROLE}` cycles `["Developer", "Video Editor", "Problem Solver", "Builder"]` over 5000ms (1250ms each), same transition, reusing the first four colour tokens in order. The cycling word sits in a box sized to the longest role and aligned left, so the static text beside it never shifts and short roles do not float.
 3. `Website loading` — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`. Three dots loop `.` → `..` → `...` at 400ms per step until reveal.
+
+Only one line is on screen at a time: each cycles, exits over 450ms with an ease-in-out curve, and the next enters. The line transition is deliberately slower and eased than the 150ms word swap within a line. Total run is about 12.6s.
 
 Reveal: once line 3 has been visible 1200ms **and** the page has fired `load`, the overlay fades over 400ms and is removed from the DOM. A 3000ms grace cap after the dwell reveals anyway, so a stalled asset can never strand the visitor behind the overlay.
 

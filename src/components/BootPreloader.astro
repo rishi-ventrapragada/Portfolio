@@ -2,8 +2,21 @@
 // Boot preloader (PRD §5.10). Word-cycling greeting shown once per browser
 // session before the hero. Plain .astro plus one small script — no React state,
 // so no island.
-const greetings = ["Hello", "Namaste", "Bonjour", "Hola", "Ciao"];
-const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
+// Each cycling word has a fixed colour token (PRD §5.10); the tokens live in
+// global.css beside the other design tokens.
+const greetings = [
+  { word: "Hello", tone: "amber" },
+  { word: "Namaste", tone: "coral" },
+  { word: "Bonjour", tone: "sky" },
+  { word: "Hola", tone: "mint" },
+  { word: "Ciao", tone: "periwinkle" },
+];
+const roles = [
+  { word: "Developer", tone: "amber" },
+  { word: "Video Editor", tone: "coral" },
+  { word: "Problem Solver", tone: "sky" },
+  { word: "Builder", tone: "mint" },
+];
 ---
 
 {/* Without JS nothing would ever remove the overlay, so hide it for no-JS
@@ -12,32 +25,39 @@ const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
 
 {/* aria-hidden: decorative. The real <h1> already carries the name. */}
 <div class="boot" data-boot aria-hidden="true">
+  {/* Lines are stacked in one grid cell so only one occupies the box at a
+      time; the script shows exactly one at a time (PRD §5.10). */}
   <div class="boot-inner">
-    <p class="boot-line boot-greeting">
-      <span class="cycler" data-cycle="greeting">
-        {/* Words are stacked over an invisible grid cell holding all of them,
-            so the box is as wide as the widest and never reflows on swap. */}
-        {greetings.map((word, i) => (
-          <span class="cycler-word" data-on={i === 0 ? "" : undefined}>{word}</span>
-        ))}
-        <span class="cycler-sizer" aria-hidden="true">
-          {greetings.map((word) => <span>{word}</span>)}
+    {/* Two stacked rows in one slide: the greeting cycles above, the name is
+        static below and visible from the start. No connector punctuation. */}
+    <p class="boot-line boot-greeting" data-line="1" data-on>
+      <span class="boot-row">
+        <span class="cycler" data-cycle="greeting">
+          {/* Words are stacked over an invisible grid cell holding all of them,
+              so the box is as wide as the widest and never reflows on swap. */}
+          {greetings.map(({ word, tone }, i) => (
+            <span class="cycler-word" style={`--tone: var(--word-${tone})`} data-on={i === 0 ? "" : undefined}>{word}</span>
+          ))}
+          <span class="cycler-sizer" aria-hidden="true">
+            {greetings.map(({ word }) => <span>{word}</span>)}
+          </span>
         </span>
-      </span><span class="boot-tail">, I&rsquo;m Rishi</span>
+      </span>
+      <span class="boot-row boot-name">I&rsquo;m Rishi</span>
     </p>
 
-    <p class="boot-line boot-role" data-step="2">
+    <p class="boot-line boot-role" data-line="2">
       <span class="boot-tail">I am a&nbsp;</span><span class="cycler" data-cycle="role">
-        {roles.map((word, i) => (
-          <span class="cycler-word" data-on={i === 0 ? "" : undefined}>{word}</span>
+        {roles.map(({ word, tone }, i) => (
+          <span class="cycler-word" style={`--tone: var(--word-${tone})`} data-on={i === 0 ? "" : undefined}>{word}</span>
         ))}
         <span class="cycler-sizer" aria-hidden="true">
-          {roles.map((word) => <span>{word}</span>)}
+          {roles.map(({ word }) => <span>{word}</span>)}
         </span>
       </span>
     </p>
 
-    <p class="boot-status label" data-step="3">
+    <p class="boot-status label" data-line="3">
       Website loading<span class="boot-dots" data-dots aria-hidden="true"></span>
     </p>
   </div>
@@ -89,13 +109,19 @@ const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
   }
 
   .boot-inner {
+    display: grid;
     width: 100%;
     max-width: 600px;
     margin-inline: auto;
+    /* Reserve the tallest line's height (line 1 is two rows at 1.2 line-height)
+       so the block never jumps between slides. */
+    min-height: 2.6em;
+    align-content: center;
   }
 
   .boot-line {
     margin: 0;
+    text-align: center;
     font-family: var(--font-display);
     font-size: clamp(1.75rem, 6vw, 3rem);
     line-height: 1.2;
@@ -108,18 +134,49 @@ const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
     font-weight: 700;
   }
 
+  /* Line 1 is two rows: cycling greeting above, static name below. */
+  .boot-row {
+    display: block;
+  }
+
+  .boot-name {
+    color: var(--fg);
+  }
+
   .boot-role {
     font-weight: 500;
   }
 
-  /* Lines 2 and 3 are hidden until their turn. */
-  .boot [data-step]:not([data-on]) {
-    visibility: hidden;
+  /* --- One line at a time -----------------------------------------------
+     Every line sits in the same grid cell. The script gives exactly one the
+     data-on attribute; the others are faded out and non-interactive. The
+     line transition is deliberately slower and eased than the 150ms
+     word swap inside a line (PRD 5.10). */
+  .boot [data-line] {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(0.6em);
+    transition:
+      opacity 450ms cubic-bezier(0.4, 0, 0.2, 1),
+      transform 450ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .boot [data-line][data-on] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Leaving lines travel up and out, so the sequence reads downward. */
+  .boot [data-line][data-out] {
+    opacity: 0;
+    transform: translateY(-0.6em);
   }
 
   .boot-status {
-    margin: 1.5rem 0 0;
+    margin: 0;
     color: var(--fg-muted);
+    text-align: center;
   }
 
   .boot-dots {
@@ -131,10 +188,19 @@ const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
   /* --- Word cycler ------------------------------------------------------
      Every word is absolutely positioned over an invisible sizer set to the
      longest word, so swapping words never reflows the line. */
+  /* The sizer fixes this box to the widest word in the array, so the static
+     text beside it never moves as words swap. On line 1 the cycler is its own
+     centred row; on line 2 it follows "I am a", so it aligns left there to
+     avoid a floating gap after the static text. */
   .cycler {
     position: relative;
     display: inline-block;
     vertical-align: baseline;
+    text-align: center;
+  }
+
+  .boot-role .cycler {
+    text-align: left;
   }
 
   /* Every word in one grid cell: the cell is as wide as the widest word. */
@@ -151,7 +217,11 @@ const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
   .cycler-word {
     position: absolute;
     inset-block-start: 0;
-    inset-inline-start: 0;
+    inset-inline: 0;
+    /* Per-word colour, set inline from the palette tokens. The colour arrives
+       and leaves with the word because the cross-fade is opacity-driven, so no
+       separate colour animation is needed. */
+    color: var(--tone, var(--fg));
     opacity: 0;
     transform: translateY(0.25em);
     transition:
