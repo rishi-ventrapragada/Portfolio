@@ -1,0 +1,197 @@
+---
+// About page (PRD §5.6). All copy is owner-supplied and used verbatim.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SkillGroups from "../components/SkillGroups.astro";
+import Timeline from "../components/Timeline.astro";
+import type { SkillGroup } from "../components/SkillGroups.astro";
+import type { TimelineEntry } from "../components/Timeline.astro";
+
+const timeline: TimelineEntry[] = [
+  { date: "2025", text: "Started VJIT, CSE with Data Science" },
+  { date: "2025", text: "Grinding LeetCode and weekly Super Coders assessments" },
+  {
+    date: "2026",
+    text: "Built KalaCart for SIH: AI cataloging, provenance verification, admin review flow, under real deadline pressure",
+  },
+  {
+    date: "2026",
+    text: "Found and disclosed the RLS gap in KalaCart myself, before anyone else looked",
+  },
+  {
+    date: "2026 — Now",
+    text: "planning Recurzn, a cross-platform life-tracking rebuild",
+    current: true,
+  },
+];
+
+// KalaCart is the only case study that exists, so every linked skill points
+// there. Revisit per-skill targets once there are more projects.
+const CASE_STUDY = "/projects/kalacart/";
+const skillGroups: SkillGroup[] = [
+  {
+    name: "Frontend",
+    items: ["React 19", "Astro", "TypeScript", "Tailwind CSS"],
+    href: CASE_STUDY,
+  },
+  {
+    name: "Backend & Data",
+    items: ["Supabase", "Postgres", "Row-Level Security", "Vercel"],
+    href: CASE_STUDY,
+  },
+  { name: "Languages", items: ["C", "Python", "Java"], href: null },
+];
+---
+
+<BaseLayout
+  title="About — Sai Rishi Ventrapragada"
+  description="CSE (Data Science) student at VJIT. I plan the architecture, make the calls, and ship with AI-assisted implementation."
+>
+  <article class="about shell">
+    <h1 class="title">About</h1>
+
+    <div class="intro">
+      {/* No photo yet. Visibly marked placeholder per CLAUDE.md §7. */}
+      <div class="photo" role="img" aria-label="Photo placeholder">
+        <span class="meta">[TODO: photo]</span>
+      </div>
+
+      <p class="story">
+        CSE (Data Science) student at VJIT, started 2025. I build things end to
+        end — plan the architecture, make the calls, and use AI tools like Claude
+        Code to implement fast. KalaCart, an artisan marketplace built for Smart
+        India Hackathon 2026, is the first thing I've shipped that had to
+        survive contact with a real deadline and a real ministry review.
+      </p>
+    </div>
+
+    <section class="section" aria-labelledby="how-heading">
+      <p class="label eyebrow">Approach</p>
+      <h2 id="how-heading" class="heading">How I work</h2>
+      <p class="prose">
+        I act as product owner and architect on my own projects — I plan the
+        decisions, and I use Claude Code to implement quickly. I also audit my
+        own security rather than assuming it's fine: I found and disclosed
+        the row-level-security gap in KalaCart's write path myself, before
+        anyone else looked.
+      </p>
+      <Timeline entries={timeline} />
+    </section>
+
+    <section class="section" aria-labelledby="skills-heading">
+      <p class="label eyebrow">Toolkit</p>
+      <h2 id="skills-heading" class="heading">Skills</h2>
+
+      <SkillGroups groups={skillGroups} />
+
+      <p class="meta learning">Currently learning &mdash; Flutter &amp; Dart, for Recurzn.</p>
+    </section>
+
+    <section class="section" aria-labelledby="community-heading">
+      <p class="label eyebrow">Community</p>
+      <h2 id="community-heading" class="heading">GDG on Campus VJIT</h2>
+      {/* Plain text until a Community page exists to link to. */}
+      <p class="prose">
+        Production team member, GDG on Campus VJIT — social media and video
+        editing for the club's channels.
+      </p>
+    </section>
+
+    {/* public/resume.pdf is supplied separately by the owner; a static build
+        cannot verify it, so this link 404s until the file lands. */}
+    <p class="resume-wrap">
+      <a class="label resume" href="/resume.pdf" download>Download résumé</a>
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .about {
+    padding-block: var(--rhythm);
+  }
+
+  .title {
+    margin: 0 0 2.5rem;
+    font-size: var(--size-h1);
+  }
+
+  .intro {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (min-width: 768px) {
+    .intro {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 3rem;
+    }
+  }
+
+  .photo {
+    display: grid;
+    place-items: center;
+    /* Capped so a full-width 3:4 box does not dominate a phone screen. */
+    max-width: 240px;
+    aspect-ratio: 3 / 4;
+    background-color: var(--bg-raised);
+    border: 1px solid var(--line);
+  }
+
+  .story {
+    margin: 0;
+    max-width: 60ch;
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    color: var(--fg);
+  }
+
+  .section {
+    margin-top: var(--rhythm);
+    padding-top: var(--rhythm);
+    border-top: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 1.5rem;
+    font-size: var(--size-h2);
+  }
+
+  .prose {
+    margin: 0 0 2.5rem;
+    max-width: 68ch;
+    color: var(--fg);
+  }
+
+  .learning {
+    margin: 2.5rem 0 0;
+  }
+
+  .resume-wrap {
+    margin: var(--rhythm) 0 0;
+  }
+
+  .resume {
+    display: inline-block;
+    padding: 0.875rem 1.5rem;
+    color: var(--fg);
+    border: 1px solid var(--line);
+    transition:
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .resume:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .resume {
+      transition: none;
+    }
+  }
+</style>
