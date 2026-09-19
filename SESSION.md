@@ -2,6 +2,53 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
+## 2026-09-19 — increment 1.6
+
+### Last milestone completed
+
+Post-deploy metadata and alias fixes.
+
+- `site: "https://rishi-ventrapragada.vercel.app"` added to `astro.config.mjs`.
+  `BaseLayout.astro` derives canonical, `og:url` and `twitter:url` from one
+  `canonical` const, so a custom domain later only needs `site` changed.
+  Added `twitter:url`, `twitter:title`, `twitter:description`, which were missing.
+- Live URL is now **https://rishi-ventrapragada.vercel.app** and serves increment 1.6.
+- CLAUDE.md §4 gained the Lightning CSS rule: `animation-timeline` and
+  `animation-range` must live in their own rule, never beside the `animation`
+  shorthand. Authorized by the owner this session.
+
+### The "old nav still in the DOM" report — root cause
+
+Not a code bug. The source was already correct after increment 1.5; nothing was
+re-deleted this session. `rishi-ventrapragada.vercel.app` was an **alias pinned to a
+10-hour-old increment-1 deployment**, so it served pre-1.5 markup while
+`portfolio-gamma-lake-gtndl2ey0m.vercel.app` served the current build. Fixed with
+`vercel alias set <deployment> rishi-ventrapragada.vercel.app`.
+
+**There is only one Vercel project.** It was renamed `portfolio` →
+`rishi-ventrapragada` (ID `prj_R7zqnBIxWhGIUImcGAZJHWsQhWXN`). `vercel ls` prints each
+deployment under the project name as it was at deploy time, which makes the history
+look like two projects. `.vercel/project.json` still records the old
+`"projectName":"portfolio"`; the ID is what matters and it matches.
+
+**Takeaway:** after a push, verify the alias points at the new deployment. A green
+Vercel build does not mean the vanity URL moved.
+
+### Verified on production after this deploy
+
+- canonical / `og:url` / `twitter:url` — all `https://rishi-ventrapragada.vercel.app/`.
+- Zero `localhost:4321` occurrences.
+- Zero occurrences of `Rishi ©`, `Portfolio 01`, `MMXXVI`, `CSE · Data Science`,
+  `Hyderabad, IN`, `React · Astro · Supabase`, `KalaCart`, `Life OS`, `AEGIS`.
+- Served nav is the single inert hamburger.
+- Client JS on `/`: 5.6 KB gzipped (ClientRouter only), against the 40 KB budget.
+
+### Note
+
+`<title>` and `<meta name="description">` still contain "Building for the web",
+"CSE Data Science" and "Supabase". That is page metadata in `src/pages/index.astro`,
+not the deleted caption layer. The owner confirmed this copy stays as is.
+
 ## 2026-09-19 — increment 1.5
 
 ### Last milestone completed
@@ -74,10 +121,8 @@ PRD §7 lists both as `[TODO]`.
   Turn it off at Vercel → Project → Settings → Deployment Protection → Vercel Authentication
   → Disabled. I could not run `vercel project protection disable` — it was blocked here as a
   security-weakening action, so it needs the owner.
-- **Pretty free URL**: blocked by the above, not by naming. Once protection is off, run
-  `vercel alias set <latest-deployment-url> rishi-ventrapragada.vercel.app` and re-check that
-  the page title is the portfolio, not "Login – Vercel" — an alias can report success without
-  actually serving your site while protection is on.
+- **Pretty free URL**: ~~blocked~~ **RESOLVED in increment 1.6.**
+  https://rishi-ventrapragada.vercel.app is live, public and serving the current build.
 - **Custom domain** (PRD §11): not touched, and no domain was purchased or registered. The
   `.vercel.app` URLs are Vercel's free auto-generated ones. Owner adds any custom domain
   in the dashboard.
