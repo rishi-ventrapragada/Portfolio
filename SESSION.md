@@ -73,6 +73,56 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-19 — increment 5.3
+
+### Last milestone completed
+
+Removed the unused React scaffold. `react()` is gone from `astro.config.mjs`
+integrations, and `@astrojs/react`, `react`, `react-dom`, `@types/react` and
+`@types/react-dom` are uninstalled (45 packages removed).
+
+**If you need client-side state later, re-add `@astrojs/react`** — `npm i
+@astrojs/react react react-dom`, add `react()` to the integrations array, and
+restore the `jsx`/`jsxImportSource` options in `tsconfig.json`.
+
+### Why it was safe
+
+No `client:*` directive existed anywhere in the repo — no `.tsx`/`.jsx` files,
+no `react` imports in `src/`, no `<astro-island>` in any built page. The 220 KB
+React client chunk was deployed but never fetched by a browser.
+
+### Also removed: two tsconfig options
+
+`"jsx": "react-jsx"` and `"jsxImportSource": "react"` were local additions (not
+part of `astro/tsconfigs/strict`) left by the React integration setup. With
+React uninstalled they pointed at a package that no longer exists.
+
+### Verified by measurement
+
+- `dist` total: **507,425 → 286,600 bytes** (−220,825, exactly the React chunk).
+- Only `.js` in `dist`: ClientRouter, **5,653 bytes gzipped**. Unchanged.
+- All three HTML files **byte-identical in size** to before, each referencing the
+  same single `<script src>`. Page weight is unchanged, as predicted.
+- `grep` for `react.transitional`/`react-dom` across `dist`: no matches.
+- Build: 0 errors. One `[WARN]` remains (`use astro:head-inject` in
+  `kalacart.mdx`) — **pre-existing**, confirmed by stashing the change and
+  rebuilding: the same single warning appears with React still installed.
+
+### Doc edits this session
+
+- CLAUDE.md §4: added a line stating the 40 KB budget is measured against bytes
+  referenced by `<script src>` in built HTML, not total `dist/` size.
+- The owner's wording cited a "§7-adjacent cleanup norm". **No such norm exists**
+  — §7 is the "Never" list. The pointer was dropped and the clause kept; whether
+  to add a real cleanup norm to §7 is an open owner decision.
+- Corrected the increment 5.2 entry below, which wrongly reported the JS budget
+  as over by counting unreferenced bytes.
+
+### Still open
+
+- The `use astro:head-inject` build warning in `kalacart.mdx` predates this work
+  and still violates CLAUDE.md §1.3's zero-warning rule. Not investigated here.
+
 ## 2026-09-19 — increment 5.2
 
 ### Preloader reverted to centred; loading text enlarged
@@ -123,13 +173,16 @@ throughout. The fixed-width sizer fix from 5.1 is intact and was not touched.
 All five first-paint cases pass: first visit, repeat session, reduced motion
 (desktop + mobile), no-JS (overlay `display:none`, hero `<h1>` visible).
 
-### Client JS budget is over — pre-existing, not from this change
+### Client JS budget — this entry was wrong, corrected 2026-09-19
 
-`dist` gzipped JS totals **73,867 bytes (72 KB) against CLAUDE.md §4's 40 KB
-budget**. Byte-identical before and after this change (this was CSS/markup
-only). It is the React island client runtime (68 KB) plus ClientRouter (5.6 KB).
-Flagging for the owner — reducing it is a separate decision, not part of this
-increment.
+**Superseded — the budget was never over.** This entry counted every `.js` file
+in `dist`, but the 68 KB React chunk was **not referenced by any page**: no
+`client:*` directive existed anywhere in the repo, so no `<astro-island>` was
+emitted and no browser ever fetched it. Actual shipped JS was ~5.6 KB gzipped
+(ClientRouter alone), comfortably inside the 40 KB budget.
+
+The React scaffold was removed in increment 5.3 and CLAUDE.md §4 now states how
+the budget is measured, so this miscount should not recur.
 
 ## 2026-09-19 — increment 5.1
 

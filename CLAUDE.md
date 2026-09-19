@@ -45,6 +45,7 @@ Governing rules for Claude Code in this repository. Read fully before any action
 - `animation-timeline` and `animation-range` declarations must live in their own CSS rule, never alongside the `animation` shorthand — Lightning CSS folds them into the shorthand and browsers silently drop the result.
 - No scroll-jacking. Native scroll always wins.
 - Budget: no page may ship more than 40 KB of client JavaScript (gzipped) at launch. Check with the build output.
+- The 40 KB budget is measured against bytes actually referenced by `<script src>` in built HTML, not total `dist/` size — an installed-but-unreferenced integration does not count, but should not be left in the deploy either.
 
 ## 5. File and code rules
 
