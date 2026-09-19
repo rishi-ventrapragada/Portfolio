@@ -157,11 +157,11 @@ Fixed 28px pill bottom-right, rendered only when `import.meta.env.DEV`, flips `d
 ### 5.10 Boot preloader `[now]`
 A word-cycling greeting shown once per browser session before the hero.
 
-Full-viewport overlay, background `--bg`. Content is vertically centred and **left-aligned**, sharing a left edge with the rest of the site's content: the block sits in a `--max-width` track with a `--gutter` inside, mirroring `.shell`, so its text starts at 121px at 1440px and 24px at 375px — the same as the footer and section eyebrows. Max-width 600px. One line occupies the box at a time; they do not accumulate.
+Full-viewport overlay, background `--bg`, content vertically and horizontally **centred**, max-width 600px. This is a full-screen transient moment rather than page content, so it does not follow the site's left-margin convention. One line occupies the box at a time; they do not accumulate.
 
 1. Two stacked rows, centred, no connector punctuation: the cycling `{GREETING}` above, static `I'm Rishi` (`--fg`) below, visible from the start. `--font-display` 700, uppercased in CSS. `{GREETING}` cycles `["Hello", "Namaste", "Bonjour", "Hola", "Ciao"]` once, 5000ms / 5 = 1000ms each. Swap is a 150ms fade plus a slight upward slide. Each word carries a fixed colour token — amber, coral, sky, mint, periwinkle in order — and the colour cross-fades with the word rather than animating separately.
 2. `I am a {ROLE}` — `--font-display` 500, static text `--fg`. `{ROLE}` cycles `["Developer", "Video Editor", "Problem Solver", "Builder"]` over 5000ms (1250ms each), same transition, reusing the first four colour tokens in order. The cycling word sits in a box sized to the longest role and aligned left, so the static text beside it never shifts and short roles do not float.
-3. `Website loading` — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`. Three dots loop `.` → `..` → `...` at 400ms per step until reveal.
+3. `Website loading` — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`, `0.9375rem` (15px — deliberately above the `--size-label` 12px used for page labels, so the final beat holds its own beneath lines 1–2). Three dots loop `.` → `..` → `...` at 400ms per step until reveal, in a reserved `1.8em` box so the text never shifts as they cycle.
 
 Only one line is on screen at a time: each cycles, exits over 450ms with an ease-in-out curve, and the next enters. The line transition is deliberately slower and eased than the 150ms word swap within a line. Total run is about 12.6s.
 

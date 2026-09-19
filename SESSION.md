@@ -73,6 +73,64 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-19 — increment 5.2
+
+### Preloader reverted to centred; loading text enlarged
+
+The owner reversed increment 5.1's decision. The preloader is a **full-screen
+transient moment, not page content**, so it does not follow the site's
+left-margin convention the way persistent content does. Content is centred on
+both axes again, and **PRD §5.10 was updated to match** — 5.1 had rewritten that
+paragraph to specify left-alignment, so leaving it would have left the spec
+describing the opposite of the code.
+
+`.boot-track` is gone; `.boot` uses `place-items: center` with the gutter as
+padding, and `.boot-inner` is back to `margin-inline: auto`.
+
+**Do not "re-fix" this by reading 5.1's entry below.** That entry describes a
+decision that has since been reversed; it is kept for the scrollbar/`100vw`
+lesson, not as a statement of current intent.
+
+### Line 3 size is now specified
+
+`Website loading` was inheriting `.label`'s `--size-label` (0.75rem / 12px) and
+read as an afterthought. It is now `0.9375rem` (15px), set on `.boot-status`
+after the `.label` class so it wins. Deliberately **above** the site's 12px page
+label size — this is a final beat in a full-screen moment, not a page label. The
+dots box went 1.5em → 1.8em: three JetBrains Mono glyphs advance 0.6em each, so
+1.5em would have clipped the third at the larger size.
+
+PRD §5.10 line 3 now records both numbers; it previously pinned font, case,
+spacing and colour but no size.
+
+### Verified by measurement, not eyeballing
+
+Block centring, measured as distance to each viewport edge:
+
+| viewport | left / right | top / bottom |
+| --- | --- | --- |
+| 1440px | 420 / 420 | 392.4 / 392.4 |
+| 375px | 24 / 24 | 372.4 / 372.4 |
+
+Glyph ink (not just box) centred at both widths: offset 0.0px for the greeting
+word, the name, and the status line.
+
+**Word-swap stability unregressed.** Sampled every 250ms through all five
+greetings and all four roles at both widths: cycler widths (213.2px / 386.9px at
+1440), "I'm Rishi" left, and the "I am a" tail each held a *single* value
+throughout. The fixed-width sizer fix from 5.1 is intact and was not touched.
+
+All five first-paint cases pass: first visit, repeat session, reduced motion
+(desktop + mobile), no-JS (overlay `display:none`, hero `<h1>` visible).
+
+### Client JS budget is over — pre-existing, not from this change
+
+`dist` gzipped JS totals **73,867 bytes (72 KB) against CLAUDE.md §4's 40 KB
+budget**. Byte-identical before and after this change (this was CSS/markup
+only). It is the React island client runtime (68 KB) plus ClientRouter (5.6 KB).
+Flagging for the owner — reducing it is a separate decision, not part of this
+increment.
+
 ## 2026-09-19 — increment 5.1
 
 ### Bug fixed: preloader content was centred, not left-aligned
