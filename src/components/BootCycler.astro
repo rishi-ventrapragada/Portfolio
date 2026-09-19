@@ -1,0 +1,76 @@
+---
+// One cycling word slot for the boot preloader (PRD §5.10). Every word is
+// absolutely positioned over an invisible sizer set to the longest word, so
+// swapping words never reflows the line. Split out of BootPreloader.astro for
+// the CLAUDE.md §5 line cap; boot-preloader.ts drives it by class name, which
+// style scoping leaves untouched.
+interface Props {
+  /** The data-cycle value the sequence script selects by. */
+  name: string;
+  /** Words in play order; `tone` names a --word-* colour token. */
+  words: { word: string; tone: string }[];
+}
+
+const { name, words } = Astro.props;
+---
+
+<span class="cycler" data-cycle={name}>
+  {
+    words.map(({ word, tone }, i) => (
+      <span class="cycler-word" style={`--tone: var(--word-${tone})`} data-on={i === 0 ? "" : undefined}>
+        {word}
+      </span>
+    ))
+  }
+  <span class="cycler-sizer" aria-hidden="true">
+    {words.map(({ word }) => <span>{word}</span>)}
+  </span>
+</span>
+
+<style>
+  /* The sizer fixes this box to the widest word in the array, so the line
+     never reflows as words swap. The cycler is its own centred row. */
+  .cycler {
+    position: relative;
+    display: inline-block;
+    vertical-align: baseline;
+    text-align: center;
+  }
+
+  /* Every word in one grid cell: the cell is as wide as the widest word. */
+  .cycler-sizer {
+    display: grid;
+    visibility: hidden;
+  }
+
+  .cycler-sizer > span {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+  }
+
+  .cycler-word {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    /* Per-word colour, set inline from the palette tokens. The colour arrives
+       and leaves with the word because the cross-fade is opacity-driven, so no
+       separate colour animation is needed. */
+    color: var(--tone, var(--fg));
+    opacity: 0;
+    transform: translateY(0.25em);
+    transition:
+      opacity 150ms ease,
+      transform 150ms ease;
+    white-space: nowrap;
+  }
+
+  .cycler-word[data-on] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .cycler-word[data-out] {
+    opacity: 0;
+    transform: translateY(-0.25em);
+  }
+</style>

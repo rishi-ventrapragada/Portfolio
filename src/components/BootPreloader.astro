@@ -4,6 +4,8 @@
 // so no island.
 // Each cycling word has a fixed colour token (PRD §5.10); the tokens live in
 // global.css beside the other design tokens.
+import BootCycler from "./BootCycler.astro";
+
 const greetings = [
   { word: "Hello", tone: "amber" },
   { word: "Namaste", tone: "coral" },
@@ -26,16 +28,7 @@ const greetings = [
         static below and visible from the start. No connector punctuation. */}
     <p class="boot-line boot-greeting" data-line="1" data-on>
       <span class="boot-row">
-        <span class="cycler" data-cycle="greeting">
-          {/* Words are stacked over an invisible grid cell holding all of them,
-              so the box is as wide as the widest and never reflows on swap. */}
-          {greetings.map(({ word, tone }, i) => (
-            <span class="cycler-word" style={`--tone: var(--word-${tone})`} data-on={i === 0 ? "" : undefined}>{word}</span>
-          ))}
-          <span class="cycler-sizer" aria-hidden="true">
-            {greetings.map(({ word }) => <span>{word}</span>)}
-          </span>
-        </span>
+        <BootCycler name="greeting" words={greetings} />
       </span>
       <span class="boot-row boot-name">I&rsquo;m Rishi</span>
     </p>
@@ -169,55 +162,6 @@ const greetings = [
        never shifts as the dots cycle. */
     min-width: 1.8em;
     text-align: left;
-  }
-
-  /* --- Word cycler ------------------------------------------------------
-     Every word is absolutely positioned over an invisible sizer set to the
-     longest word, so swapping words never reflows the line. */
-  /* The sizer fixes this box to the widest word in the array, so the line
-     never reflows as words swap. The cycler is its own centred row. */
-  .cycler {
-    position: relative;
-    display: inline-block;
-    vertical-align: baseline;
-    text-align: center;
-  }
-
-  /* Every word in one grid cell: the cell is as wide as the widest word. */
-  .cycler-sizer {
-    display: grid;
-    visibility: hidden;
-  }
-
-  .cycler-sizer > span {
-    grid-area: 1 / 1;
-    white-space: nowrap;
-  }
-
-  .cycler-word {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline: 0;
-    /* Per-word colour, set inline from the palette tokens. The colour arrives
-       and leaves with the word because the cross-fade is opacity-driven, so no
-       separate colour animation is needed. */
-    color: var(--tone, var(--fg));
-    opacity: 0;
-    transform: translateY(0.25em);
-    transition:
-      opacity 150ms ease,
-      transform 150ms ease;
-    white-space: nowrap;
-  }
-
-  .cycler-word[data-on] {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .cycler-word[data-out] {
-    opacity: 0;
-    transform: translateY(-0.25em);
   }
 
   /* --- Reduced motion: the script removes the overlay outright, so this is
