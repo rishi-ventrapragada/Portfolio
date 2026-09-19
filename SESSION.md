@@ -2,6 +2,60 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
+## 2026-09-19 — increment 1.7
+
+### Last milestone completed
+
+Boot preloader (PRD §5.10, new section added this session).
+
+- `src/components/BootPreloader.astro` — overlay markup and scoped styles.
+- `src/scripts/boot-preloader.ts` — the sequence, split out to stay under the
+  CLAUDE.md §5 200-line cap. Astro inlines it into the HTML rather than emitting
+  a file, which is what we want: no extra request before the first frame.
+- Mounted as the first child of `<body>` in `BaseLayout.astro`. `<body>` gained
+  `tabindex="-1"` so focus can move there when the overlay is removed, with
+  `body:focus { outline: none }` so it never shows a ring.
+
+### Verified
+
+Timing was checked by running the *built* script against a DOM stand-in in Node
+(no browser automation in this repo, and adding one needs owner sign-off per §2):
+
+- Greeting 5 × 1000ms → line 2 at 5000ms → roles 4 × 1250ms → line 3 at 10000ms
+  → fade at 11200ms → removed from the DOM at 11700ms.
+- `boot-seen` set, and `prefers-reduced-motion`, both remove the overlay at 0ms
+  with no sequence.
+- Build clean: 0 errors, 0 warnings, 0 hints.
+- Boot script 785 B gzipped against the 2.5 KB allowance. Page total 6.85 KB
+  gzipped against the 40 KB cap.
+
+### Bug caught and fixed before commit
+
+The first version waited on `window.load` with no ceiling, so a single stalled
+image or font would have left the overlay up forever with the dots spinning —
+the site unreachable except by clicking to skip. There is now a 3000ms grace cap
+after the 1200ms dwell: reveal happens regardless. Re-tested, reveals at 14200ms
+on a load event that never fires.
+
+### Still to eyeball in the browser
+
+None of the below is verifiable from the build output — please look:
+
+- The word swap at 150ms: is the upward slide too subtle or too much?
+- Whether 10s before the hero feels right. It is a long hold on a first visit.
+  Shortening the cycles is a one-line change in `BootPreloader.astro`.
+- The overlay is `hidden` in markup and revealed by script, so on a slow
+  connection the hero may flash before the overlay appears. Worth checking on a
+  throttled connection.
+
+### Open question carried forward
+
+The owner chose "ship as specced, keep hero eager" on the LCP tension: PRD §8
+targets LCP ≤ 2.0s, and the overlay covers the hero for ~11s on a first visit.
+The hero image still loads eagerly behind it, so it is ready at reveal, but a
+field LCP measurement will read the overlay, not the hero. Worth deciding
+whether §8's target needs a carve-out for first-visit sessions.
+
 ## 2026-09-19 — increment 1.6
 
 ### Last milestone completed

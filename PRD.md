@@ -123,6 +123,26 @@ Email link (`mailto`), GitHub, LinkedIn, résumé. Mono labels. No form at launc
 ### 5.9 Dev accent toggle `[now, dev only]`
 Fixed 28px pill bottom-right, rendered only when `import.meta.env.DEV`, flips `data-accent` between crimson and violet, remembers in localStorage. Removed once a final accent is chosen.
 
+### 5.10 Boot preloader `[now]`
+A word-cycling greeting shown once per browser session before the hero.
+
+Full-viewport overlay, background `--bg`, content vertically centred, left-aligned, max-width 600px. Lines stack top to bottom as each completes.
+
+1. `{GREETING}, I'm Rishi` — `--font-display` 700, `--fg`, uppercased in CSS. `{GREETING}` cycles `["Hello", "Namaste", "Bonjour", "Hola", "Ciao"]` once, 5000ms / 5 = 1000ms each. Swap is a 150ms fade plus a slight upward slide. After the last word has had its full turn the line holds and line 2 begins.
+2. `I am a {ROLE}` — `--font-display` 500, `--fg`. `{ROLE}` cycles `["Developer", "Video Editor", "Problem Solver", "Builder"]` over 5000ms (1250ms each), same transition, then holds and line 3 begins.
+3. `Website loading` — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`. Three dots loop `.` → `..` → `...` at 400ms per step until reveal.
+
+Reveal: once line 3 has been visible 1200ms **and** the page has fired `load`, the overlay fades over 400ms and is removed from the DOM. A 3000ms grace cap after the dwell reveals anyway, so a stalled asset can never strand the visitor behind the overlay.
+
+Behaviour:
+- Once per browser session via `sessionStorage` key `boot-seen`. Same-session reloads go straight to the hero.
+- Skippable by click, keypress, wheel, touch or scroll: cycling stops, every line snaps to its final word, and the overlay fades.
+- `prefers-reduced-motion: reduce` skips it entirely — no overlay, straight to the hero.
+- No layout shift on swap: words are absolutely positioned over an invisible grid holding all of them, so the box is always as wide as the widest word.
+- The hero image stays `loading="eager"` behind the overlay so it is painted before the reveal.
+- Budget: 785 B gzipped against the 2.5 KB allowance; page total 6.85 KB against the 40 KB cap.
+- Accessibility: the overlay is `aria-hidden` (decorative — the real `<h1>` carries the name) and focus moves to the top of the document once it is removed.
+
 ## 6. Content model
 
 `src/content/projects/*.mdx` with schema:

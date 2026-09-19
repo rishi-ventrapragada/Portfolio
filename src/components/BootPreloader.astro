@@ -1,0 +1,156 @@
+---
+// Boot preloader (PRD §5.10). Word-cycling greeting shown once per browser
+// session before the hero. Plain .astro plus one small script — no React state,
+// so no island.
+const greetings = ["Hello", "Namaste", "Bonjour", "Hola", "Ciao"];
+const roles = ["Developer", "Video Editor", "Problem Solver", "Builder"];
+---
+
+{/* aria-hidden: decorative. The real <h1> already carries the name. */}
+<div class="boot" data-boot aria-hidden="true" hidden>
+  <div class="boot-inner">
+    <p class="boot-line boot-greeting">
+      <span class="cycler" data-cycle="greeting">
+        {/* Words are stacked over an invisible grid cell holding all of them,
+            so the box is as wide as the widest and never reflows on swap. */}
+        {greetings.map((word, i) => (
+          <span class="cycler-word" data-on={i === 0 ? "" : undefined}>{word}</span>
+        ))}
+        <span class="cycler-sizer" aria-hidden="true">
+          {greetings.map((word) => <span>{word}</span>)}
+        </span>
+      </span><span class="boot-tail">, I&rsquo;m Rishi</span>
+    </p>
+
+    <p class="boot-line boot-role" data-step="2">
+      <span class="boot-tail">I am a&nbsp;</span><span class="cycler" data-cycle="role">
+        {roles.map((word, i) => (
+          <span class="cycler-word" data-on={i === 0 ? "" : undefined}>{word}</span>
+        ))}
+        <span class="cycler-sizer" aria-hidden="true">
+          {roles.map((word) => <span>{word}</span>)}
+        </span>
+      </span>
+    </p>
+
+    <p class="boot-status label" data-step="3">
+      Website loading<span class="boot-dots" data-dots aria-hidden="true"></span>
+    </p>
+  </div>
+</div>
+
+<script>
+  import { runBootSequence } from "../scripts/boot-preloader";
+
+  // 5000ms per line, per PRD §5.10.
+  runBootSequence(5000);
+</script>
+
+<style>
+  .boot {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    align-items: center;
+    padding: 0 var(--gutter);
+    background-color: var(--bg);
+    opacity: 1;
+    transition: opacity 400ms ease;
+  }
+
+  .boot[data-out] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .boot-inner {
+    width: 100%;
+    max-width: 600px;
+    margin-inline: auto;
+  }
+
+  .boot-line {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 6vw, 3rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .boot-greeting {
+    font-weight: 700;
+  }
+
+  .boot-role {
+    font-weight: 500;
+  }
+
+  /* Lines 2 and 3 are hidden until their turn. */
+  .boot [data-step]:not([data-on]) {
+    visibility: hidden;
+  }
+
+  .boot-status {
+    margin: 1.5rem 0 0;
+    color: var(--fg-muted);
+  }
+
+  .boot-dots {
+    display: inline-block;
+    min-width: 1.5em;
+    text-align: left;
+  }
+
+  /* --- Word cycler ------------------------------------------------------
+     Every word is absolutely positioned over an invisible sizer set to the
+     longest word, so swapping words never reflows the line. */
+  .cycler {
+    position: relative;
+    display: inline-block;
+    vertical-align: baseline;
+  }
+
+  /* Every word in one grid cell: the cell is as wide as the widest word. */
+  .cycler-sizer {
+    display: grid;
+    visibility: hidden;
+  }
+
+  .cycler-sizer > span {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+  }
+
+  .cycler-word {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    opacity: 0;
+    transform: translateY(0.25em);
+    transition:
+      opacity 150ms ease,
+      transform 150ms ease;
+    white-space: nowrap;
+  }
+
+  .cycler-word[data-on] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .cycler-word[data-out] {
+    opacity: 0;
+    transform: translateY(-0.25em);
+  }
+
+  /* --- Reduced motion: the script removes the overlay outright, so this is
+     only a guard for the frame before the script runs. ------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    .boot {
+      display: none;
+    }
+  }
+</style>
