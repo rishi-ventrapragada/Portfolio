@@ -66,6 +66,90 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-20 — increment 7
+
+### Last milestone completed
+
+Seven commits: preloader role line cut; scroll progress bar in the nav; Skills
+rebuilt as six tech-stack cards with a shared `Pills.astro`; `planned` status
+and the project-card rework (no status text, pill stack, real KalaCart repo
+link); Recurzn planned card with a generated placeholder; `BootCycler.astro`
+split out for the line cap; these docs.
+
+### Decisions worth knowing before you touch this
+
+- **Progress bar is CSS-first, script-fallback** (CLAUDE.md §4, same shape as the
+  hero dissolve). `@supports (animation-timeline: scroll())` drives the fill;
+  the rAF script in `Nav.astro` only runs where that is unsupported. The
+  timeline longhands live in their own rule — verified in the built CSS that
+  nothing folded into an `animation` shorthand. **The track is the nav's bottom
+  hairline at every scroll position**; `.nav` has no `border-bottom` any more.
+  It stays on under reduced motion by design (state, not decoration).
+- **`status` is never printed.** The card heading is `Title · Year`. The field
+  only dims a `planned` card to `opacity: 0.5`. A `superRefine` in
+  `content.config.ts` makes `summary` and `stack` required unless planned;
+  proven by building with KalaCart's stack removed — the build fails.
+- **`Pills.astro` is the only pill.** Tech-stack cards and the project card both
+  render `string[]` through it; `muted` is for "currently learning". Pills are
+  mono 12px, **not uppercased** (product names read wrong shouted) — a deliberate
+  departure from the `.label` rule, they are tags, not labels.
+- **Tech stack links nowhere.** The old per-skill `#projects` links are gone with
+  the "shipped with" framing. The section id is still `#skills`, so the nav and
+  every PRD anchor reference are unchanged; the h2 says "Tech stack".
+- **Currently learning is now Docker, Kubernetes** (owner's wording), replacing
+  "Flutter & Dart, for Recurzn."
+- **Recurzn placeholder** is `recurzn-cover.png`, 1272×700 to match the KalaCart
+  cover so the two cards align. libvips could not read the woff2 in
+  `.astro/fonts/` (no brotli in its build), so the text is a generic monospace
+  face; logged in ASSETS.md. Rebranding the Life OS app is another repo's job.
+- **Line cap:** BootPreloader.astro 259 → 176 via the split; Hero.astro (253) is
+  the one remaining violation, untouched this increment.
+
+### Doc edits this session (CLAUDE.md §7)
+
+PRD §5.10 (two beats, 7.1s, budget), §5.1 (progress bar), §4.4 (one clause: the
+hairline is the track), §5.6 (tech stack), §3 (site-map row), §5.3 (cards),
+§6 (schema). ASSETS.md: Recurzn placeholder entry. README unchanged.
+
+### Verified by measurement, not eyeballing
+
+Headless Chrome over CDP, fresh target per case, reduced motion emulated per
+target rather than forced at launch so the preloader could run with motion on.
+
+- **Preloader, all five first-paint cases**, on the split build: first visit
+  present at DOMContentLoaded (`position: fixed` from the critical-paint CSS,
+  no role line in the DOM); `boot-seen` absent; reduced motion absent; reduced +
+  `boot-seen` absent; scripts disabled → `display: none` from the noscript rule.
+  Loading line on and greeting off at 5.9s; **overlay removed at 6,961 ms**.
+- **Progress bar**, 1280 and 375: fill 0 / 640 / 1280 px and 0 / 187.5 / 375 px
+  at 0 / 50 / 100% of max scroll — exact. Track `--line`, fill `--accent`, track
+  bottom = 64 = nav height, nav `border-bottom-width: 0`. Script branch forced in
+  Chrome (stubbed `CSS.supports`, `animation: none` injected): same three
+  readings, `--scroll-progress` written 0 / 0.5 / 1.
+- **Tech stack:** 6 cards, 8/9/7/3/4/2 pills, 3 columns at 1280 and 1 at 375,
+  zero `<a>` in the section, learning pills in `--fg-muted`.
+- **Cards:** KalaCart — "KalaCart · 2026", 5 pills, Live site + GitHub hrefs both
+  200. Recurzn — opacity 0.5, no summary/pills/links, cover renders. Two columns
+  at 1280, one at 375. "in-progress" appears nowhere in rendered text.
+- One `<h1>`, every fragment resolves, `[TODO: photo]` still present,
+  `[TODO: add if public]` gone. Build + `astro check` 0/0/0 at every commit.
+- **Client JS: 2020 B gzipped, all inline, no external script** (cap 40 KB).
+
+### Harness gotchas recorded for next time
+
+- `Page.addScriptToEvaluateOnNewDocument` runs before `document.documentElement`
+  exists; observe `document` itself or attach at DOMContentLoaded.
+- `innerText` applies `text-transform`, so a `[TODO: photo]` check against an
+  uppercase `.meta` fails; use `textContent`.
+- `Page.captureScreenshot` `clip` is in document coordinates: `y: 0` while
+  scrolled captures the hero top, not the fixed nav. Crop a viewport capture.
+
+### Still open
+
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Hero.astro over the 200-line cap (pre-existing).
+- Final accent, custom domain (PRD §11).
+
 ## 2026-09-20 — increment 6
 
 ### Last milestone completed

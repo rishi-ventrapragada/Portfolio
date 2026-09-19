@@ -175,7 +175,7 @@ Behaviour:
 - `prefers-reduced-motion: reduce` skips it entirely — no overlay, straight to the hero.
 - No layout shift on swap: words are absolutely positioned over an invisible grid holding all of them, so the box is always as wide as the widest word.
 - The hero image stays `loading="eager"` behind the overlay so it is painted before the reveal.
-- Budget: 714 B gzipped for the sequence script against the 2.5 KB allowance; page total 1817 B against the 40 KB cap (measured after increment 7 cut the role line).
+- Budget: 714 B gzipped for the sequence script against the 2.5 KB allowance; page total 2020 B of inline JS against the 40 KB cap, no external script (measured at the end of increment 7).
 - Accessibility: the overlay is `aria-hidden` (decorative — the real `<h1>` carries the name) and focus moves to the top of the document once it is removed.
 
 ## 6. Content model
