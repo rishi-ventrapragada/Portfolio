@@ -42,6 +42,7 @@ Governing rules for Claude Code in this repository. Read fully before any action
 - Every animation has a `prefers-reduced-motion: reduce` branch that removes movement and blur, keeping at most an opacity fade.
 - Pointer-driven effects (cursor, tilt, hover-follow) are gated behind `@media (pointer: fine)` and feature-detected in script.
 - Scroll effects use `animation-timeline` with `CSS.supports` detection; fallback scripts use `requestAnimationFrame`, never scroll handlers that do layout work per event.
+- `animation-timeline` and `animation-range` declarations must live in their own CSS rule, never alongside the `animation` shorthand — Lightning CSS folds them into the shorthand and browsers silently drop the result.
 - No scroll-jacking. Native scroll always wins.
 - Budget: no page may ship more than 40 KB of client JavaScript (gzipped) at launch. Check with the build output.
 
