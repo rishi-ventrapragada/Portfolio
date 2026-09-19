@@ -5,6 +5,7 @@ import "../styles/global.css";
 import Footer from "../components/Footer.astro";
 import AccentToggle from "../components/AccentToggle.astro";
 import BootPreloader from "../components/BootPreloader.astro";
+import Nav from "../components/Nav.astro";
 
 interface Props {
   title: string;
@@ -86,8 +87,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
   <body tabindex="-1">
     <BootPreloader />
     <a class="skip-link label" href="#main">Skip to content</a>
-    {/* <Nav /> is unmounted until increment 2+ gives it somewhere to go.
-        The component is kept intact for reuse — this is not a deletion. */}
+    <Nav />
     <main id="main">
       <slot />
     </main>

@@ -1,38 +1,74 @@
 ---
-// PRD 5.1 — a single fixed hamburger, top right. Menu behaviour is [next];
-// the button exists now and stays inert until then.
+// PRD §5.1 — a fixed bar, transparent over the hero, solid once past it.
+// Four links shown directly: with this few there is nothing worth hiding
+// behind a toggle, so there is no hamburger and no open/close state.
+// Only routes and anchors that exist today are listed (no About/Community).
+const { pathname } = Astro.url;
+
+// Anchor-only entries are positions on a page, not destinations, so they are
+// never "current". `current` is resolved at build time — no client router.
+const links = [
+  { label: "Home", href: "/", current: pathname === "/" },
+  { label: "Work", href: "/#projects-heading", current: false },
+  {
+    label: "KalaCart",
+    href: "/projects/kalacart/",
+    current: pathname.startsWith("/projects/kalacart"),
+  },
+  { label: "Contact", href: "/#contact", current: false },
+];
 ---
 
 <header class="nav" data-nav>
-  <div class="nav-inner">
-    <button
-      type="button"
-      class="burger"
-      aria-expanded="false"
-      aria-controls="site-menu"
-      aria-label="Open menu"
-      disabled
-    >
-      <span></span>
-      <span></span>
-    </button>
-  </div>
+  <nav class="nav-inner" aria-label="Primary">
+    <ul class="links">
+      {
+        links.map((link) => (
+          <li>
+            <a
+              class="label link"
+              href={link.href}
+              aria-current={link.current ? "page" : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
 </header>
 
 <script>
-  // Adds .is-scrolled once the hero is behind the bar (PRD 4.4).
-  const nav = document.querySelector<HTMLElement>("[data-nav]");
-  if (nav) {
-    const sentinel = document.createElement("div");
+  // Adds .is-scrolled once the hero is behind the bar (PRD §4.4).
+  //
+  // Runs on astro:page-load, not at module scope: ClientRouter swaps the DOM
+  // on navigation but does NOT re-run an identical script, so a module-scope
+  // observer would stay bound to the discarded nav and silently stop working
+  // from the second page onward.
+  let observer: IntersectionObserver | undefined;
+  let sentinel: HTMLElement | undefined;
+
+  const setup = () => {
+    observer?.disconnect();
+    sentinel?.remove();
+
+    const nav = document.querySelector<HTMLElement>("[data-nav]");
+    if (!nav) return;
+
+    sentinel = document.createElement("div");
     sentinel.setAttribute("aria-hidden", "true");
     sentinel.style.cssText = "position:absolute;top:100dvh;height:1px;width:1px;";
     document.body.prepend(sentinel);
 
-    new IntersectionObserver(
+    observer = new IntersectionObserver(
       ([entry]) => nav.classList.toggle("is-scrolled", !entry.isIntersecting),
       { rootMargin: "0px" },
-    ).observe(sentinel);
-  }
+    );
+    observer.observe(sentinel);
+  };
+
+  document.addEventListener("astro:page-load", setup);
 </script>
 
 <style>
@@ -60,35 +96,47 @@
     height: 100%;
     max-width: var(--max-width);
     margin-inline: auto;
-    /* Gutter keeps the button on the same line as page content rather than
+    /* Gutter keeps the links on the same line as page content rather than
        floating at the very edge. */
     padding-inline: var(--gutter);
   }
 
-  /* 64px square hit area; the bars themselves stay 28px wide, right-aligned
-     inside it so they sit on the gutter line. */
-  .burger {
-    display: grid;
-    align-content: center;
-    justify-items: end;
-    gap: 5px;
-    width: var(--nav-height);
-    height: var(--nav-height);
+  .links {
+    display: flex;
+    /* Measured: the four labels total ~259px against 327px available at
+       375px, so they fit at every width without collapsing. */
+    gap: 1.25rem;
+    margin: 0;
     padding: 0;
-    background: none;
-    border: 0;
-    cursor: not-allowed;
+    list-style: none;
   }
 
-  .burger span {
+  @media (min-width: 768px) {
+    .links {
+      gap: 2rem;
+    }
+  }
+
+  .link {
     display: block;
-    width: 28px;
-    height: 1px;
-    background-color: var(--fg);
-    transition: background-color 160ms ease;
+    padding-block: 0.5rem;
+    color: var(--fg);
+    border-bottom: 1px solid transparent;
   }
 
-  .burger:hover:not(:disabled) span {
-    background-color: var(--accent);
+  .link:hover {
+    color: var(--accent);
+  }
+
+  /* Current page, not current position: anchor links never carry this. */
+  .link[aria-current="page"] {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav {
+      transition: none;
+    }
   }
 </style>

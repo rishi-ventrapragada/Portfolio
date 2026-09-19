@@ -105,6 +105,14 @@ a:hover {
   outline-offset: 3px;
 }
 
+/* The nav is fixed, so anything an anchor jumps to must reserve its height or
+   it lands underneath the bar. Measured: without this, #projects-heading sits
+   at top:0 behind a 64px bar. The extra 1rem is breathing room. */
+:target,
+[id] {
+  scroll-margin-top: calc(var(--nav-height) + 1rem);
+}
+
 img {
   display: block;
   max-width: 100%;
