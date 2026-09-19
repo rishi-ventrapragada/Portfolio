@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from "astro/config";
+import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -7,7 +8,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   site: "https://rishi-ventrapragada.vercel.app",
   output: "static",
-  integrations: [react()],
+  integrations: [mdx(), react()],
   vite: {
     plugins: [tailwindcss()],
   },
