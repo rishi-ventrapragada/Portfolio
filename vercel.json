@@ -11,7 +11,22 @@
       "permanent": true
     },
     {
+      "source": "/about/",
+      "destination": "/#about",
+      "permanent": true
+    },
+    {
       "source": "/projects/:path*",
+      "destination": "/#projects",
+      "permanent": true
+    },
+    {
+      "source": "/projects/",
+      "destination": "/#projects",
+      "permanent": true
+    },
+    {
+      "source": "/projects/kalacart/",
       "destination": "/#projects",
       "permanent": true
     }
