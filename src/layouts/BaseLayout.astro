@@ -12,6 +12,8 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+// Every absolute URL below derives from this one value, so changing `site`
+// in astro.config.mjs updates canonical, og:url and twitter:url together.
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 ---
 
@@ -31,6 +33,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
 
     <Font cssVariable="--font-display-src" preload />
     <Font cssVariable="--font-mono-src" />
