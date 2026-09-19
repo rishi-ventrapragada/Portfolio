@@ -11,12 +11,6 @@ const greetings = [
   { word: "Hola", tone: "mint" },
   { word: "Ciao", tone: "periwinkle" },
 ];
-const roles = [
-  { word: "Developer", tone: "amber" },
-  { word: "Video Editor", tone: "coral" },
-  { word: "Problem Solver", tone: "sky" },
-  { word: "Builder", tone: "mint" },
-];
 ---
 
 {/* Without JS nothing would ever remove the overlay, so hide it for no-JS
@@ -46,18 +40,7 @@ const roles = [
       <span class="boot-row boot-name">I&rsquo;m Rishi</span>
     </p>
 
-    <p class="boot-line boot-role" data-line="2">
-      <span class="boot-tail">I am a&nbsp;</span><span class="cycler" data-cycle="role">
-        {roles.map(({ word, tone }, i) => (
-          <span class="cycler-word" style={`--tone: var(--word-${tone})`} data-on={i === 0 ? "" : undefined}>{word}</span>
-        ))}
-        <span class="cycler-sizer" aria-hidden="true">
-          {roles.map(({ word }) => <span>{word}</span>)}
-        </span>
-      </span>
-    </p>
-
-    <p class="boot-status label" data-line="3">
+    <p class="boot-status label" data-line="2">
       Website loading<span class="boot-dots" data-dots aria-hidden="true"></span>
     </p>
   </div>
@@ -86,7 +69,7 @@ const roles = [
 <script>
   import { runBootSequence } from "../scripts/boot-preloader";
 
-  // 5000ms per line, per PRD §5.10.
+  // 5000ms for the greeting cycle, per PRD §5.10.
   runBootSequence(5000);
 </script>
 
@@ -145,10 +128,6 @@ const roles = [
     color: var(--fg);
   }
 
-  .boot-role {
-    font-weight: 500;
-  }
-
   /* --- One line at a time -----------------------------------------------
      Every line sits in the same grid cell. The script gives exactly one the
      data-on attribute; the others are faded out and non-interactive. The
@@ -179,8 +158,8 @@ const roles = [
     margin: 0;
     color: var(--fg-muted);
     text-align: center;
-    /* Above --size-label (0.75rem): line 3 is the final beat of a full-screen
-       moment, not a page label, and needs to hold its own under lines 1-2. */
+    /* Above --size-label (0.75rem): line 2 is the final beat of a full-screen
+       moment, not a page label, and needs to hold its own under line 1. */
     font-size: 0.9375rem;
   }
 
@@ -195,19 +174,13 @@ const roles = [
   /* --- Word cycler ------------------------------------------------------
      Every word is absolutely positioned over an invisible sizer set to the
      longest word, so swapping words never reflows the line. */
-  /* The sizer fixes this box to the widest word in the array, so the static
-     text beside it never moves as words swap. On line 1 the cycler is its own
-     centred row; on line 2 it follows "I am a", so it aligns left there to
-     avoid a floating gap after the static text. */
+  /* The sizer fixes this box to the widest word in the array, so the line
+     never reflows as words swap. The cycler is its own centred row. */
   .cycler {
     position: relative;
     display: inline-block;
     vertical-align: baseline;
     text-align: center;
-  }
-
-  .boot-role .cycler {
-    text-align: left;
   }
 
   /* Every word in one grid cell: the cell is as wide as the widest word. */

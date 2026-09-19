@@ -12,7 +12,7 @@ function show(word: HTMLElement): void {
 /**
  * Run the greeting sequence over an already-rendered overlay.
  *
- * @param cycleMs how long each line takes to cycle its whole word array.
+ * @param cycleMs how long the greeting line takes to cycle its whole word array.
  */
 export function runBootSequence(cycleMs: number): void {
   // The synchronous script in BootPreloader.astro has already removed the
@@ -86,7 +86,7 @@ export function runBootSequence(cycleMs: number): void {
     });
     // Skipping jumps to the final state: only the status line is on screen.
     root.querySelectorAll<HTMLElement>("[data-line]").forEach(exit);
-    enter(line(3));
+    enter(line(2));
 
     root.setAttribute("data-out", "");
     root.addEventListener("transitionend", remove, { once: true });
@@ -122,7 +122,7 @@ export function runBootSequence(cycleMs: number): void {
   const readyGraceMs = 3000;
 
   const showStatus = () => {
-    enter(line(3));
+    enter(line(2));
     const dots = root.querySelector<HTMLElement>("[data-dots]");
     let n = 0;
     const tick = () => {
@@ -140,22 +140,16 @@ export function runBootSequence(cycleMs: number): void {
   };
 
   const greeting = root.querySelector<HTMLElement>('[data-cycle="greeting"]');
-  const role = root.querySelector<HTMLElement>('[data-cycle="role"]');
-  if (!greeting || !role) {
+  if (!greeting) {
     finish();
     return;
   }
 
-  // One line at a time: each cycles, exits, then the next enters. Line 1 is
-  // already on from the markup, so the overlay is never blank before JS runs.
+  // Two beats: the greeting line cycles and exits, then the loading line
+  // enters. Line 1 is already on from the markup, so the overlay is never
+  // blank before JS runs.
   cycle(greeting, () => {
     exit(line(1));
-    wait(() => {
-      enter(line(2));
-      cycle(role, () => {
-        exit(line(2));
-        wait(showStatus, lineMs);
-      });
-    }, lineMs);
+    wait(showStatus, lineMs);
   });
 }

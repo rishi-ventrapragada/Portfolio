@@ -157,10 +157,9 @@ A word-cycling greeting shown once per browser session before the hero.
 Full-viewport overlay, background `--bg`, content vertically and horizontally **centred**, max-width 600px. This is a full-screen transient moment rather than page content, so it does not follow the site's left-margin convention. One line occupies the box at a time; they do not accumulate.
 
 1. Two stacked rows, centred, no connector punctuation: the cycling `{GREETING}` above, static `I'm Rishi` (`--fg`) below, visible from the start. `--font-display` 700, uppercased in CSS. `{GREETING}` cycles `["Hello", "Namaste", "Bonjour", "Hola", "Ciao"]` once, 5000ms / 5 = 1000ms each. Swap is a 150ms fade plus a slight upward slide. Each word carries a fixed colour token — amber, coral, sky, mint, periwinkle in order — and the colour cross-fades with the word rather than animating separately.
-2. `I am a {ROLE}` — `--font-display` 500, static text `--fg`. `{ROLE}` cycles `["Developer", "Video Editor", "Problem Solver", "Builder"]` over 5000ms (1250ms each), same transition, reusing the first four colour tokens in order. The cycling word sits in a box sized to the longest role and aligned left, so the static text beside it never shifts and short roles do not float.
-3. `Website loading` — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`, `0.9375rem` (15px — deliberately above the `--size-label` 12px used for page labels, so the final beat holds its own beneath lines 1–2). Three dots loop `.` → `..` → `...` at 400ms per step until reveal, in a reserved `1.8em` box so the text never shifts as they cycle.
+2. `Website loading` — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`, `0.9375rem` (15px — deliberately above the `--size-label` 12px used for page labels, so the final beat holds its own beneath line 1). Three dots loop `.` → `..` → `...` at 400ms per step until reveal, in a reserved `1.8em` box so the text never shifts as they cycle.
 
-Only one line is on screen at a time: each cycles, exits over 450ms with an ease-in-out curve, and the next enters. The line transition is deliberately slower and eased than the 150ms word swap within a line. Total run is about 12.6s.
+Only one line is on screen at a time: the greeting line cycles, exits over 450ms with an ease-in-out curve, and the loading line enters. The line transition is deliberately slower and eased than the 150ms word swap within a line. Total run is about 7.1s (5.0s greeting cycle + 0.45s exit + 1.2s dwell + 0.4s fade). The role-cycling line that made it 12.6s was cut in increment 7.
 
 Reveal: once line 3 has been visible 1200ms **and** the page has fired `load`, the overlay fades over 400ms and is removed from the DOM. A 3000ms grace cap after the dwell reveals anyway, so a stalled asset can never strand the visitor behind the overlay.
 
@@ -173,7 +172,7 @@ Behaviour:
 - `prefers-reduced-motion: reduce` skips it entirely — no overlay, straight to the hero.
 - No layout shift on swap: words are absolutely positioned over an invisible grid holding all of them, so the box is always as wide as the widest word.
 - The hero image stays `loading="eager"` behind the overlay so it is painted before the reveal.
-- Budget: 785 B gzipped against the 2.5 KB allowance; page total 6.85 KB against the 40 KB cap.
+- Budget: 714 B gzipped for the sequence script against the 2.5 KB allowance; page total 1817 B against the 40 KB cap (measured after increment 7 cut the role line).
 - Accessibility: the overlay is `aria-hidden` (decorative — the real `<h1>` carries the name) and focus moves to the top of the document once it is removed.
 
 ## 6. Content model
