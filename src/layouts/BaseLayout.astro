@@ -22,6 +22,34 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {/* Critical paint styles, inline and first: global.css is bundled into an
+        external stylesheet, so until that request resolves the document has no
+        background and the browser paints white — a bright flash on every hard
+        reload before the dark theme lands. These few declarations give the
+        first paint the right canvas. Values are duplicated from the tokens in
+        global.css by necessity (nothing else is parsed yet) and must be kept
+        in step with them. */}
+    <style is:inline>
+      :root {
+        color-scheme: dark;
+        background-color: #111214;
+      }
+      html,
+      body {
+        margin: 0;
+        background-color: #111214;
+      }
+      /* The preloader overlay covers the hero from the first paint, so the
+         hero must never be visible behind it even before global.css lands. */
+      .boot {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background-color: #111214;
+      }
+    </style>
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={canonical} />
     <title>{title}</title>

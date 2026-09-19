@@ -6,7 +6,10 @@
    --------------------------------------------------------------- */
 
 :root {
-  /* Surfaces and text */
+  /* Surfaces and text.
+     NOTE: --bg is duplicated as a literal in BaseLayout.astro's inline
+     critical-paint <style>, because this file is an external stylesheet and
+     is not parsed in time for the first paint. Change both together. */
   --bg: #111214;
   --bg-raised: #1a1b1e;
   --fg: #ffffff;

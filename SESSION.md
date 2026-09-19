@@ -2,6 +2,82 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
+## 2026-09-19 — increment 2.1
+
+### Bug fixed: white flash on hard reload
+
+**Root cause: the entire dark theme lives in an external stylesheet.**
+
+`global.css` is imported as a module in `BaseLayout.astro`, so Astro bundles it
+into `/_astro/_astro_content.*.css`. Every base rule — `:root` tokens including
+`--bg`, the `html` and `body` background, `color-scheme: dark` — exists **only**
+there. The inline `<style>` blocks in the head are just `@font-face` and scoped
+component CSS; they contain no `html`, `body` or `--bg` rule at all.
+
+So between first paint and the stylesheet arriving, the document had **no
+background**. The browser painted its default white, with the hero image and
+wordmark already in the DOM and visible against it.
+
+Astro's head ordering made it worse: the ClientRouter module script and the
+inline accent script are emitted *before* the `<link rel="stylesheet">`.
+
+`<meta name="theme-color">` does not help — it tints browser chrome, not the
+page canvas.
+
+### Ruled out (the four things asked about)
+
+1. **Not async/deferred CSS.** The `<link rel="stylesheet">` is a normal
+   render-blocking link. Tailwind v4 and the Vite plugin are not at fault. The
+   problem is that it is *external at all*, so nothing paints correctly until a
+   second network round trip completes.
+2. **Not the Fonts API.** Font CSS is already inlined ahead of everything, with
+   a `preload` for the display face. Fonts affect text rendering, not the page
+   background, and could not produce a light canvas.
+3. **Not ClientRouter.** View Transitions only take over in-app navigation; a
+   hard reload is an ordinary document load. Its script sits before the
+   stylesheet in the head, which does not help, but removing it would not fix
+   the flash. Confirmed by reproducing with the same ordering.
+4. **The overlay CSS was the victim, not the cause.** `.boot` is
+   visible-by-default, but its `position: fixed` and background come from the
+   external sheet, so during the gap it was an unstyled block that did not
+   cover the hero.
+
+### Reproduced before fixing
+
+Built a static server that delays **only** `.css` responses by 1500ms
+(`scratchpad/slowserve.mjs`), then sampled the iframe's computed
+`backgroundColor` every 50ms. Plain screenshots do not show this: headless
+Chrome blocks first paint on the stylesheet.
+
+- **Before:** `rgba(0, 0, 0, 0)` — transparent, painted white — for the full
+  1.5s window.
+- **After:** `rgb(17, 18, 20)` from the first sample at 59ms.
+
+Pixel-sampled the rendered output at 200ms and 600ms with CSS still in flight:
+all four corners and centre `(17, 18, 20)`. No white frame.
+
+### The fix
+
+A small `is:inline` critical-paint `<style>` in `BaseLayout.astro`, placed
+immediately after `<meta name="viewport">` — byte 203 of the document, versus
+4630 for the ClientRouter script and 5042 for the stylesheet. It sets
+`color-scheme: dark`, the `html`/`body` background, and enough of `.boot`
+(`position: fixed; inset: 0; z-index: 200`) that the overlay covers the hero
+from the first paint.
+
+247 B gzipped. No change to client JS (6.94 KB against the 40 KB cap).
+
+**Maintenance note:** `#111214` is now duplicated as a literal, because nothing
+else is parsed at that point. `global.css` carries a comment next to `--bg`
+saying to change both together.
+
+### Verified
+
+- Build clean: 0 errors, 0 warnings, 0 hints.
+- Overlay computes `position: fixed`, `z-index: 200` from 64ms with CSS delayed.
+- All five first-paint cases still correct (first visit, repeat session,
+  reduced motion first/repeat, no-JS).
+
 ## 2026-09-19 — increment 2
 
 ### Last milestone completed
