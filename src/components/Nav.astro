@@ -2,7 +2,8 @@
 // PRD §5.1 — a fixed bar, transparent over the hero, solid once past it.
 // Four links shown directly: with this few there is nothing worth hiding
 // behind a toggle, so there is no hamburger and no open/close state.
-// Only routes and anchors that exist today are listed (no About/Community).
+// Only routes and anchors that exist today are listed. Community is absent
+// because that page does not exist yet; add it here when it ships.
 const { pathname } = Astro.url;
 
 // Anchor-only entries are positions on a page, not destinations, so they are
@@ -15,6 +16,7 @@ const links = [
     href: "/projects/kalacart/",
     current: pathname.startsWith("/projects/kalacart"),
   },
+  { label: "About", href: "/about/", current: pathname.startsWith("/about") },
   { label: "Contact", href: "/#contact", current: false },
 ];
 ---
@@ -103,9 +105,11 @@ const links = [
 
   .links {
     display: flex;
-    /* Measured: the four labels total ~259px against 327px available at
-       375px, so they fit at every width without collapsing. */
-    gap: 1.25rem;
+    /* Measured at 375px: 312px available inside the gutters. Five labels need
+       322px at a 1.25rem gap (overflow) but 306px at 1rem, leaving 6px. A
+       sixth link will not fit — it needs a different approach, not a smaller
+       gap. */
+    gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
