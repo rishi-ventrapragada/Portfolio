@@ -118,13 +118,14 @@ Scroll behaviour over the first 40% of the hero's height:
 - Mobile: wordmark at 88vw, pushed down from the nav so the figure still reaches into it; subject scaled to fit height.
 
 ### 5.3 Project cards `[now]`
-One card per project in the Projects section, from the projects collection (§6). Each card: cover image (`<Image>`, lazy; the image sets its own aspect ratio so a screenshot is never cropped), eyebrow `status · year` (`--accent`), title, one-line summary, stack labels, and a links row.
+One card per project in the Projects section, from the projects collection (§6). Each card: cover image (`<Image>`, lazy; the image sets its own aspect ratio so a screenshot is never cropped), then a heading line `Title · Year` (one `<h3>`, the year in `--fg-muted`), the one-line summary, the stack as tag pills (`Pills.astro`, shared with §5.6), and a links row.
 
-- **Links row.** `links.live` renders as "Live site" and `links.repo` as "GitHub", each an `<a>` only when the value is a real `http(s)` URL. Any other value — today `repo` is `[TODO: add if public]` — renders as visible mono text, never as an href (CLAUDE.md §7).
+- **`status` is never printed.** Increment 7 removed the `status · year` eyebrow; the field only drives the planned state below.
+- **Links row.** `links.live` renders as "Live site" and `links.repo` as "GitHub", each an `<a>` only when the value is a real `http(s)` URL; any other value renders as visible mono text, never as an href (CLAUDE.md §7). The row is omitted when `links` is absent. KalaCart's repo is public as of increment 7, so both of its links are real.
+- **Planned projects.** `status: "planned"` renders the card at `opacity: 0.5` with only the cover (a placeholder, §7), the title and the year if known — no summary, no stack, no links. The schema makes those fields optional and, for every other status, required (§6), so a shipped project can never silently render empty.
 - **No case study, so no stretched link and no card hover.** The links row is the only way out of the card; the title is plain text.
-- **No demo video.** The `<video>` branch and the `video` schema field were removed in increment 6; §7's demo-video asset note is parked with them.
-- The grid is `repeat(auto-fit, …)` so further entries form columns with no rewrite, and a lone card splits into cover + text at ≥768px via `:only-child` so it does not read as a stretched banner.
-- The eyebrow is `status · year`, not a project type: there is no `type` field and inventing a taxonomy would be inventing copy.
+- **No demo video.** Removed in increment 6.
+- The grid is `repeat(auto-fit, minmax(28rem, 1fr))`: two cards sit side by side from roughly 60rem and stack below it. A lone card splits into cover + text at ≥768px via `:only-child`, which stops matching the moment a second card exists.
 
 ### 5.4 Currently building strip `[now, partial]`
 **Increment 2 ships a single static line**, copy hardcoded in `CurrentlyBuilding.astro`:
@@ -182,15 +183,15 @@ Behaviour:
 `src/content/projects/*.json`, one file per project, loaded by `glob({ pattern: "*.json" })` from `src/content.config.ts` (Content Layer API; `src/content/config.ts` throws in Astro 7). The id is the filename, so `kalacart.json` → `kalacart`. Entries are data only — nothing renders a body, so MDX was dropped in increment 6 and `@astrojs/mdx` is uninstalled.
 ```
 title: string
-summary: string (max 140 chars)
-stack: string[]
-status: "live" | "in-progress" | "archived"
-year: number
-links: { live?: string, repo?: string }   plain strings; only http(s) values render as hrefs
-cover: image()                            relative to the entry file, e.g. "./kalacart-cover.jpeg"
+summary?: string (max 140 chars)     required unless status is "planned"
+stack?: string[]                     required unless status is "planned"
+status: "live" | "in-progress" | "archived" | "planned"
+year?: number
+links?: { live?: string, repo?: string }   plain strings; only http(s) values render as hrefs
+cover: image()                       relative to the entry file; a planned entry uses a placeholder (§7)
 order: number
 ```
-`role` and `video` were removed with the case study. `src/content/now.json` (§5.4) is still deferred.
+A `superRefine` enforces "required unless planned" at build time, so a live or in-progress card cannot ship without a summary and stack (CLAUDE.md §7). `status` is data only — nothing prints it (§5.3). `role` and `video` were removed with the case study. `src/content/now.json` (§5.4) is still deferred.
 
 ## 7. Assets
 
