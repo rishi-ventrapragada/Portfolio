@@ -26,7 +26,7 @@ One page, `/`, with anchored sections in this order. The nav (§5.1) links to th
 | --- | --- | --- |
 | Hero | — (the nav mark's `#top` scrolls here) | §5.2 |
 | About: photo, story, GDG line | `#about` | §5.6 |
-| Skills grouped by what shipped with them | `#skills` | §5.6 |
+| Tech stack: six category cards of tags | `#skills` | §5.6 |
 | Projects: one card per project, then "currently building" | `#projects` | §5.3, §5.4 |
 | Contact: the footer | `#contact` | §5.8 |
 
@@ -135,12 +135,12 @@ One card per project in the Projects section, from the projects collection (§6)
 ### 5.5 Case study page `[removed]`
 Removed in increment 6 with the move to a single page. The `/projects/[slug]` route, `CaseStudyMeta.astro`, `CaseStudyToc.astro` and the KalaCart MDX body (Context, What I built, Decisions, What broke, Outcome) are gone from the repo and the public site; the security-disclosure prose in particular is no longer published. `/projects/kalacart/` redirects to `/#projects`. Everything is in git history if a case study ever returns.
 
-### 5.6 About and Skills `[now]`
+### 5.6 About and Tech stack `[now]`
 Two sections on the single page, directly under the hero.
 
 **About (`#about`)**: h2 "About"; a 240px CSS photo placeholder at 3:4 (`role="img"`, `[TODO: photo]` in mono — logged in ASSETS.md) beside the owner's story paragraph, verbatim; below the story, the GDG one-liner as small plain mono text. No top rule: the hero subject fades into this section.
 
-**Skills (`#skills`)**: eyebrow "Toolkit", h2 "Skills", `SkillGroups.astro` with the three groups verbatim — Frontend, Backend & Data, Languages — and the "Currently learning — Flutter & Dart, for Recurzn." line. Frontend and Backend & Data items link to `#projects` (KalaCart is the only project; revisit per-skill targets when there are more). Languages are plain text.
+**Tech stack (`#skills`)**: eyebrow "Toolkit", h2 "Tech stack" (`TechStack.astro`, increment 7). Six category cards — `--bg-raised`, 1px `--line` — in a grid that lands three across on desktop, two on a tablet, one on a phone (`auto-fit`, 20rem floor). Each card: the category name as an uppercase mono `--accent` label, then its items as tag pills (`Pills.astro`: mono 12px, not uppercased, 1px `--line` border, `--fg` text, transparent ground). Order and items, verbatim: Languages (C, Python, Java, HTML, CSS, JavaScript, TypeScript, Dart); Frameworks (Flutter, Astro, React, Next.js, Node.js, Django, FastAPI, Tailwind CSS, Vite); AI (Claude, Claude Code, Gemini, GPT-6 Astra, Codex, Ollama, Open Router); Tools (Notion, Canva, Figma); Platforms (Supabase, Firebase, Vercel, Render); Cloud (Google Cloud, AWS). Below the grid, a "Currently learning" `--fg-muted` label with muted pills: Docker, Kubernetes. **Nothing in the section links anywhere** — it is a showcase, not the old "shipped with" list, so the per-skill `#projects` links from increment 6 are gone. `SkillGroups.astro` and `Skills.astro` were deleted.
 
 Cut in increment 6, not deferred: the "How I work" paragraph and the `Timeline.astro` component (deleted). The résumé button the old About page carried is **intentionally not duplicated**: the footer (§5.8) is the résumé link and satisfies §1's one-click requirement. The GDG line stays plain text until a Community section exists (§5.7).
 
