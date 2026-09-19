@@ -104,11 +104,20 @@ Scroll behaviour over the first 40% of the hero's height:
 - Reduced motion: opacity fade only, no blur or movement.
 - Mobile: wordmark at 88vw, pushed down from the nav so the figure still reaches into it; subject scaled to fit height.
 
-### 5.3 Project tiles `[next]`
-Three large tiles on Home, one per project, each with: eyebrow (`--accent`, project type), title, one-line summary, stack labels, a muted looping demo video (WebM + MP4, poster image, autoplay muted playsinline, paused under reduced motion), and a link to the case study. Data comes from the projects collection.
+### 5.3 Project tiles `[now]`
+Large tiles on Home, one per project, each with: eyebrow (`--accent`), title, one-line summary, stack labels, a cover image, and a link to the case study. Data comes from the projects collection.
 
-### 5.4 Currently building strip `[next]`
-Horizontal marquee or static row of mono labels reading from `src/content/now.json` (project, one-line status, date). Marquee pauses on hover and is static under reduced motion.
+As of increment 2 there is **one** tile (KalaCart); the others land when their copy does. The grid is `repeat(auto-fit, …)` so further entries form columns with no rewrite, and a lone tile splits into cover + text at ≥768px via `:only-child` so it does not read as a stretched banner.
+
+Two deviations from the original spec, both deliberate:
+- **The demo video is optional, not required.** No project has one yet (PRD §7 `[TODO]`), so the tile omits the whole `<video>` block when absent rather than rendering an empty player. Videos land in increment 4.
+- **The eyebrow is `status · year`**, not a project type. There is no `type` field in the schema and inventing a taxonomy would be inventing copy (CLAUDE.md §7). Revisit if a real type field is added.
+
+### 5.4 Currently building strip `[now, partial]`
+**Increment 2 ships a single static line**, copy hardcoded in `CurrentlyBuilding.astro`:
+"Recurzn — a cross-platform life tracker with a voice assistant."
+
+**Deferred to a later increment:** the horizontal marquee, the `src/content/now.json` source (project, one-line status, date), the pause-on-hover behaviour and the reduced-motion static fallback. A one-entry JSON collection would be overhead with no payoff until the marquee exists.
 
 ### 5.5 Case study page `[next]`
 MDX with frontmatter: `title, summary, role, stack[], status, year, links{live, repo}, video, cover`. Sections in order: hero (title, meta row, cover video or image), Context, What I built, Decisions and trade-offs, What broke and what I learned, Outcome, Links. Sidebar on desktop with meta and a sticky table of contents.
@@ -152,10 +161,12 @@ Behaviour:
 
 ## 6. Content model
 
-`src/content/projects/*.mdx` with schema:
+`src/content/projects/*.mdx` with schema. Note `slug` is **not** a frontmatter
+field: Astro's Content Layer API derives it from the filename
+(`kalacart.mdx` → `/projects/kalacart`), and the config lives at
+`src/content.config.ts` — `src/content/config.ts` throws in Astro 7.
 ```
 title: string
-slug: string
 summary: string (max 140 chars)
 role: string
 stack: string[]
@@ -194,7 +205,7 @@ order: number
 ## 10. Increments
 
 1. `[now]` Scaffold, tokens, fonts, BaseLayout, Nav, Hero, placeholder section, footer, dev accent toggle, Vercel deploy.
-2. `[next]` Projects collection with three entries, project tiles on Home, `/projects` index.
+2. `[now]` Projects collection, project tiles on Home, case study route `/projects/[slug]`. **Scoped to KalaCart only** — the other entries need real copy first (CLAUDE.md §7). The `/projects` index page is deferred until there is more than one project to index.
 3. `[next]` Case study template and KalaCart write-up.
 4. `[next]` Life OS and AEGIS case studies, demo videos.
 5. `[next]` About page, résumé, OG images, analytics.

@@ -2,6 +2,84 @@
 
 Handoff notes per CLAUDE.md §8. Newest session at the top.
 
+## 2026-09-19 — increment 2
+
+### Last milestone completed
+
+Projects content collection, KalaCart tile, case study route.
+
+- `src/content.config.ts` — `projects` collection, glob loader, Zod schema per
+  PRD §6. **Must be `src/content.config.ts`**: Astro 7 throws
+  `LegacyContentConfigError` on `src/content/config.ts`.
+- `src/content/projects/kalacart.mdx` + co-located placeholder cover.
+- `ProjectTile.astro`, `ProjectsSection.astro`, `CurrentlyBuilding.astro`.
+- `src/pages/projects/[slug].astro` — case study route, MDX body.
+- `ProjectsPlaceholder.astro` deleted; `index.astro` now renders the real section.
+- `ASSETS.md` created (did not exist, required by CLAUDE.md §7). Logs the
+  KalaCart placeholder and, retroactively, the hero subject.
+
+### New dependency
+
+`@astrojs/mdx` 8.0.1, MIT, first-party Astro. Owner approved. PRD §6 specifies
+`.mdx`, and increment 3's case study body will want components.
+
+### Verified
+
+- Build clean: 0 errors, 0 warnings, 0 hints.
+- `dist/projects/kalacart/index.html` exists; the tile's `href` is
+  `/projects/kalacart/` and matches. Both routes return HTTP 200 under preview.
+- **Zero `<video>` elements emitted** on either page — the optional-video path
+  omits the block rather than rendering an empty player, as specified.
+- Exactly one `<h1>` per page.
+- `[TODO: add if public]` renders as plain text, never as an `href`.
+- Role string verified byte-identical to the owner's wording, with a literal
+  `&` (escaped to `&amp;` in HTML, displays correctly).
+- Client JS: home 6.94 KB gz, case study 6.43 KB gz, against the 40 KB cap.
+- Cover PNG 37 KB → 1.5–5 KB WebP variants.
+
+### Two bugs caught by screenshotting
+
+1. **`:only-child` never matched.** The tile's `<script>` was emitted as a
+   sibling of `<article>`, making it a second child of the grid, so the
+   single-tile split layout silently did not apply and the tile stacked
+   full-width — exactly the "awkward single tile" the increment was meant to
+   avoid. Fixed by moving the script inside the `<article>`. Confirmed in the
+   browser: `matches: true`, `grid-template-columns: 646.8px 431.2px`.
+2. `astro check` reported 17 hints: `z` re-exported from `astro:content` is
+   deprecated in Astro 7. Switched to `import { z } from "astro/zod"`.
+
+### Deferred, with PRD updated
+
+- **`/projects` index page** — not built. PRD §10.2 said increment 2 would
+  include it, but with one project there is nothing to index. §10.2 amended.
+- **Marquee + `now.json`** (§5.4) — static line only this increment.
+- **Demo videos** (§5.3) — schema supports them, no assets exist yet.
+
+### Doc edits this session
+
+PRD §5.3 (`[next]` → `[now]`, video now optional, eyebrow is `status · year`),
+§5.4 (`[now, partial]`, marquee deferred), §6 (slug derives from the filename;
+config path note), §10.2 (scope reduced to KalaCart, index deferred).
+
+### Open item carried forward
+
+**Nav re-added once increment 2+ gives it somewhere to go.** Still unmounted.
+There is now a case study route, so this is worth revisiting next session.
+
+### Blocker for the owner — alias, and a better fix
+
+`rishi-ventrapragada.vercel.app` is **still serving a pre-1.9 build**
+(`Age: 8684`), while `portfolio-gamma-lake-gtndl2ey0m.vercel.app` serves the
+current one. The push deploys fine; the vanity alias is pinned to an old
+deployment. Same failure as increment 1.6.
+
+I could not fix it: the Vercel MCP connector is authenticated to a **different
+account** (projects `orca-frontend`, `aws-sbg-vjit`, `krishisathi` — no
+portfolio project), and there is no Vercel CLI auth in this environment.
+
+The owner's plan is to **buy a custom domain and add it in the Vercel
+dashboard**, which replaces the vanity alias and stops this recurring.
+
 ## 2026-09-19 — increment 1.9
 
 ### Changes

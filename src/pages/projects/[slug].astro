@@ -1,0 +1,173 @@
+---
+// Case study page (PRD §5.5). Routing and layout land in increment 2 so
+// increment 3 only has to write the prose.
+import type { GetStaticPaths } from "astro";
+import { Image } from "astro:assets";
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export const getStaticPaths = (async () => {
+  const projects = await getCollection("projects");
+  return projects.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+// Content Layer API: top-level render(), not the removed entry.render().
+const { Content } = await render(entry);
+const { title, summary, role, stack, status, year, links, cover } = entry.data;
+
+// `links.repo` may hold a visibly marked "[TODO]" placeholder, which must not
+// become an href. Only real URLs are rendered as links.
+const isUrl = (value?: string) => !!value && /^https?:\/\//.test(value);
+const pending = [
+  links.live && !isUrl(links.live) ? links.live : null,
+  links.repo && !isUrl(links.repo) ? links.repo : null,
+].filter(Boolean);
+---
+
+<BaseLayout title={`${title} — Sai Rishi Ventrapragada`} description={summary}>
+  <article class="case shell">
+    <p class="label eyebrow">{status} &middot; {year}</p>
+    <h1 class="title">{title}</h1>
+    <p class="summary">{summary}</p>
+
+    <Image
+      class="cover"
+      src={cover}
+      alt={`${title} project cover`}
+      widths={[592, 1184]}
+      sizes="(min-width: 768px) 1184px, 92vw"
+      loading="eager"
+      decoding="async"
+    />
+
+    <dl class="facts">
+      <div class="fact">
+        <dt class="meta">Role</dt>
+        <dd>{role}</dd>
+      </div>
+      <div class="fact">
+        <dt class="meta">Stack</dt>
+        <dd>
+          <ul class="stack">
+            {stack.map((item) => <li class="meta">{item}</li>)}
+          </ul>
+        </dd>
+      </div>
+      {
+        (isUrl(links.live) || isUrl(links.repo)) && (
+          <div class="fact">
+            <dt class="meta">Links</dt>
+            <dd class="links">
+              {isUrl(links.live) && <a href={links.live}>Live</a>}
+              {isUrl(links.repo) && <a href={links.repo}>Repo</a>}
+            </dd>
+          </div>
+        )
+      }
+      {
+        pending.length > 0 && (
+          <div class="fact">
+            <dt class="meta">Links</dt>
+            {/* Placeholder stays visible per CLAUDE.md §7, but never as a link. */}
+            <dd class="meta pending">{pending.join(" ")}</dd>
+          </div>
+        )
+      }
+    </dl>
+
+    <div class="body">
+      <Content />
+    </div>
+
+    <p class="back"><a class="label" href="/#projects-heading">&larr; All work</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .case {
+    padding-block: var(--rhythm);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .title {
+    margin: 0 0 1rem;
+    font-size: var(--size-h1);
+  }
+
+  .summary {
+    margin: 0 0 2.5rem;
+    max-width: 60ch;
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    color: var(--fg);
+  }
+
+  .cover {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: 1px solid var(--line);
+  }
+
+  .facts {
+    display: grid;
+    gap: 1.5rem;
+    margin: 2.5rem 0 0;
+    padding-block: 2rem;
+    border-block: 1px solid var(--line);
+  }
+
+  @media (min-width: 768px) {
+    .facts {
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    }
+  }
+
+  .fact dt {
+    margin-bottom: 0.5rem;
+  }
+
+  .fact dd {
+    margin: 0;
+    color: var(--fg);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .pending {
+    color: var(--fg-muted);
+  }
+
+  .body {
+    margin-block: 2.5rem;
+    max-width: 68ch;
+  }
+
+  .back {
+    margin: 0;
+  }
+
+  .back a {
+    color: var(--accent);
+  }
+</style>
