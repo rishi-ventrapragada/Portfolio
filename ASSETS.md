@@ -14,7 +14,7 @@ material that must be replaced before launch.
 | Licence | N/A |
 | Date | 2026-09-19 |
 
-There is **no image file**. `src/pages/about.astro` renders a bordered
+There is **no image file**. `src/components/About.astro` renders a bordered
 `--bg-raised` box at `aspect-ratio: 3/4` with centred `[TODO: photo]` in mono
 `--fg-muted`. Unlike the KalaCart cover there is no PNG to optimise, so nothing
 goes through `<Image>` until a real photo arrives.
@@ -57,11 +57,14 @@ the artisan" headline, and the scattered craft-photo collage.
 PNG (1600 × 900, solid `--bg-raised` with "KALACART" in `--fg-muted`), which was
 deleted in the same change and is no longer referenced anywhere.
 
+As of increment 6 it renders only in the Projects card on the single page
+(`ProjectCard.astro`); the case study page that also showed it is gone.
+
 Two notes for whoever touches the tile next:
 
 - **The tile no longer forces 16:9.** The old placeholder was generated at 16:9
   precisely so it needed no layout change; this screenshot is 1.82:1, so
-  `ProjectTile.astro` lets the image set its own ratio instead of cropping
+  `ProjectCard.astro` (then `ProjectTile.astro`) lets the image set its own ratio instead of cropping
   ~14px off each side. Demo **video** still uses 16:9 per PRD §7.
 - **Body text in the screenshot is not legible at tile size.** Rendered ~700px
   wide, the source's 16px body text lands near 8px. The headline stays readable;

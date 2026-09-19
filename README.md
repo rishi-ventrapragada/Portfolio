@@ -5,17 +5,16 @@ with a magazine-cover hero, built to show shipped work to recruiters, GDG organi
 and hackathon teammates.
 
 `PRD.md` is the product spec. `CLAUDE.md` is how the work gets done. `SESSION.md`
-carries the handoff between sessions.
+carries the handoff between sessions. `ASSETS.md` logs every non-code asset.
 
 ## Stack
 
-- **Astro 7** — static output, TypeScript strict
+- **Astro 7** — static output, TypeScript strict, no integrations
 - **Tailwind v4** via `@tailwindcss/vite` — layout and spacing only; distinctive
   visual work lives in scoped `<style>` blocks
-- **@astrojs/react** — installed for islands; nothing uses one yet
 - **Astro Fonts API** — Space Grotesk and JetBrains Mono, self-hosted
 - Motion is CSS scroll-driven animation with a `requestAnimationFrame` fallback.
-  No animation libraries.
+  No animation libraries, no client router, no islands.
 
 ## Run
 
@@ -30,11 +29,16 @@ npm run preview  # serve the production build locally
 
 ```
 src/
-  assets/hero-subject.png   real cutout, 923x1435 transparent PNG
-  components/               Nav, Hero, Footer, ProjectsPlaceholder, AccentToggle
-  layouts/BaseLayout.astro  head, fonts, landmarks, view transitions
-  pages/index.astro         home
-  styles/global.css         all design tokens
+  assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
+  components/                 Nav, Hero, About, Skills, SkillGroups, ProjectsSection,
+                              ProjectCard, CurrentlyBuilding, Footer, BootPreloader,
+                              AccentToggle (dev only)
+  content/projects/*.json     one data file per project, beside its cover image
+  content.config.ts           the projects collection schema
+  layouts/BaseLayout.astro    head, fonts, landmarks
+  pages/index.astro           the whole site: one page, anchored sections
+  scripts/boot-preloader.ts   preloader sequence
+  styles/global.css           all design tokens
 ```
 
 The accent toggle bottom-right is dev-only and disappears from production builds;

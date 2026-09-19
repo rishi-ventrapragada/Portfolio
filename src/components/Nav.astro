@@ -1,37 +1,25 @@
 ---
 // PRD §5.1 — a fixed bar, transparent over the hero, solid once past it.
-// Four links shown directly: with this few there is nothing worth hiding
-// behind a toggle, so there is no hamburger and no open/close state.
-// Only routes and anchors that exist today are listed. Community is absent
-// because that page does not exist yet; add it here when it ships.
-const { pathname } = Astro.url;
-
-// Anchor-only entries are positions on a page, not destinations, so they are
-// never "current". `current` is resolved at build time — no client router.
+// Single-page site: every entry is an anchor on this page, so there is no
+// current-page state, no hamburger and no responsive collapse. Three short
+// labels fit at every width (measured in SESSION.md, increment 6).
 const links = [
-  { label: "Home", href: "/", current: pathname === "/" },
-  { label: "Work", href: "/#projects-heading", current: false },
-  {
-    label: "KalaCart",
-    href: "/projects/kalacart/",
-    current: pathname.startsWith("/projects/kalacart"),
-  },
-  { label: "About", href: "/about/", current: pathname.startsWith("/about") },
-  { label: "Contact", href: "/#contact", current: false },
+  { label: "Skills", href: "#skills" },
+  { label: "Projects", href: "#projects" },
+  { label: "Contact", href: "#contact" },
 ];
 ---
 
 <header class="nav" data-nav>
   <nav class="nav-inner" aria-label="Primary">
+    {/* `#top` with no matching element scrolls to the document top per the
+        HTML spec, so the hero needs no id and there is no reload. */}
+    <a class="label mark" href="#top">Rishi</a>
     <ul class="links">
       {
         links.map((link) => (
           <li>
-            <a
-              class="label link"
-              href={link.href}
-              aria-current={link.current ? "page" : undefined}
-            >
+            <a class="label link" href={link.href}>
               {link.label}
             </a>
           </li>
@@ -42,35 +30,21 @@ const links = [
 </header>
 
 <script>
-  // Adds .is-scrolled once the hero is behind the bar (PRD §4.4).
-  //
-  // Runs on astro:page-load, not at module scope: ClientRouter swaps the DOM
-  // on navigation but does NOT re-run an identical script, so a module-scope
-  // observer would stay bound to the discarded nav and silently stop working
-  // from the second page onward.
-  let observer: IntersectionObserver | undefined;
-  let sentinel: HTMLElement | undefined;
-
-  const setup = () => {
-    observer?.disconnect();
-    sentinel?.remove();
-
-    const nav = document.querySelector<HTMLElement>("[data-nav]");
-    if (!nav) return;
-
-    sentinel = document.createElement("div");
+  // Adds .is-scrolled once the hero is behind the bar (PRD §4.4). Module
+  // scope is fine here: there is no client router swapping the DOM out from
+  // under it, so the observer is bound once and stays bound.
+  const nav = document.querySelector<HTMLElement>("[data-nav]");
+  if (nav) {
+    const sentinel = document.createElement("div");
     sentinel.setAttribute("aria-hidden", "true");
     sentinel.style.cssText = "position:absolute;top:100dvh;height:1px;width:1px;";
     document.body.prepend(sentinel);
 
-    observer = new IntersectionObserver(
+    new IntersectionObserver(
       ([entry]) => nav.classList.toggle("is-scrolled", !entry.isIntersecting),
       { rootMargin: "0px" },
-    );
-    observer.observe(sentinel);
-  };
-
-  document.addEventListener("astro:page-load", setup);
+    ).observe(sentinel);
+  }
 </script>
 
 <style>
@@ -93,23 +67,29 @@ const links = [
 
   .nav-inner {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     height: 100%;
     max-width: var(--max-width);
     margin-inline: auto;
-    /* Gutter keeps the links on the same line as page content rather than
-       floating at the very edge. */
+    /* Gutter keeps the mark and links on the same line as page content rather
+       than floating at the very edge. */
     padding-inline: var(--gutter);
+  }
+
+  .mark {
+    display: block;
+    padding-block: 0.5rem;
+    color: var(--heading);
+  }
+
+  .mark:hover {
+    color: var(--accent);
   }
 
   .links {
     display: flex;
-    /* Measured at 375px: 312px available inside the gutters. Five labels need
-       322px at a 1.25rem gap (overflow) but 306px at 1rem, leaving 6px. A
-       sixth link will not fit — it needs a different approach, not a smaller
-       gap. */
-    gap: 1rem;
+    gap: 1.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -125,17 +105,10 @@ const links = [
     display: block;
     padding-block: 0.5rem;
     color: var(--fg);
-    border-bottom: 1px solid transparent;
   }
 
   .link:hover {
     color: var(--accent);
-  }
-
-  /* Current page, not current position: anchor links never carry this. */
-  .link[aria-current="page"] {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
   }
 
   @media (prefers-reduced-motion: reduce) {

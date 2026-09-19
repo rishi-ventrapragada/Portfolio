@@ -1,15 +1,21 @@
 ---
+// The whole site is this one page (PRD §3). Sections carry ids and the nav
+// links to them.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import Skills from "../components/Skills.astro";
 import ProjectsSection from "../components/ProjectsSection.astro";
 import CurrentlyBuilding from "../components/CurrentlyBuilding.astro";
 ---
 
 <BaseLayout
   title="Sai Rishi Ventrapragada — Building for the web"
-  description="Portfolio of Sai Rishi Ventrapragada, CSE Data Science student building with React, Astro and Supabase."
+  description="Portfolio of Sai Rishi Ventrapragada, CSE (Data Science) student at VJIT building with React, Astro and Supabase."
 >
   <Hero />
+  <About />
+  <Skills />
   <ProjectsSection />
   <CurrentlyBuilding />
 </BaseLayout>

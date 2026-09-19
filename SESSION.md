@@ -31,25 +31,18 @@ The local Vercel CLI is authenticated as `rishi-ventrapragada` and this works.
 A custom domain added in the dashboard tracks production automatically and would
 retire this whole entry.
 
-### The nav is full at five links — a sixth needs a new approach
+### Nav capacity — resolved by increment 6 (kept for the numbers)
 
-The nav lists **only routes that exist**: Home, Work (`/#projects-heading`),
-KalaCart, About, Contact (`/#contact`). Community is absent because that page
-does not exist yet (PRD §5.7).
+The five-route nav is gone. Since the single-page restructure the bar is a
+`RISHI` mark (`#top`) plus three anchors: Skills, Projects, Contact. Measured at
+375px: **43px mark + 229px links = 272px of 327px available, 55px spare.** The
+old bar needed 306 of 312px. Projects are cards under `#projects`, so there is no
+per-project nav entry either — the "further case studies" sub-concern is moot.
 
-**When Community ships, add it to the `links` array in `Nav.astro`.** Nothing
-else references that array, so a new page will not appear in the nav on its own
-and the omission is silent — no build error, no warning.
-
-**But it will not simply fit.** Measured at 375px: 312px available inside the
-gutters, and the five current links already take 306px at the `1rem` mobile gap.
-A sixth link overflows. Shrinking the gap further is not the answer — it is
-already tight. A sixth entry needs a real decision: drop or merge something,
-truncate, or reintroduce a toggle for small screens.
-
-The same applies to further case studies: the nav links to KalaCart by name, so
-a second project needs a decision about whether the bar keeps listing projects
-individually or collapses to a single "Work".
+**A fourth link does not automatically fit.** A "Community" label in 12px mono
+at 0.12em tracking is roughly 80px plus a 24px gap, against 55px spare at 375px.
+Measure before adding it; a shorter label or a smaller mobile gap is the likely
+answer, not a hamburger.
 
 ### `#111214` is duplicated outside the token — change every copy together
 
@@ -72,6 +65,96 @@ sanctioned exception. If the background token changes, **both** must change, or
 the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
+
+## 2026-09-20 — increment 6
+
+### Last milestone completed
+
+**Single-page restructure.** `/about/` and `/projects/kalacart/` are gone; the
+site is `/` with anchored sections — Hero, About (`#about`), Skills (`#skills`),
+Projects (`#projects`) + Currently building, Contact (`#contact`, the footer).
+Nav is anchor-only: `RISHI` mark left (`#top`), Skills / Projects / Contact
+right. The case study and its security-disclosure prose are off the public
+site. Old routes 301 to `/#about` and `/#projects` via `vercel.json`.
+
+### Decisions worth knowing before you touch this
+
+- **Content model is a JSON collection, not MDX.** `kalacart.json` under
+  `glob({ pattern: "*.json" })`, schema without `role`/`video`. CLAUDE.md §5
+  requires a `src/content/` collection, which ruled out a plain data object; MDX
+  was overhead with no body to render. Verified in Astro source before choosing:
+  `.json` is a registered data-entry type and `image()` resolves relative to any
+  Content Layer entry. `@astrojs/mdx` is uninstalled and the `onwarn` head-inject
+  filter in `astro.config.mjs` is gone with it — no MDX, no warning (build proven).
+- **`<ClientRouter />` removed.** It was the entire 5.6 KB of external client JS
+  and only existed for cross-page crossfades. PRD §4.5 updated (flagged in the
+  plan; outside the originally authorised sections). Nav's observer is now module
+  scope — the `astro:page-load` rebinding dance was only for the router.
+- **`#top` for the mark.** Per the HTML spec a `#top` fragment with no matching
+  element scrolls to the document top, so `Hero.astro` stays untouched.
+- **`Timeline.astro`, `CaseStudyMeta.astro`, `CaseStudyToc.astro`,
+  `ProjectTile.astro` deleted**, not parked. Each was grep-verified to have zero
+  references outside another deletion target before `git rm`.
+- **The About résumé button is intentionally not duplicated.** Owner confirmed:
+  the footer is the résumé link and satisfies PRD §1. Do not "restore" it.
+- **Smooth anchor scrolling** moved from the deleted case-study page into
+  `global.css`, gated on `prefers-reduced-motion: no-preference`.
+
+### Doc edits this session (CLAUDE.md §7)
+
+PRD.md §3 (site map → single page + anchors + redirects), §4.5 (no page
+transitions), §5.1 (anchor nav), §5.3 (tiles → cards; no stretched link, no
+video, links-row rule), §5.5 (`[removed]`), §5.6 (About and Skills sections),
+§5.7 (section, not route), §6 (JSON collection, simplified schema), §7 (demo
+videos parked), §8 (OG line no longer "per case study"), §10 (increments
+renumbered: 6 = this restructure, 7 = currently-building strip, 8 = later; 2/3/5
+marked superseded, 4 dropped). README.md rewritten for the single page and to
+drop the stale `@astrojs/react` line. ASSETS.md paths updated. CLAUDE.md
+unchanged.
+
+### Verified by measurement, not eyeballing
+
+Static, on `dist/`:
+- Only `index.html`; no `about/`, no `projects/`. `astro check` + build 0/0/0.
+- Every `#fragment` href resolves to an id on the page (`#projects` ×9 = nav +
+  8 linked skills). Zero occurrences of `/about`, `/projects/`, `ClientRouter`,
+  `astro-island`, `<video>`. Exactly one `<h1>`. `[TODO: photo]` and
+  `[TODO: add if public]` present as text; the latter has no href.
+- External links HEAD 200: kalacart-website.vercel.app, GitHub, LinkedIn.
+  `/resume.pdf` is the known pre-existing 404.
+- **Client JS: 1,843 B gzipped, five inline blocks, no external script at all.**
+  Was 5.6 KB with ClientRouter. Cap is 40 KB.
+
+In headless Chrome over CDP, 1280×900 and 375×812, reduced motion forced so the
+preloader self-removes and scrolls are instant:
+- Nav height 64. Clicking Skills and Projects lands the target at **80px** from
+  the top on both viewports (64 nav + 1rem `scroll-margin-top`). Contact lands
+  at 660 / 605 with the footer fully in view — the page cannot scroll further.
+  `#top` returns to `scrollY 0`; `.is-scrolled` toggles correctly both ways.
+- Card: desktop `:only-child` split 646.8 / 431.2px (3fr/2fr matched the new
+  `.card`); image ratio 1.8172 = source, zero crop. Mobile single column 277px.
+- Full-page screenshots reviewed at both widths; section order and split
+  layout correct.
+
+### Harness gotchas recorded for next time
+
+- **Bash commands over roughly 8 KB are silently truncated** before bash parses
+  them; the symptom is `unexpected EOF while looking for matching '` at a line
+  number that drifts as you edit. Write long scripts with the Write tool into
+  the scratchpad and run them — do not fight it with heredoc tweaks.
+- Full-page screenshots: `captureBeyondViewport` resizes the viewport, which
+  balloons `100dvh` sections. `cdp-verify.mjs` stitches viewport-sized captures
+  with sharp instead (sharp resolved from the project cwd via `createRequire`).
+- Kill the harness Chrome by PID with its own `--user-data-dir`, never
+  `taskkill /IM chrome.exe` — that takes the owner's browser down too.
+
+### Still open
+
+- `public/resume.pdf` still missing; footer link 404s.
+- About photo still a CSS placeholder.
+- Live redirect verification (`/about`, `/projects/kalacart` → 301) is recorded
+  in a follow-up commit once the deploy is aliased.
+- Final accent, custom domain (PRD §11).
 
 ## 2026-09-20 — increment 5.4
 

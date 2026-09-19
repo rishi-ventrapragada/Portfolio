@@ -1,0 +1,86 @@
+---
+// About section (PRD §5.6). Sits directly under the hero on the single page.
+// All copy is owner-supplied and used verbatim. The timeline and "How I work"
+// block were cut in increment 6, not deferred.
+---
+
+<section class="about shell" id="about" aria-labelledby="about-heading">
+  <h2 id="about-heading" class="heading">About</h2>
+
+  <div class="intro">
+    {/* No photo yet. Visibly marked placeholder per CLAUDE.md §7. */}
+    <div class="photo" role="img" aria-label="Photo placeholder">
+      <span class="meta">[TODO: photo]</span>
+    </div>
+
+    <div class="text">
+      <p class="story">
+        CSE (Data Science) student at VJIT, started 2025. I build things end to
+        end &mdash; plan the architecture, make the calls, and use AI tools like
+        Claude Code to implement fast. KalaCart, an artisan marketplace built for
+        Smart India Hackathon 2026, is the first thing I've shipped that had to
+        survive contact with a real deadline and a real ministry review.
+      </p>
+
+      {/* Plain text: there is no Community page to link to (PRD §5.7). */}
+      <p class="meta community">
+        Production team member, GDG on Campus VJIT &mdash; social media and video
+        editing for the club's channels.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* No top rule: the hero subject fades out into this section, and a hairline
+     right under the fade would read as a cut. */
+  .about {
+    padding-block: var(--rhythm);
+  }
+
+  .heading {
+    margin: 0 0 2.5rem;
+    font-size: var(--size-h2);
+  }
+
+  .intro {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (min-width: 768px) {
+    .intro {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 3rem;
+    }
+  }
+
+  .photo {
+    display: grid;
+    place-items: center;
+    /* Capped so a full-width 3:4 box does not dominate a phone screen. */
+    max-width: 240px;
+    aspect-ratio: 3 / 4;
+    background-color: var(--bg-raised);
+    border: 1px solid var(--line);
+  }
+
+  .text {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+  }
+
+  .story {
+    margin: 0;
+    max-width: 60ch;
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    color: var(--fg);
+  }
+
+  .community {
+    margin: 0;
+    max-width: 60ch;
+  }
+</style>

@@ -1,0 +1,54 @@
+---
+// Skills grouped by what they shipped with (PRD §5.6). Groups and copy moved
+// verbatim from the old About page in increment 6. A group with an `href`
+// links every item there; KalaCart is the only project, so both linked groups
+// point at the Projects section on this page. Revisit per-skill targets once
+// there are more projects, or the grouping will read oddly.
+import SkillGroups from "./SkillGroups.astro";
+import type { SkillGroup } from "./SkillGroups.astro";
+
+const PROJECTS = "#projects";
+const skillGroups: SkillGroup[] = [
+  {
+    name: "Frontend",
+    items: ["React 19", "Astro", "TypeScript", "Tailwind CSS"],
+    href: PROJECTS,
+  },
+  {
+    name: "Backend & Data",
+    items: ["Supabase", "Postgres", "Row-Level Security", "Vercel"],
+    href: PROJECTS,
+  },
+  { name: "Languages", items: ["C", "Python", "Java"], href: null },
+];
+---
+
+<section class="skills shell" id="skills" aria-labelledby="skills-heading">
+  <p class="label eyebrow">Toolkit</p>
+  <h2 id="skills-heading" class="heading">Skills</h2>
+
+  <SkillGroups groups={skillGroups} />
+
+  <p class="meta learning">Currently learning &mdash; Flutter &amp; Dart, for Recurzn.</p>
+</section>
+
+<style>
+  .skills {
+    padding-block: var(--rhythm);
+    border-top: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: var(--size-h2);
+  }
+
+  .learning {
+    margin: 2.5rem 0 0;
+  }
+</style>

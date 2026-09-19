@@ -20,12 +20,17 @@ Success looks like: a recruiter understands who he is in 10 seconds on the homep
 
 ## 3. Site map
 
-- `/` Home: hero, project tiles, "currently building" strip, short about teaser, contact
-- `/projects` Index generated from the projects content collection
-- `/projects/kalacart`, `/projects/life-os`, `/projects/aegis` Case studies (MDX)
-- `/about` Story, how he works, skills grouped by what shipped with them, résumé download
-- `/community` GDG on Campus VJIT work, events, media
-- Contact is a section on Home and in the footer, not a separate page `[now]`
+One page, `/`, with anchored sections in this order. The nav (§5.1) links to the anchors. Restructured in increment 6; the old `/about/` and `/projects/kalacart/` routes redirect permanently to `/#about` and `/#projects` via `vercel.json`.
+
+| Section | Anchor | Spec |
+| --- | --- | --- |
+| Hero | — (the nav mark's `#top` scrolls here) | §5.2 |
+| About: photo, story, GDG line | `#about` | §5.6 |
+| Skills grouped by what shipped with them | `#skills` | §5.6 |
+| Projects: one card per project, then "currently building" | `#projects` | §5.3, §5.4 |
+| Contact: the footer | `#contact` | §5.8 |
+
+No `/projects` index, no case study pages, no `/community` page. A Community section is `[later]` (§5.7).
 
 ## 4. Design system
 
@@ -70,26 +75,24 @@ Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, li
 - Motion explains structure or rewards scroll; it never blocks reading.
 - Scroll-driven CSS animations first, script fallback second, libraries never (at launch).
 - Every effect has a reduced-motion branch. Pointer effects only on fine pointers.
-- Page transitions via Astro View Transitions, default crossfade, 200ms.
+- No page transitions: the site is one page (§3). `<ClientRouter />` was removed in increment 6 along with its 5.6 KB of client JS.
 
 ## 5. Component spec
 
 ### 5.1 Nav `[now]`
 Fixed top bar, 64px tall, transparent over the hero and `--bg-raised` with a 1px `--line` bottom border after scrolling past it (§4.4).
 
-Four links, right-aligned, `.label` mono uppercase. **No hamburger and no menu overlay**: with this few entries there is nothing worth hiding behind a toggle, so the bar shows them directly at every width. Measured ~259px of links against 327px available at 375px, so there is no responsive collapse.
+Single-page site, so every entry is an anchor. Left: a small `.label` mark, **RISHI**, `href="#top"` — per the HTML spec a `#top` fragment with no matching element scrolls to the document top, so the hero carries no id and nothing reloads. Right: three links, `.label` mono uppercase. **No hamburger, no menu overlay, no responsive collapse**: three short labels fit at every width (measured in SESSION.md, increment 6).
 
 | Label | Target |
 | --- | --- |
-| Home | `/` |
-| Work | `/#projects-heading` |
-| KalaCart | `/projects/kalacart/` |
-| Contact | `/#contact` |
+| Skills | `#skills` |
+| Projects | `#projects` |
+| Contact | `#contact` |
 
-- **Scope is what exists.** About and Community are not listed because those pages do not exist. They are added here when they ship.
-- **Active state** is resolved at build time from `Astro.url.pathname` — `aria-current="page"` plus an `--accent` colour and underline. Anchor-only links (Work, Contact) are positions on a page rather than destinations, so they are never marked current.
-- Anchor targets carry `scroll-margin-top: calc(var(--nav-height) + 1rem)` in `global.css`. Without it a jump to `#projects-heading` lands at `top: 0`, behind the fixed bar — measured, not assumed.
-- The scroll observer runs on `astro:page-load`, not at module scope: ClientRouter swaps the DOM but does not re-run an identical script, so a module-scope observer would stay bound to the discarded nav and stop working from the second page onward.
+- **No active state.** Anchors are positions on a page, not destinations, so nothing carries `aria-current`. Scroll-spy (highlighting the section in view) is deliberately not implemented — it would be client JS for a four-section page.
+- Anchor targets carry `scroll-margin-top: calc(var(--nav-height) + 1rem)` in `global.css`, so a jump lands 80px below the top edge, clear of the fixed bar — measured, not assumed. `html { scroll-behavior: smooth }` applies under `prefers-reduced-motion: no-preference` only.
+- The scroll observer runs at module scope. There is no client router swapping the DOM, so it is bound once and stays bound.
 
 ### 5.2 Hero `[now]`
 100dvh, background `--bg`, two layers.
@@ -112,14 +115,14 @@ Scroll behaviour over the first 40% of the hero's height:
 - Reduced motion: opacity fade only, no blur or movement.
 - Mobile: wordmark at 88vw, pushed down from the nav so the figure still reaches into it; subject scaled to fit height.
 
-### 5.3 Project tiles `[now]`
-Large tiles on Home, one per project, each with: eyebrow (`--accent`), title, one-line summary, stack labels, a cover image, and a link to the case study. Data comes from the projects collection.
+### 5.3 Project cards `[now]`
+One card per project in the Projects section, from the projects collection (§6). Each card: cover image (`<Image>`, lazy; the image sets its own aspect ratio so a screenshot is never cropped), eyebrow `status · year` (`--accent`), title, one-line summary, stack labels, and a links row.
 
-As of increment 2 there is **one** tile (KalaCart); the others land when their copy does. The grid is `repeat(auto-fit, …)` so further entries form columns with no rewrite, and a lone tile splits into cover + text at ≥768px via `:only-child` so it does not read as a stretched banner.
-
-Two deviations from the original spec, both deliberate:
-- **The demo video is optional, not required.** No project has one yet (PRD §7 `[TODO]`), so the tile omits the whole `<video>` block when absent rather than rendering an empty player. Videos land in increment 4.
-- **The eyebrow is `status · year`**, not a project type. There is no `type` field in the schema and inventing a taxonomy would be inventing copy (CLAUDE.md §7). Revisit if a real type field is added.
+- **Links row.** `links.live` renders as "Live site" and `links.repo` as "GitHub", each an `<a>` only when the value is a real `http(s)` URL. Any other value — today `repo` is `[TODO: add if public]` — renders as visible mono text, never as an href (CLAUDE.md §7).
+- **No case study, so no stretched link and no card hover.** The links row is the only way out of the card; the title is plain text.
+- **No demo video.** The `<video>` branch and the `video` schema field were removed in increment 6; §7's demo-video asset note is parked with them.
+- The grid is `repeat(auto-fit, …)` so further entries form columns with no rewrite, and a lone card splits into cover + text at ≥768px via `:only-child` so it does not read as a stretched banner.
+- The eyebrow is `status · year`, not a project type: there is no `type` field and inventing a taxonomy would be inventing copy.
 
 ### 5.4 Currently building strip `[now, partial]`
 **Increment 2 ships a single static line**, copy hardcoded in `CurrentlyBuilding.astro`:
@@ -127,26 +130,20 @@ Two deviations from the original spec, both deliberate:
 
 **Deferred to a later increment:** the horizontal marquee, the `src/content/now.json` source (project, one-line status, date), the pause-on-hover behaviour and the reduced-motion static fallback. A one-entry JSON collection would be overhead with no payoff until the marquee exists.
 
-### 5.5 Case study page `[now]`
-MDX with frontmatter: `title, summary, role, stack[], status, year, links{live, repo}, video, cover`. Sections in order: hero (title, meta row, cover video or image), Context, What I built, Decisions and trade-offs, What broke and what I learned, Outcome, Links. Sidebar on desktop with meta and a sticky table of contents.
+### 5.5 Case study page `[removed]`
+Removed in increment 6 with the move to a single page. The `/projects/[slug]` route, `CaseStudyMeta.astro`, `CaseStudyToc.astro` and the KalaCart MDX body (Context, What I built, Decisions, What broke, Outcome) are gone from the repo and the public site; the security-disclosure prose in particular is no longer published. `/projects/kalacart/` redirects to `/#projects`. Everything is in git history if a case study ever returns.
 
-As built (increment 3):
-- The table of contents is generated at build time from the rendered headings (`render()` returns `headings`), not a hardcoded list, so it cannot drift from the document. Anchors use Astro's auto-injected heading `id`s.
-- Two columns at ≥1024px, sidebar second in the DOM so reading and tab order stay content-first. Below that it is one column and the TOC is hidden; the meta panel stays.
-- **Scroll-spy (active-section highlighting) is deliberately not implemented.** §5.5 asks for a sticky TOC, not a position tracker, and it would be the first client JS on this page. Revisit only if the page gets long enough to need it.
+### 5.6 About and Skills `[now]`
+Two sections on the single page, directly under the hero.
 
-### 5.6 About `[now]`
-Photo, 3-4 line story, "How I work" (product-owner approach, architecture-first, AI-assisted implementation, security auditing), skills grouped by shipped-with (frontend, backend and data, languages) where each skill links to the project it was used in, "Currently learning" line, GDG one-liner, résumé download button.
+**About (`#about`)**: h2 "About"; a 240px CSS photo placeholder at 3:4 (`role="img"`, `[TODO: photo]` in mono — logged in ASSETS.md) beside the owner's story paragraph, verbatim; below the story, the GDG one-liner as small plain mono text. No top rule: the hero subject fades into this section.
 
-As built (increment 5):
-- **Photo is a CSS placeholder**, not an image — a bordered `--bg-raised` box at 3:4 with `[TODO: photo]` in mono. Logged in ASSETS.md.
-- **"How I work" gained a vertical timeline** (`Timeline.astro`, entries passed as a prop so a Community page can reuse it). Mono dates, thin `--line` rule, `--accent` dot on the current entry.
-- **Every linked skill points at `/projects/kalacart/`**, the only case study that exists. Languages are plain text. Revisit per-skill targets once there are more projects, or the grouping will read oddly.
-- **The GDG line is plain text.** It becomes a link when the §5.7 Community page ships.
-- **The résumé button links to `/resume.pdf`, which is not in the repo.** A static build cannot verify link targets, so it 404s silently until the owner adds the file.
+**Skills (`#skills`)**: eyebrow "Toolkit", h2 "Skills", `SkillGroups.astro` with the three groups verbatim — Frontend, Backend & Data, Languages — and the "Currently learning — Flutter & Dart, for Recurzn." line. Frontend and Backend & Data items link to `#projects` (KalaCart is the only project; revisit per-skill targets when there are more). Languages are plain text.
+
+Cut in increment 6, not deferred: the "How I work" paragraph and the `Timeline.astro` component (deleted). The résumé button the old About page carried is **intentionally not duplicated**: the footer (§5.8) is the résumé link and satisfies §1's one-click requirement. The GDG line stays plain text until a Community section exists (§5.7).
 
 ### 5.7 Community `[later]`
-GDG on Campus VJIT production team work, event media, links.
+GDG on Campus VJIT production team work, event media, links. A section on the single page, not a route (§3).
 
 ### 5.8 Footer and contact `[now, minimal]`
 Email link (`mailto`), GitHub, LinkedIn, résumé. Mono labels. No form at launch.
@@ -181,28 +178,23 @@ Behaviour:
 
 ## 6. Content model
 
-`src/content/projects/*.mdx` with schema. Note `slug` is **not** a frontmatter
-field: Astro's Content Layer API derives it from the filename
-(`kalacart.mdx` → `/projects/kalacart`), and the config lives at
-`src/content.config.ts` — `src/content/config.ts` throws in Astro 7.
+`src/content/projects/*.json`, one file per project, loaded by `glob({ pattern: "*.json" })` from `src/content.config.ts` (Content Layer API; `src/content/config.ts` throws in Astro 7). The id is the filename, so `kalacart.json` → `kalacart`. Entries are data only — nothing renders a body, so MDX was dropped in increment 6 and `@astrojs/mdx` is uninstalled.
 ```
 title: string
 summary: string (max 140 chars)
-role: string
 stack: string[]
 status: "live" | "in-progress" | "archived"
 year: number
-links: { live?: url, repo?: url }
-video?: { webm: string, mp4: string, poster: string }
-cover: image
+links: { live?: string, repo?: string }   plain strings; only http(s) values render as hrefs
+cover: image()                            relative to the entry file, e.g. "./kalacart-cover.jpeg"
 order: number
 ```
-`src/content/now.json`: array of `{ project, status, date }`.
+`role` and `video` were removed with the case study. `src/content/now.json` (§5.4) is still deferred.
 
 ## 7. Assets
 
 - Hero subject: transparent PNG, ~1200x1600, real cutout to be supplied by owner `[TODO]`.
-- Demo videos: under 8 seconds, 1080p max, WebM (VP9) + MP4 (H.264), poster JPG, muted. `[TODO]`
+- Demo videos `[parked]` (no `video` field or branch since increment 6): under 8 seconds, 1080p max, WebM (VP9) + MP4 (H.264), poster JPG, muted. `[TODO]`
 - Résumé: `public/resume.pdf` `[TODO]`
 - Every external asset logged in `ASSETS.md` with source and license.
 
@@ -213,7 +205,7 @@ order: number
 - Largest Contentful Paint ≤ 2.0s on a mid-range Android over 4G (hero image is the LCP element; keep it under 250 KB). **Excludes first-visit sessions where the §5.10 boot preloader plays.** The target applies to repeat visits within a session (`boot-seen` set), reduced-motion visitors, and any load where the preloader is skipped. In the first three the overlay is removed before first paint, so the hero is the LCP element as normal; on a skip the overlay paints first and the hero is revealed as soon as the visitor skips.
 - The preloader deliberately covers the hero for roughly 11s on a first visit, so a field LCP measurement for those sessions reads the overlay, not the hero. That is accepted, not a regression. The hero image still loads `eager` behind the overlay so it is painted and ready at the moment of reveal.
 - Works without JavaScript except the scroll dissolve and accent toggle. The boot preloader is hidden outright without JavaScript, since nothing would remove it.
-- Per-page metadata and Open Graph image; dynamic OG images per case study `[next]`.
+- Page metadata and an Open Graph image `[next]`.
 - Analytics: Vercel Analytics or Umami `[next]`.
 
 ## 9. Out of scope
@@ -224,13 +216,14 @@ order: number
 
 ## 10. Increments
 
-1. `[now]` Scaffold, tokens, fonts, BaseLayout, Nav, Hero, placeholder section, footer, dev accent toggle, Vercel deploy.
-2. `[now]` Projects collection, project tiles on Home, case study route `/projects/[slug]`. **Scoped to KalaCart only** — the other entries need real copy first (CLAUDE.md §7). The `/projects` index page is deferred until there is more than one project to index.
-3. `[now]` Case study template and KalaCart write-up.
-4. `[next]` Life OS and AEGIS case studies, demo videos.
-5. `[now]` About page. Résumé PDF pending from the owner; OG images and analytics still `[next]`.
-6. `[next]` "Currently building" strip (marquee + `now.json`). Nav shipped in increment 4 as links rather than a hamburger menu.
-7. `[later]` Community page, external component adoption (per CLAUDE.md §6), reference-site pattern pass.
+1. `[done]` Scaffold, tokens, fonts, BaseLayout, Nav, Hero, placeholder section, footer, dev accent toggle, Vercel deploy.
+2. `[done, superseded by 6]` Projects collection, project tiles on Home, case study route `/projects/[slug]`.
+3. `[done, superseded by 6]` Case study template and KalaCart write-up.
+4. `[dropped]` Life OS and AEGIS case studies, demo videos. Case studies no longer exist (§5.5); further projects are cards (§5.3).
+5. `[done, superseded by 6]` About page. Merged into the single page as the About and Skills sections.
+6. `[done]` Single-page restructure: anchor nav, About and Skills sections under the hero, one project card, case study removed, MDX and ClientRouter dropped, old routes redirected. Résumé PDF still pending from the owner.
+7. `[next]` "Currently building" strip (marquee + `now.json`). OG image and analytics.
+8. `[later]` Community section, external component adoption (per CLAUDE.md §6), reference-site pattern pass.
 
 ## 11. Open decisions
 

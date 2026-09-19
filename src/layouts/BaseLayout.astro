@@ -1,6 +1,5 @@
 ---
 import { Font } from "astro:assets";
-import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 import Footer from "../components/Footer.astro";
 import AccentToggle from "../components/AccentToggle.astro";
@@ -68,8 +67,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 
     <Font cssVariable="--font-display-src" preload />
     <Font cssVariable="--font-mono-src" />
-
-    <ClientRouter />
 
     {/* Set the accent before first paint so the toggle never flashes. */}
     <script is:inline>

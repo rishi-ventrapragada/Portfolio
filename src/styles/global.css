@@ -113,6 +113,14 @@ a:hover {
   scroll-margin-top: calc(var(--nav-height) + 1rem);
 }
 
+/* Anchor navigation on a single page: smooth by default, instant for anyone
+   who asked for reduced motion (CLAUDE.md §4). */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 img {
   display: block;
   max-width: 100%;

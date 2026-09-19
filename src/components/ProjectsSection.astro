@@ -1,8 +1,9 @@
 ---
-// Home projects section (PRD §5.3). Reads the collection, so adding an entry
-// is the only work needed to add a tile.
+// Projects section (PRD §5.3). Reads the collection, so adding an entry is
+// the only work needed to add a card. `id="projects"` is the nav and skills
+// anchor; the heading keeps its own id for aria-labelledby.
 import { getCollection } from "astro:content";
-import ProjectTile from "./ProjectTile.astro";
+import ProjectCard from "./ProjectCard.astro";
 
 // Loader order is not `order`, so sort explicitly even with one entry.
 const projects = (await getCollection("projects")).sort(
@@ -10,14 +11,14 @@ const projects = (await getCollection("projects")).sort(
 );
 ---
 
-<section class="projects shell" aria-labelledby="projects-heading">
+<section class="projects shell" id="projects" aria-labelledby="projects-heading">
   <p class="label eyebrow">Selected work</p>
   <h2 id="projects-heading" class="heading">Projects</h2>
 
   {/* auto-fit means one entry fills the row and later entries form columns
-      with no rewrite. The tile itself splits when it is the only child. */}
+      with no rewrite. The card itself splits when it is the only child. */}
   <div class="grid">
-    {projects.map((entry) => <ProjectTile entry={entry} />)}
+    {projects.map((entry) => <ProjectCard entry={entry} />)}
   </div>
 </section>
 
@@ -43,13 +44,13 @@ const projects = (await getCollection("projects")).sort(
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
   }
 
-  /* A lone tile stretched across the full width reads as a banner, so it
+  /* A lone card stretched across the full width reads as a banner, so it
      splits into cover + text instead. Self-disabling: the moment a second
      project lands :only-child stops matching and the grid takes over. The
      rule lives here because this component owns the grid; :global reaches
      the child component's scoped root. */
   @media (min-width: 768px) {
-    .grid > :global(.tile:only-child) {
+    .grid > :global(.card:only-child) {
       grid-template-columns: 3fr 2fr;
       align-items: center;
       gap: 2.5rem;

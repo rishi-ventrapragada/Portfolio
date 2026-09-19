@@ -1,0 +1,155 @@
+---
+// Project card (PRD §5.3). One per collection entry. There is no case study to
+// open any more, so the title is plain text and the links row is the only way
+// out of the card — no stretched link, no hover state on the card itself.
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  entry: CollectionEntry<"projects">;
+}
+
+const { entry } = Astro.props;
+const { title, summary, stack, status, year, links, cover } = entry.data;
+
+// A link value may hold a visibly marked "[TODO]" placeholder (CLAUDE.md §7),
+// which must never become an href. Only real URLs render as links; anything
+// else renders as text so the placeholder stays visible.
+const isUrl = (value?: string) => !!value && /^https?:\/\//.test(value);
+---
+
+<article class="card">
+  <div class="cover">
+    <Image
+      src={cover}
+      alt={`${title} project cover`}
+      widths={[636, 1272]}
+      sizes="(min-width: 768px) 700px, 92vw"
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+
+  <div class="body">
+    {/* No `type` field in the schema, so the eyebrow is built from real data
+        rather than invented copy (CLAUDE.md §7). */}
+    <p class="label eyebrow">{status} &middot; {year}</p>
+    {/* h3: the section owns the h2 and the hero owns the page's only h1. */}
+    <h3 class="title">{title}</h3>
+    <p class="summary">{summary}</p>
+    <ul class="stack">
+      {stack.map((item) => <li class="meta">{item}</li>)}
+    </ul>
+
+    <ul class="links">
+      {
+        isUrl(links.live) ? (
+          <li>
+            <a class="label link" href={links.live} rel="noopener">
+              Live site
+            </a>
+          </li>
+        ) : links.live ? (
+          <li class="meta pending">Live site &mdash; {links.live}</li>
+        ) : null
+      }
+      {
+        isUrl(links.repo) ? (
+          <li>
+            <a class="label link" href={links.repo} rel="noopener">
+              GitHub
+            </a>
+          </li>
+        ) : links.repo ? (
+          <li class="meta pending">GitHub &mdash; {links.repo}</li>
+        ) : null
+      }
+    </ul>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+    padding: 1.5rem;
+    background-color: var(--bg-raised);
+    border: 1px solid var(--line);
+  }
+
+  .cover {
+    overflow: hidden;
+  }
+
+  /* The cover is a screenshot, so it sets its own ratio rather than being
+     cropped: a forced box would clip UI chrome, which reads as a mistake on a
+     screenshot in a way it would not on a photo. */
+  .cover :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .body {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+  }
+
+  .eyebrow {
+    margin: 0;
+    color: var(--accent);
+  }
+
+  .title {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  }
+
+  .summary {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--fg);
+  }
+
+  .stack,
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links {
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .link {
+    display: inline-block;
+    padding-block: 0.25rem;
+    color: var(--fg);
+    border-bottom: 1px solid var(--line);
+    transition:
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .link:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .pending {
+    align-self: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link {
+      transition: none;
+    }
+  }
+</style>
