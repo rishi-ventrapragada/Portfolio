@@ -27,9 +27,9 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
 </div>
 
 {/* Synchronous and inline, straight after the overlay: this runs before the
-    browser paints, so a repeat visit or reduced-motion visitor never sees a
-    frame of the overlay. The deferred module below drives the sequence for
-    everyone else. */}
+    browser paints, so a repeat visit, a deep link or a reduced-motion visitor
+    never sees a frame of the overlay. The deferred module below drives the
+    sequence for everyone else. */}
 <script is:inline>
   (() => {
     const el = document.querySelector("[data-boot]");
@@ -40,7 +40,11 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
     } catch {
       /* sessionStorage unavailable — treat as unseen; it just replays. */
     }
-    if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // A deep link (any URL with a fragment, including the redirected old
+    // routes) lands mid-page, not on the hero. Without this the browser's own
+    // fragment scroll trips the scroll skip a frame after first paint, and the
+    // overlay flashes for one fade over a page that is still scrolling.
+    if (seen || location.hash || matchMedia("(prefers-reduced-motion: reduce)").matches) {
       el.remove();
     }
   })();

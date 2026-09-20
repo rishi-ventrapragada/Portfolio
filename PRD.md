@@ -178,6 +178,7 @@ Full-viewport overlay, content vertically and horizontally **centred**, max-widt
 Behaviour:
 - Once per browser session via `sessionStorage` key `boot-seen`. Same-session reloads go straight to the hero.
 - The overlay is **visible by default in CSS**, needing no JavaScript to show. A synchronous inline script placed immediately after the overlay markup (classic, not a module, so it is not deferred) removes it before first paint when `boot-seen` is set or reduced motion is on. Repeat visits and reduced-motion visitors therefore never see a frame of it, and there is no flash of the hero before the overlay appears.
+- A deep link — any URL with a fragment, including the redirected old routes — lands mid-page rather than on the hero, so the same inline script removes the overlay before first paint and leaves `boot-seen` unset. Before the 2026-09-20 audit the browser's own fragment scroll tripped the scroll skip a frame after first paint, and the overlay flashed for one 400ms fade over a page still scrolling to its anchor.
 - Reduced motion is covered twice: the same inline script, and a `prefers-reduced-motion` CSS rule that hides the overlay outright. The layer transitions carry their own reduced-motion rule as belt and braces.
 - Without JavaScript a `<noscript>` rule hides the overlay, since nothing would remove it.
 - Skippable by click, keypress, wheel, touch or scroll: the sequence stops, the square snaps to full, and the overlay fades.
