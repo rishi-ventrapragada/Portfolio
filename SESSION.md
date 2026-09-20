@@ -66,6 +66,111 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-20 — increment 8
+
+### Last milestone completed
+
+Square-fill loading animation, replacing the word-cycling greeting preloader.
+A bordered 72px square fills bottom-up from **real page readiness**, with a live
+percentage above it, over an original generated pixel-noise texture.
+
+Removed entirely: the greeting arrays, `BootCycler.astro`, the "I'M RISHI" line,
+the status line and its looping dots.
+
+Kept untouched (the five-case guarantee — do not re-derive these): the
+`sessionStorage` `boot-seen` gate, the reduced-motion bypass in *both* the
+inline script and CSS, the `<noscript>` hide, skip-on-interaction, and the
+synchronous inline first-paint script.
+
+### The status line is a PLACEHOLDER
+
+`STATUS_TEXT` in `src/scripts/boot-copy.ts` currently reads `LOADING`. **Final
+copy is still pending from the owner.** It is a standalone module rather than an
+`.astro` frontmatter export, because frontmatter exports are not importable —
+swapping the string is a genuine one-line change in one place.
+
+### Decisions worth knowing before you touch this
+
+- **clip-path, not height, and quantised to 16 steps.** Owner left the choice
+  open. An animated `height` puts the fill edge on fractional pixels and Chrome
+  antialiases it into a soft grey line, plainly visible at 72px. The fill is a
+  full-size child revealed by `clip-path: inset()`, stepped to 1/16 so the edge
+  always lands on a whole pixel. **Only the geometry is stepped** — the readout
+  stays continuous, so the number is never rounded away from its true value.
+- **The fill's empty state is duplicated into BaseLayout's critical-paint CSS.**
+  Without it the square paints *full* for the frames before `global.css` lands —
+  a white flash on a slow connection. Caught by measurement, not by eye. This is
+  a third copy of the "duplicated outside the token" problem already recorded
+  above for `#111214`; change them together.
+- **Grace cap is armed at t=0, not after the dwell.** The increment 1.7 bug was
+  an unbounded wait. Arming inside the dwell callback would reintroduce a path
+  where a never-firing `load` strands the visitor. Do not move it back.
+- **The texture had to be collapsed to one channel.** `feTurbulence` generates
+  R, G and B independently, so the first version speckled green and magenta at
+  0.55 opacity over a washed-out mid-grey. `feColorMatrix` collapses it to
+  luminance before the discrete step; layer sits at 0.05.
+- **The readout used to park at 95%.** `getEntriesByType("resource")` only
+  covers requests already started, so once they settle the share pins and the
+  number dead-stalls until `load`. The remaining gap is now spent against the
+  clock on an exponential curve. First attempt used `Math.max` of share and
+  creep, which silently did nothing — the creep was always the smaller of the
+  two. It adds *above* the share now.
+- **`--word-*` tokens kept, not deleted** (owner's call), annotated UNUSED in
+  `global.css`.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.10** rewritten in full, replacing the greeting-cycle spec entirely.
+- **PRD §8** — the "covers the hero for roughly 11s" line was stale; the overlay
+  now lasts as long as the page actually takes.
+- **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+Headless Chrome over CDP, fresh target per case, reduced motion emulated
+per-target. Scripts in the session scratchpad.
+
+- **All five first-paint cases** pass unchanged: first visit present at DCL
+  (`display: grid`, `position: fixed`); `boot-seen` absent; reduced motion
+  absent; reduced + `boot-seen` absent; scripts disabled → `display: none`.
+- **Progress is real, not a fixed clock.** Overlay lifetime **1.6s unthrottled /
+  4.4s at 200kb/s / 6.1s at 60kb/s**. A fixed timer would give three identical
+  figures. Readout tracks settled Resource Timing entries; only `load` hits 100%.
+- **Grace cap fires.** Three resources held open with `Fetch.requestPaused` so
+  `load` never fired (`readyState` stuck at `interactive`); overlay still gone at
+  ~3.4s = 3000ms cap + 400ms fade.
+- **Removed, not hidden:** `[data-boot]` absent from the DOM after reveal,
+  `.boot` count 0, `boot-seen` set, focus on `body`, hero present.
+- **Texture, read from the compositor:** 3 distinct tones, `rgb(17,18,20)`
+  (= `--bg` exactly) → `rgb(26,27,29)` (= `--bg-raised`).
+- **Both accents + mobile:** border follows `--accent` (`#ff3b5c` → `#a78bfa`),
+  fill stays `--heading` in both, square exactly 72x72 and centred at 1280 and
+  375, no horizontal overflow.
+- **Client JS: 1452 B gzipped, all inline, no external script** (cap 40 KB),
+  down from 2020 B in increment 7.
+- Build + `astro check` 0/0/0 at every commit. All touched files under the
+  200-line cap.
+
+### Harness gotchas recorded for next time
+
+- Under heavy throttling the overlay does not exist yet at first poll — the HTML
+  has not streamed. A sampler that treats "not found" as "removed" reports a
+  *faster* load on a slower network. Wait until the element has been seen once.
+- CDP eval round-trips are slower than the fill, so polling for an exact
+  percentage misses every threshold. For state screenshots, stub
+  `requestAnimationFrame` via `Page.addScriptToEvaluateOnNewDocument` and pin
+  the state instead of chasing it.
+- Clear `boot-seen` in that same on-new-document script, or the inline
+  first-paint script removes the overlay before the screenshot.
+- `Network.setCacheDisabled` takes `cacheDisabled`, not `value`.
+
+### Still open
+
+- **Status-line copy** (`STATUS_TEXT`) — placeholder pending the owner.
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Hero.astro over the 200-line cap (pre-existing).
+- Final accent, custom domain (PRD §11).
+
 ## 2026-09-20 — increment 7
 
 ### Last milestone completed

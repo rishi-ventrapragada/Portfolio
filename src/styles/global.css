@@ -21,8 +21,11 @@
   --accent: #ff3b5c;
   --accent-soft: rgba(255, 59, 92, 0.18);
 
-  /* Boot preloader cycling-word palette (PRD §5.10). Fixed per word, so they
-     read the same under both accents. */
+  /* Cycling-word palette. UNUSED since increment 8 replaced the boot
+     preloader's greeting cycle with the square-fill loader (PRD §5.10);
+     nothing consumes these today. Kept by the owner's decision so the hexes
+     do not have to be re-chosen if a later increment wants a multi-colour
+     palette. Delete them if that never happens. */
   --word-amber: #ffb454;
   --word-coral: #ff8f6b;
   --word-sky: #6ec9f5;

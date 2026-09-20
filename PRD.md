@@ -155,28 +155,36 @@ Email link (`mailto`), GitHub, LinkedIn, résumé. Mono labels. No form at launc
 Fixed 28px pill bottom-right, rendered only when `import.meta.env.DEV`, flips `data-accent` between crimson and violet, remembers in localStorage. Removed once a final accent is chosen.
 
 ### 5.10 Boot preloader `[now]`
-A word-cycling greeting shown once per browser session before the hero.
+A square-fill loading animation shown once per browser session before the hero. Replaced the word-cycling greeting in increment 8.
 
-Full-viewport overlay, background `--bg`, content vertically and horizontally **centred**, max-width 600px. This is a full-screen transient moment rather than page content, so it does not follow the site's left-margin convention. One line occupies the box at a time; they do not accumulate.
+Full-viewport overlay, content vertically and horizontally **centred**, max-width 600px. This is a full-screen transient moment rather than page content, so it does not follow the site's left-margin convention.
 
-1. Two stacked rows, centred, no connector punctuation: the cycling `{GREETING}` above, static `I'm Rishi` (`--fg`) below, visible from the start. `--font-display` 700, uppercased in CSS. `{GREETING}` cycles `["Hello", "Namaste", "Bonjour", "Hola", "Ciao"]` once, 5000ms / 5 = 1000ms each. Swap is a 150ms fade plus a slight upward slide. Each word carries a fixed colour token — amber, coral, sky, mint, periwinkle in order — and the colour cross-fades with the word rather than animating separately.
-2. `Website loading` — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`, `0.9375rem` (15px — deliberately above the `--size-label` 12px used for page labels, so the final beat holds its own beneath line 1). Three dots loop `.` → `..` → `...` at 400ms per step until reveal, in a reserved `1.8em` box so the text never shifts as they cycle.
+**Background.** `--bg`, overlaid with an original pixelated noise texture: an inline SVG `feTurbulence` (`fractalNoise`, `baseFrequency 0.5`, fixed `seed` so it is identical across builds) collapsed to a single luminance channel by `feColorMatrix`, then quantised by a `discrete` alpha ramp so it reads as small flat squares rather than film grain. The collapse is load-bearing — turbulence generates each channel independently, so without it the three drift apart and the texture speckles green and magenta. Rendered at 120px and scaled to 360px so cells land at 2–4px, tiled, at `opacity: 0.05`. Measured from the compositor: **3 distinct tones spanning `rgb(17,18,20)` (`--bg` exactly) to `rgb(26,27,29)` (effectively `--bg-raised`)**, low enough contrast to read as texture rather than pattern. Generated in CSS — no image request, no build step, no third-party asset.
 
-Only one line is on screen at a time: the greeting line cycles, exits over 450ms with an ease-in-out curve, and the loading line enters. The line transition is deliberately slower and eased than the 150ms word swap within a line. Total run is about 7.1s (5.0s greeting cycle + 0.45s exit + 1.2s dwell + 0.4s fade). The role-cycling line that made it 12.6s was cut in increment 7.
+**Foreground**, stacked and centred with a 1rem gap:
+1. **Percentage readout** — `--font-mono`, `1.125rem`, `--fg`, `tabular-nums` so the box does not jog as digits change. Directly above the square. Rendered `0%` in the markup, so the overlay is never blank in the frame before script runs.
+2. **The square** — 72px, `border: 3px solid var(--accent)`, transparent background. Inside it a full-size fill child in `--heading` (not `--accent`, so it reads the same under both accents), revealed by `clip-path: inset(X% 0 0 0)` from the bottom up. Clipping rather than an animated `height`: a height-driven edge lands on fractional pixels and the browser antialiases it into a soft grey line, which is visible at 72px. Progress is **quantised to 16 steps for the clip only**, so the fill edge always lands on a whole pixel; the readout above stays continuous and is never rounded away from its true value. The empty state is duplicated into BaseLayout's critical-paint `<style>`, or the square paints full for the frames before `global.css` lands — a white flash on a slow connection.
+3. **Status line** — `--font-mono`, uppercase, `letter-spacing: 0.12em`, `--fg-muted`, via the `.label` class. Currently the placeholder `LOADING`; **final copy is deferred**. It lives as a single exported constant, `STATUS_TEXT` in `src/scripts/boot-copy.ts`, so swapping it is a one-line change. It is its own module because an `.astro` frontmatter export is not importable.
 
-Reveal: once line 3 has been visible 1200ms **and** the page has fired `load`, the overlay fades over 400ms and is removed from the DOM. A 3000ms grace cap after the dwell reveals anyway, so a stalled asset can never strand the visitor behind the overlay.
+**Progress mechanic — tied to real load state, not a fixed timer.** `document.readyState` gives the coarse floor (`loading` → 0.15, `interactive` → 0.5); between `interactive` and `complete` the settled share of `performance.getEntriesByType("resource")` entries (`responseEnd > 0`) moves the number, so on a slow network it tracks resources genuinely arriving. Because that collection only covers requests the browser has already *started*, the share pins at its ceiling while the page keeps fetching and the readout visibly hangs; the remaining gap is therefore spent against the clock on an exponential curve, approaching 1 without arriving. **Only `load` reaches 100%.** The displayed value eases toward true readiness each `requestAnimationFrame` and is capped by it, so the readout can never overstate how loaded the page is.
+
+**Minimum dwell** 700ms before the readout may commit to 100%, so an instant load sweeps 0→100 across the dwell rather than flashing in a single frame.
+
+**Grace cap** 3000ms, armed at **t=0, not after the dwell**: a `load` that never fires must not strand the visitor behind the overlay (the increment 1.7 bug). At the cap the overlay reveals regardless of true load state.
+
+**Reveal.** At 100% and past the dwell, the overlay fades over 400ms and is **removed from the DOM**, with a `transitionend` listener plus a 500ms `setTimeout` as belt and braces, and focus moved to the top of the document.
 
 Behaviour:
 - Once per browser session via `sessionStorage` key `boot-seen`. Same-session reloads go straight to the hero.
 - The overlay is **visible by default in CSS**, needing no JavaScript to show. A synchronous inline script placed immediately after the overlay markup (classic, not a module, so it is not deferred) removes it before first paint when `boot-seen` is set or reduced motion is on. Repeat visits and reduced-motion visitors therefore never see a frame of it, and there is no flash of the hero before the overlay appears.
 - Reduced motion is covered twice: the same inline script, and a `prefers-reduced-motion` CSS rule that hides the overlay outright.
 - Without JavaScript a `<noscript>` rule hides the overlay, since nothing would remove it.
-- Skippable by click, keypress, wheel, touch or scroll: cycling stops, every line snaps to its final word, and the overlay fades.
-- `prefers-reduced-motion: reduce` skips it entirely — no overlay, straight to the hero.
-- No layout shift on swap: words are absolutely positioned over an invisible grid holding all of them, so the box is always as wide as the widest word.
+- Skippable by click, keypress, wheel, touch or scroll: the sequence stops, the square snaps to full, and the overlay fades.
 - The hero image stays `loading="eager"` behind the overlay so it is painted before the reveal.
-- Budget: 714 B gzipped for the sequence script against the 2.5 KB allowance; page total 2020 B of inline JS against the 40 KB cap, no external script (measured at the end of increment 7).
+- Budget: **1452 B gzipped, all inline, no external script** against the 40 KB cap (measured at the end of increment 8, down from 2020 B in increment 7 — the square-fill script is smaller than the cycler machinery it replaced).
 - Accessibility: the overlay is `aria-hidden` (decorative — the real `<h1>` carries the name) and focus moves to the top of the document once it is removed.
+
+Measured overlay lifetime, three network conditions (increment 8): **1.6s unthrottled, 4.4s at 200kb/s, 6.1s at 60kb/s.** A fixed-clock animation would give three identical figures; these track the real network, which is the point.
 
 ## 6. Content model
 
@@ -205,7 +213,7 @@ A `superRefine` enforces "required unless planned" at build time, so a live or i
 - Lighthouse: Performance ≥ 95, Accessibility ≥ 95, SEO ≥ 95 on mobile.
 - Client JS ≤ 40 KB gzipped per page at launch.
 - Largest Contentful Paint ≤ 2.0s on a mid-range Android over 4G (hero image is the LCP element; keep it under 250 KB). **Excludes first-visit sessions where the §5.10 boot preloader plays.** The target applies to repeat visits within a session (`boot-seen` set), reduced-motion visitors, and any load where the preloader is skipped. In the first three the overlay is removed before first paint, so the hero is the LCP element as normal; on a skip the overlay paints first and the hero is revealed as soon as the visitor skips.
-- The preloader deliberately covers the hero for roughly 11s on a first visit, so a field LCP measurement for those sessions reads the overlay, not the hero. That is accepted, not a regression. The hero image still loads `eager` behind the overlay so it is painted and ready at the moment of reveal.
+- The preloader covers the hero on a first visit, so a field LCP measurement for those sessions reads the overlay, not the hero. That is accepted, not a regression. Since increment 8 the overlay lasts only as long as the page genuinely takes to load (1.6s unthrottled, 4.4s at 200kb/s, 6.1s at 60kb/s, 3s hard cap), rather than the fixed ~7s the greeting cycle held it for. The hero image still loads `eager` behind the overlay so it is painted and ready at the moment of reveal.
 - Works without JavaScript except the scroll dissolve and accent toggle. The boot preloader is hidden outright without JavaScript, since nothing would remove it.
 - Page metadata and an Open Graph image `[next]`.
 - Analytics: Vercel Analytics or Umami `[next]`.
