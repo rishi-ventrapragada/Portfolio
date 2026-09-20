@@ -48,6 +48,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
         z-index: 200;
         background-color: #111214;
       }
+      /* The square's fill starts empty. Without this the fill paints at full
+         height for the frames before global.css lands — a filled white square
+         flashing before it drops to 0% on a slow connection. */
+      .boot-fill {
+        clip-path: inset(100% 0 0 0);
+      }
     </style>
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

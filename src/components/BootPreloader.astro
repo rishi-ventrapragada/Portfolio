@@ -1,18 +1,11 @@
 ---
-// Boot preloader (PRD §5.10). Word-cycling greeting shown once per browser
-// session before the hero. Plain .astro plus one small script — no React state,
-// so no island.
-// Each cycling word has a fixed colour token (PRD §5.10); the tokens live in
-// global.css beside the other design tokens.
-import BootCycler from "./BootCycler.astro";
-
-const greetings = [
-  { word: "Hello", tone: "amber" },
-  { word: "Namaste", tone: "coral" },
-  { word: "Bonjour", tone: "sky" },
-  { word: "Hola", tone: "mint" },
-  { word: "Ciao", tone: "periwinkle" },
-];
+// Boot preloader (PRD §5.10). A bordered square that fills bottom-up as the
+// page actually loads, with a live percentage above it, shown once per browser
+// session before the hero. Plain .astro plus one small script — no React
+// state, so no island.
+// The texture and the square are drawn from this site's own tokens; nothing
+// here is derived from any third-party asset.
+import { STATUS_TEXT } from "../scripts/boot-copy";
 ---
 
 {/* Without JS nothing would ever remove the overlay, so hide it for no-JS
@@ -21,21 +14,20 @@ const greetings = [
 
 {/* aria-hidden: decorative. The real <h1> already carries the name. */}
 <div class="boot" data-boot aria-hidden="true">
-  {/* Lines are stacked in one grid cell so only one occupies the box at a
-      time; the script shows exactly one at a time (PRD §5.10). */}
   <div class="boot-inner">
-    {/* Two stacked rows in one slide: the greeting cycles above, the name is
-        static below and visible from the start. No connector punctuation. */}
-    <p class="boot-line boot-greeting" data-line="1" data-on>
-      <span class="boot-row">
-        <BootCycler name="greeting" words={greetings} />
-      </span>
-      <span class="boot-row boot-name">I&rsquo;m Rishi</span>
-    </p>
+    {/* Live readout, directly above the square. Starts at 0% so the overlay is
+        never blank in the frame before the script runs. */}
+    <p class="boot-pct" data-pct>0%</p>
 
-    <p class="boot-status label" data-line="2">
-      Website loading<span class="boot-dots" data-dots aria-hidden="true"></span>
-    </p>
+    {/* The fill is a full-size child revealed by clip-path rather than a child
+        whose height animates: a height-driven edge lands on fractional pixels
+        and the browser antialiases it into a soft grey line, which is visible
+        at this size. Clipping keeps the edge hard. */}
+    <div class="boot-square">
+      <div class="boot-fill" data-fill></div>
+    </div>
+
+    <p class="boot-status label">{STATUS_TEXT}</p>
   </div>
 </div>
 
@@ -62,8 +54,9 @@ const greetings = [
 <script>
   import { runBootSequence } from "../scripts/boot-preloader";
 
-  // 5000ms for the greeting cycle, per PRD §5.10.
-  runBootSequence(5000);
+  // 700ms minimum dwell so an instant load still reads as an animation;
+  // 3000ms grace cap so a stalled resource can never strand the visitor.
+  runBootSequence(700, 3000);
 </script>
 
 <style>
@@ -81,87 +74,71 @@ const greetings = [
     transition: opacity 400ms ease;
   }
 
+  /* --- Pixel-noise texture ------------------------------------------------
+     Generated here, not downloaded: an inline SVG filter whose fractalNoise is
+     pushed through a discrete transfer function, which quantises the smooth
+     noise into flat steps so it reads as small squares rather than film grain.
+     A fixed seed keeps it identical across builds. Layered over --bg at low
+     alpha, so the tones sit close to --bg / --bg-raised and it reads as
+     texture rather than pattern. */
+  .boot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='1' seed='7' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0.05 0.1 0.16'/%3E%3CfeFuncG type='discrete' tableValues='0.05 0.1 0.16'/%3E%3CfeFuncB type='discrete' tableValues='0.06 0.11 0.18'/%3E%3CfeFuncA type='discrete' tableValues='0 1 1 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* Scaled up from the 120px render so each noise cell lands at 2–4px. */
+    background-size: 360px 360px;
+    background-repeat: repeat;
+    opacity: 0.55;
+    /* Decorative only; the foreground sits above it. */
+    pointer-events: none;
+  }
+
   .boot[data-out] {
     opacity: 0;
     pointer-events: none;
   }
 
   .boot-inner {
+    position: relative;
     display: grid;
+    justify-items: center;
+    gap: 1rem;
     width: 100%;
     max-width: 600px;
     margin-inline: auto;
-    /* Reserve the tallest line's height (line 1 is two rows at 1.2 line-height)
-       so the block never jumps between slides. */
-    min-height: 2.6em;
-    align-content: center;
   }
 
-  .boot-line {
+  .boot-pct {
     margin: 0;
-    text-align: center;
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 6vw, 3rem);
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
+    font-family: var(--font-mono);
+    font-size: 1.125rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
     color: var(--fg);
   }
 
-  .boot-greeting {
-    font-weight: 700;
+  .boot-square {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border: 3px solid var(--accent);
+    background-color: transparent;
   }
 
-  /* Line 1 is two rows: cycling greeting above, static name below. */
-  .boot-row {
-    display: block;
-  }
-
-  .boot-name {
-    color: var(--fg);
-  }
-
-  /* --- One line at a time -----------------------------------------------
-     Every line sits in the same grid cell. The script gives exactly one the
-     data-on attribute; the others are faded out and non-interactive. The
-     line transition is deliberately slower and eased than the 150ms
-     word swap inside a line (PRD 5.10). */
-  .boot [data-line] {
-    grid-area: 1 / 1;
-    opacity: 0;
-    transform: translateY(0.6em);
-    transition:
-      opacity 450ms cubic-bezier(0.4, 0, 0.2, 1),
-      transform 450ms cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-  }
-
-  .boot [data-line][data-on] {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Leaving lines travel up and out, so the sequence reads downward. */
-  .boot [data-line][data-out] {
-    opacity: 0;
-    transform: translateY(-0.6em);
+  /* Full-size; the script reveals it from the bottom by moving the top inset.
+     Not --accent, so the fill reads the same under both accents. */
+  .boot-fill {
+    position: absolute;
+    inset: 0;
+    background-color: var(--heading);
+    clip-path: inset(100% 0 0 0);
   }
 
   .boot-status {
     margin: 0;
     color: var(--fg-muted);
     text-align: center;
-    /* Above --size-label (0.75rem): line 2 is the final beat of a full-screen
-       moment, not a page label, and needs to hold its own under line 1. */
-    font-size: 0.9375rem;
-  }
-
-  .boot-dots {
-    display: inline-block;
-    /* Three mono glyphs at 0.6em advance each; reserved so the text above
-       never shifts as the dots cycle. */
-    min-width: 1.8em;
-    text-align: left;
   }
 
   /* --- Reduced motion: the script removes the overlay outright, so this is
