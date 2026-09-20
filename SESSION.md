@@ -80,6 +80,93 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-20 — full audit
+
+### Last milestone completed
+
+A full audit of the build so far: every source file read against CLAUDE.md
+and PRD.md, the production build inspected, and the built site driven in
+headless Chrome over CDP at 1280×800 and 375×667, plus reduced-motion and a
+forced script-fallback run. Two defects found and fixed, docs refreshed.
+
+### Fixed
+
+- **Deep links flashed the preloader.** Landing on `/#projects` (what the
+  redirected `/about` and `/projects/*` routes produce) painted the overlay,
+  then the browser's own fragment scroll tripped the `scroll` skip a frame
+  later, so the visitor saw a 400ms fading overlay over a page still scrolling
+  to its anchor. The inline first-paint script now also removes the overlay
+  when `location.hash` is set, the same path as a repeat visit. `boot-seen`
+  stays unset on that path, so a later hard load of `/` still plays it once.
+  Judgement call: the PRD said "scroll skips"; a self-inflicted skip on frame
+  one is a flash, not a skip. PRD §5.10 records the new behaviour.
+- **Hero.astro was 253 lines**, over the CLAUDE.md §5 cap and open since
+  increment 6. Layer A now lives in `Wordmark.astro` (162 lines: markup, all
+  wordmark CSS, the dissolve, the mobile and reduced-motion branches) and its
+  Firefox script branch in `src/scripts/hero-dissolve.ts`, mirroring the
+  preloader split. `Hero.astro` (71 lines) keeps the section, the grid and the
+  subject. The fallback flag moved from `.hero[data-fallback]` to
+  `.wordmark-wrap[data-fallback]` so nothing crosses component scope; the
+  unused `data-hero` hook is gone. The anti-merge prefix on the longhand rule
+  is now `:where([data-wordmark])`; the built CSS still carries
+  `animation-timeline:scroll(root)` and `animation-range:0 40dvh` as
+  longhands with no `animation:` shorthand anywhere.
+- README listed the deleted `Skills` / `SkillGroups` components and missed
+  `TechStack`, `Pills`, `BootSquare`, `Wordmark` and the scripts; ASSETS.md
+  still said `/about` links to the résumé.
+
+### Verified by measurement (unchanged before and after the split)
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints. Longest file 197.
+- Client JS: no external `<script src>`; five inline scripts.
+- Preloader: 24 distinct steps across the 2800ms dwell, `100%` on `load`,
+  removed ~3.3s; absent at the first sample under reduced motion and on a
+  same-session reload; absent at the first sample on a `#projects` arrival.
+- Nav: transparent at scrollY 0–798, raised at 802 (hero 800 tall), and at
+  0–665 / 669 on the phone. Mark ends at 67px, links span 122–351 of 375.
+- Progress fill: `scaleX` 0 at top, 0.30 at the hero's foot, exactly 1 at the
+  bottom; identical numbers from the CSS branch and the forced script branch.
+- Dissolve: opacity 1 / filter none at rest; 0.50 and 4px blur at 20% of the
+  viewport; 0 and 8px at 40%; identical from both branches.
+- Anchors: `#about`, `#skills`, `#projects` land with the section top 80px
+  below the viewport edge; `#contact` is limited by page end; `#main` and
+  `#top` return to 0.
+- No horizontal overflow at 375. One `<h1>`. Every image has `alt`. Console
+  clean on every run.
+- Cards: KalaCart at opacity 1 with both links as real hrefs; Recurzn at 0.5
+  with title and year only. Two columns of 518px at 1280, one of 277px at 375.
+- Wordmark box 172,72 922×330 and subject 398,193 470×607 at 1280; 23,171
+  330×118 and 23,241 330×426 at 375 — byte-identical to the pre-split run.
+
+### Looked at and left alone
+
+- `<meta name="twitter:card" content="summary_large_image">` with no
+  `og:image` / `twitter:image`. Harmless until the OG image lands (PRD §8,
+  `[next]`); switch to `summary` or add the image then.
+- `vercel.json` carries two redirect rules that `/projects/:path*` already
+  covers. Verified live in increment 6; not worth a redeploy to tidy.
+- `.grid` is both a scoped class and a Tailwind utility; both say
+  `display: grid`, so no conflict.
+- `Footer.astro` bakes the copyright year in at build time. Standard for a
+  static site; it refreshes on the next deploy.
+- `AGENTS.md` sits untracked at the root: a Codex-flavoured copy of CLAUDE.md.
+  Owner's file — neither committed nor removed here.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.10** — one bullet under Behaviour for the deep-link path.
+- **README.md**, **ASSETS.md** — corrections above. **SESSION.md** — this.
+
+### Not done
+
+- **Not pushed.** Three local commits on `main`. Pushing deploys, and the
+  alias step in the standing constraint needs the owner's CLI session.
+
+### Still open
+
+- Status-line copy (`STATUS_TEXT`), `public/resume.pdf`, the About photo.
+- Final accent, custom domain, vanity URL as a project domain (PRD §11).
+
 ## 2026-09-20 — increment 9
 
 ### Last milestone completed

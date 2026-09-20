@@ -32,8 +32,8 @@ goes through `<Image>` until a real photo arrives.
 | Licence | Owner's own material |
 | Date | Not yet added |
 
-`/about` and the footer both link to `/resume.pdf`. **The file is not in the
-repo**, so both links 404 until the owner adds it. A static build cannot verify
+The footer links to `/resume.pdf`. **The file is not in the repo**, so the
+link 404s until the owner adds it. A static build cannot verify
 link targets, so this does not fail the build and will not surface as an error —
 it has to be remembered.
 

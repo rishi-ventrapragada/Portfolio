@@ -30,14 +30,14 @@ npm run preview  # serve the production build locally
 ```
 src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
-  components/                 Nav, Hero, About, Skills, SkillGroups, ProjectsSection,
-                              ProjectCard, CurrentlyBuilding, Footer, BootPreloader,
-                              AccentToggle (dev only)
+  components/                 Nav, Hero, Wordmark, About, TechStack, Pills,
+                              ProjectsSection, ProjectCard, CurrentlyBuilding,
+                              Footer, BootPreloader, BootSquare, AccentToggle (dev only)
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
   pages/index.astro           the whole site: one page, anchored sections
-  scripts/boot-preloader.ts   preloader sequence
+  scripts/                    boot-preloader.ts, boot-copy.ts, hero-dissolve.ts
   styles/global.css           all design tokens
 ```
 
