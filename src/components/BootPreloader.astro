@@ -75,21 +75,23 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
   }
 
   /* --- Pixel-noise texture ------------------------------------------------
-     Generated here, not downloaded: an inline SVG filter whose fractalNoise is
-     pushed through a discrete transfer function, which quantises the smooth
-     noise into flat steps so it reads as small squares rather than film grain.
-     A fixed seed keeps it identical across builds. Layered over --bg at low
-     alpha, so the tones sit close to --bg / --bg-raised and it reads as
-     texture rather than pattern. */
+     Generated here, not downloaded. fractalNoise is collapsed to a single
+     luminance channel by feColorMatrix — turbulence generates each channel
+     independently, so without this the three drift apart and the texture
+     speckles green and magenta. The discrete alpha ramp then quantises the
+     smooth noise into flat steps, which is what makes it read as small squares
+     rather than film grain. A fixed seed keeps it identical across builds. */
   .boot::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='1' seed='7' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0.05 0.1 0.16'/%3E%3CfeFuncG type='discrete' tableValues='0.05 0.1 0.16'/%3E%3CfeFuncB type='discrete' tableValues='0.06 0.11 0.18'/%3E%3CfeFuncA type='discrete' tableValues='0 1 1 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='1' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.34 0.34 0.34 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0.45 0.75 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
     /* Scaled up from the 120px render so each noise cell lands at 2–4px. */
     background-size: 360px 360px;
     background-repeat: repeat;
-    opacity: 0.55;
+    /* Light squares over --bg, held low so the result sits between --bg and
+       --bg-raised and reads as texture rather than pattern. */
+    opacity: 0.05;
     /* Decorative only; the foreground sits above it. */
     pointer-events: none;
   }
