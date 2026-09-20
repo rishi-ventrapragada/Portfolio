@@ -19,10 +19,24 @@ Get the URL from `vercel ls` (row 1 = newest). Then **verify the vanity URL
 itself**, not the deployment URL — the success message only says the pointer
 moved, not that the right code is behind it.
 
-**Why this is manual:** the project has no Git integration moving the alias, so
-it stays pinned to whichever deployment was last set by hand. A green build and
-a live deployment URL do **not** mean the vanity URL moved. This has gone stale
-twice (increments 1.6 and again through 1.9→5).
+**Why this is manual — corrected in increment 8.** This entry used to say the
+project has no Git integration. That is **wrong**. Verified against the API:
+the project *is* connected to `github:rishi-ventrapragada/Portfolio`, production
+branch `main`, and every deployment in the history before increment 8 has
+`source: git`. **Pushing to `main` deploys on its own; you do not need to run
+`vercel --prod`.**
+
+The real reason the alias is manual: `rishi-ventrapragada.vercel.app` is **not
+a domain on the project**. The only project domain is the auto-assigned
+`portfolio-gamma-lake-gtndl2ey0m.vercel.app`, which *does* auto-follow
+production. The vanity URL is a bare alias pointing at one specific deployment
+id, so nothing moves it but a hand-run `vercel alias set`. A green build and a
+live deployment URL still do **not** mean the vanity URL moved. This has gone
+stale twice (increments 1.6 and again through 1.9→5).
+
+**Better fix available:** add `rishi-ventrapragada.vercel.app` to the project as
+a domain in the dashboard. It would then auto-follow production like the
+gamma-lake one does, and retire this whole entry. Owner's call.
 
 The local Vercel CLI is authenticated as `rishi-ventrapragada` and this works.
 (The Vercel **MCP connector** is a different account — `orca-frontend`,
@@ -163,6 +177,25 @@ per-target. Scripts in the session scratchpad.
 - Clear `boot-seen` in that same on-new-document script, or the inline
   first-paint script removes the overlay before the screenshot.
 - `Network.setCacheDisabled` takes `cacheDisabled`, not `value`.
+
+### The "two projects" scare — resolved, and the stale file fixed
+
+The increment 8 deploy showed up as `rishiventra/portfolio` while all history
+was `rishiventra/rishi-ventrapragada`. Checked against the API: **there is only
+one project** (`prj_R7zqnBIxWhGIUImcGAZJHWsQhWXN`), and only three in the whole
+team, one per repo. Nothing to delete. A previous session had already diagnosed
+this (see increment 1.9 above); it recurred because the cause was never fixed.
+
+**Cause:** `.vercel/project.json` still carried `"projectName":"portfolio"` from
+before the rename, and a CLI deploy labels the deployment from that field.
+**Fixed this session** — the file now reads `rishi-ventrapragada`, so CLI
+deploys stop mislabelling. It is gitignored, so this is local-only; a fresh
+clone that runs `vercel link` gets the right name anyway.
+
+**Also learned:** the push had *already* auto-deployed via the Git integration
+(`source: git`, same commit) before the manual `vercel --prod` ran. The manual
+deploy was a redundant rebuild of the identical commit. See the corrected
+standing constraint at the top of this file.
 
 ### Still open
 
