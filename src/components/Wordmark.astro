@@ -1,0 +1,162 @@
+---
+// Hero layer A (PRD §5.2): the RISHI wordmark and its scroll dissolve. Split
+// out of Hero.astro for the CLAUDE.md §5 line cap. Hero.astro owns the section
+// and the subject; this file owns everything about the letters.
+//
+// Rendered as inline SVG rather than a text node, because only textLength can
+// pin the glyphs to an exact width at every viewport. The visually hidden <h1>
+// carries the semantics while the SVG does the typography.
+//
+// The viewBox is the glyphs' painted ink box, measured off a real render
+// rather than taken from font metrics (getBBox and getExtentOfChar both report
+// advance boxes, which are wider and much taller than the paint). Cropping to
+// it is what removes the dead space around the letters, so the capped width
+// below is all glyph. preserveAspectRatio stays at the default so the
+// letterforms scale uniformly, and lengthAdjust="spacing" only redistributes
+// the gaps between glyphs — never the letters themselves.
+---
+
+{/* Sticky so it dissolves in place. data-wordmark is the script hook. */}
+<div class="wordmark-wrap" data-wordmark>
+  <h1 class="visually-hidden">Rishi</h1>
+  <svg
+    class="wordmark"
+    viewBox="63 31 2055 735"
+    preserveAspectRatio="xMidYMid meet"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <text
+      x="0"
+      y="748"
+      textLength="2146"
+      lengthAdjust="spacing"
+      dominant-baseline="alphabetic">RISHI</text
+    >
+  </svg>
+</div>
+
+<script>
+  import { runHeroDissolveFallback } from "../scripts/hero-dissolve";
+
+  runHeroDissolveFallback();
+</script>
+
+<style>
+  /* Sticky wrapper spans the viewport; the SVG inside it is centred and capped,
+     pinned just under the nav so the head and shoulders cross the lower half of
+     the letters. grid-area places it in the hero's single cell, under the
+     subject (z-index 2, Hero.astro). */
+  .wordmark-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    grid-area: 1 / 1;
+    height: 100dvh;
+    /* Overflow stays visible so the dissolve's 8px blur is not clipped;
+       .hero already clips anything that leaves the section. */
+    padding-top: calc(var(--nav-height) + 0.5rem);
+    pointer-events: none;
+  }
+
+  .wordmark {
+    display: block;
+    /* 72vw centred: ~14% margin each side at 1440px. Sits between the original
+       22vw type and the edge-to-edge version. */
+    width: clamp(320px, 72vw, 1100px);
+    margin-inline: auto;
+    /* Ratio matches the ink-box viewBox, so width drives height and the glyphs
+       are never stretched. */
+    height: auto;
+    aspect-ratio: 2055 / 735;
+  }
+
+  .wordmark text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    /* 1000px type with the baseline at y=748 puts the caps inside the viewBox
+       above; textLength then pins the advance to the box width. */
+    font-size: 1000px;
+    letter-spacing: -0.03em;
+    fill: var(--heading);
+  }
+
+  /* --- Scroll dissolve over the first 40% (PRD 5.2) ---------------------- */
+  /* Animated on the wrapper, never the SVG, so the glyphs stay crisp at rest:
+     no filter or transform touches the SVG at scroll position 0. */
+  /* Starts at 0.01% rather than 0% so the resting frame keeps filter:none and
+     transform:none — a blur(0) layer would soften the glyph edges at rest. */
+  @keyframes wordmark-dissolve {
+    0% {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+    0.01% {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(-8%);
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    /* Longhands, never the `animation` shorthand: if the timeline is allowed to
+       fold into it, the minifier emits `animation: ... scroll(root)` and every
+       browser drops the declaration, silently killing the dissolve. The
+       :where() prefix keeps this rule from merging with the one below. */
+    :where([data-wordmark]).wordmark-wrap {
+      animation-name: wordmark-dissolve;
+      animation-duration: 1ms; /* Overridden by the timeline. */
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+    }
+
+    .wordmark-wrap {
+      animation-timeline: scroll(root block);
+      animation-range: 0 40dvh;
+    }
+  }
+
+  /* Script fallback drives the same visuals from --hero-progress. */
+  .wordmark-wrap[data-fallback="on"] {
+    opacity: calc(1 - var(--hero-progress, 0));
+    filter: blur(calc(var(--hero-progress, 0) * 8px));
+    transform: translateY(calc(var(--hero-progress, 0) * -8%));
+  }
+
+  /* 640px rather than the project's usual 768px: below this the 72vw cap makes
+     the wordmark too small to carry the composition, so it goes near-full-bleed. */
+  @media (max-width: 639px) {
+    .wordmark {
+      width: 88vw;
+    }
+
+    /* Pushed further down than on desktop: the mobile wordmark is short, so the
+       figure has to reach well up into it for the overlap to read. */
+    .wordmark-wrap {
+      padding-top: calc(var(--nav-height) + 16dvh);
+    }
+  }
+
+  /* --- Reduced motion: opacity only, no blur or movement ----------------- */
+  @media (prefers-reduced-motion: reduce) {
+    @keyframes wordmark-dissolve {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .wordmark-wrap[data-fallback="on"] {
+      filter: none;
+      transform: none;
+    }
+  }
+</style>
