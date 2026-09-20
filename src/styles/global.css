@@ -16,6 +16,10 @@
   --fg-muted: #9a9ca3;
   --line: #2a2b30;
   --heading: #f2f2f2;
+  /* Boot preloader square backdrop (PRD §5.10): the not-yet-revealed area of
+     the loading square. Darker than --bg so the box reads as a distinct object
+     against the overlay's noise texture. */
+  --boot-square-bg: #0b0c0e;
 
   /* Accent — crimson default, switched by data-accent on <html> */
   --accent: #ff3b5c;

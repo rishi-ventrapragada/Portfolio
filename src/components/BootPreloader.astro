@@ -1,10 +1,11 @@
 ---
-// Boot preloader (PRD §5.10). A bordered square that fills bottom-up as the
+// Boot preloader (PRD §5.10). A square that grows out from its centre as the
 // page actually loads, with a live percentage above it, shown once per browser
 // session before the hero. Plain .astro plus one small script — no React
 // state, so no island.
 // The texture and the square are drawn from this site's own tokens; nothing
 // here is derived from any third-party asset.
+import BootSquare from "./BootSquare.astro";
 import { STATUS_TEXT } from "../scripts/boot-copy";
 ---
 
@@ -19,13 +20,7 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
         never blank in the frame before the script runs. */}
     <p class="boot-pct" data-pct>0%</p>
 
-    {/* The fill is a full-size child revealed by clip-path rather than a child
-        whose height animates: a height-driven edge lands on fractional pixels
-        and the browser antialiases it into a soft grey line, which is visible
-        at this size. Clipping keeps the edge hard. */}
-    <div class="boot-square">
-      <div class="boot-fill" data-fill></div>
-    </div>
+    <BootSquare />
 
     <p class="boot-status label">{STATUS_TEXT}</p>
   </div>
@@ -54,9 +49,10 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
 <script>
   import { runBootSequence } from "../scripts/boot-preloader";
 
-  // 700ms minimum dwell so an instant load still reads as an animation;
-  // 3000ms grace cap so a stalled resource can never strand the visitor.
-  runBootSequence(700, 3000);
+  // 2800ms dwell: an instant load still walks every step rather than
+  // flashing. 4500ms grace cap so a stalled resource can never strand the
+  // visitor.
+  runBootSequence(2800, 4500);
 </script>
 
 <style>
@@ -118,23 +114,6 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.08em;
     color: var(--fg);
-  }
-
-  .boot-square {
-    position: relative;
-    width: 72px;
-    height: 72px;
-    border: 3px solid var(--accent);
-    background-color: transparent;
-  }
-
-  /* Full-size; the script reveals it from the bottom by moving the top inset.
-     Not --accent, so the fill reads the same under both accents. */
-  .boot-fill {
-    position: absolute;
-    inset: 0;
-    background-color: var(--heading);
-    clip-path: inset(100% 0 0 0);
   }
 
   .boot-status {

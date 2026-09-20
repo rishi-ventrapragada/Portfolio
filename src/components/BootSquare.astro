@@ -1,0 +1,61 @@
+---
+// The loading square (PRD §5.10). Three stacked layers grow out from the
+// centre as the page loads: a --heading core, an --accent ring revealed one
+// step ahead of it, and a --fg-muted band one step ahead of that. Split out of
+// BootPreloader.astro for the CLAUDE.md §5 line cap; boot-preloader.ts drives
+// the layers by data attribute, which style scoping leaves untouched.
+//
+// Each layer's starting clip is an inline attribute so it applies at parse
+// time, before global.css lands — otherwise the layers paint fully revealed
+// for a few frames on a slow connection. inset() with one value clips all
+// four sides equally, which is what makes the growth centre-out rather than
+// directional.
+---
+
+<div class="boot-square" data-square>
+  <div class="boot-layer boot-band" data-band style="clip-path: inset(42%)"></div>
+  <div class="boot-layer boot-ring" data-ring style="clip-path: inset(46%)"></div>
+  <div class="boot-layer boot-core" data-core style="clip-path: inset(50%)"></div>
+</div>
+
+<style>
+  .boot-square {
+    position: relative;
+    width: clamp(120px, 20vw, 180px);
+    aspect-ratio: 1;
+    /* Darker than --bg so the unrevealed area reads as a distinct object
+       against the noise texture behind it. */
+    background-color: var(--boot-square-bg);
+  }
+
+  .boot-layer {
+    position: absolute;
+    inset: 0;
+    /* Each step lands as a chunky jump that settles, not a tween: short,
+       ease-out, and only ever between the quantised values the script writes. */
+    transition: clip-path 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* Stacking is source order: band at the back, core in front. The ring and
+     band are only visible in the margin each leaves beyond the layer above. */
+  .boot-band {
+    background-color: var(--fg-muted);
+  }
+
+  .boot-ring {
+    background-color: var(--accent);
+  }
+
+  /* Not --accent, so the core reads the same under both accents. */
+  .boot-core {
+    background-color: var(--heading);
+  }
+
+  /* The overlay never renders under reduced motion (BootPreloader.astro), so
+     this is belt and braces per CLAUDE.md §4. */
+  @media (prefers-reduced-motion: reduce) {
+    .boot-layer {
+      transition: none;
+    }
+  }
+</style>

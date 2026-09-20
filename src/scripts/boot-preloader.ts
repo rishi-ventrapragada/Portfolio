@@ -6,8 +6,18 @@
  * fixed clock, so the number the visitor sees means something.
  */
 
-/** Steps the fill is quantised to, so its edge always lands on a whole pixel. */
-const FILL_STEPS = 16;
+/**
+ * Discrete levels the readout and the square move through. 24 puts 25 / 50 /
+ * 75 % exactly on steps 6 / 12 / 18.
+ */
+const STEPS = 24;
+
+/**
+ * How far ahead of the core each outer layer is revealed, in percent of the
+ * box per side. The ring leads the core by one width; the band leads the ring.
+ */
+const RING_LEAD = 4;
+const BAND_LEAD = 8;
 
 /** Module load time, used as the origin for the creep below. */
 const navStart = performance.now();
@@ -49,10 +59,16 @@ function readiness(): number {
 }
 
 /**
+ * Quantise readiness to a step. Floor, not round: 0.99 must stay at 23, so
+ * `load` (readiness 1) is the only thing that reaches the last step.
+ */
+const toStep = (r: number) => Math.floor(r * STEPS);
+
+/**
  * Run the loading sequence over an already-rendered overlay.
  *
- * @param minDwellMs earliest the readout may commit to 100%, so an instant
- *   load still reads as an animation rather than a single flash.
+ * @param minDwellMs the window the steps are paced across. An instant load
+ *   still walks every step rather than flashing to 100%.
  * @param graceMs hard cap on the whole sequence. Armed at t=0, not after the
  *   dwell: a `load` that never fires must not strand the visitor behind the
  *   overlay (the increment 1.7 bug — do not move this back inside a callback).
@@ -71,32 +87,55 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   }
 
   const pct = root.querySelector<HTMLElement>("[data-pct]");
-  const fill = root.querySelector<HTMLElement>("[data-fill]");
+  const core = root.querySelector<HTMLElement>("[data-core]");
+  const ring = root.querySelector<HTMLElement>("[data-ring]");
+  const band = root.querySelector<HTMLElement>("[data-band]");
   const start = performance.now();
-  let shown = 0;
+  const slotMs = minDwellMs / STEPS;
+  /** Highest step the page has genuinely reached. */
+  let recorded = 0;
+  /** Step currently on screen. Never exceeds `recorded`. */
+  let displayed = 0;
+  /** When the current step went on screen; 0% is on screen from the markup. */
+  let lastPaint = start;
   let frame = 0;
   let done = false;
 
-  const paint = (value: number) => {
-    shown = value;
-    if (pct) pct.textContent = `${Math.round(value * 100)}%`;
-    // Only the geometry is stepped; the readout above stays continuous, so the
-    // number is never rounded away from its true value.
-    const step = Math.round(value * FILL_STEPS) / FILL_STEPS;
-    if (fill) fill.style.clipPath = `inset(${(1 - step) * 100}% 0 0 0)`;
+  /** Write one step to the readout and every layer together. */
+  const paint = (step: number) => {
+    displayed = step;
+    lastPaint = performance.now();
+    if (pct) pct.textContent = `${Math.round((step / STEPS) * 100)}%`;
+    // One inset value clips all four sides equally, so growth is centre-out.
+    const inset = (1 - step / STEPS) * 50;
+    const clip = (n: number) => `inset(${Math.max(0, n)}%)`;
+    if (core) core.style.clipPath = clip(inset);
+    if (ring) ring.style.clipPath = clip(inset - RING_LEAD);
+    if (band) band.style.clipPath = clip(inset - BAND_LEAD);
   };
 
-  /** Fade out and drop from the DOM — removed, not merely hidden. */
-  const finish = () => {
+  /**
+   * Fade out and drop from the DOM — removed, not merely hidden.
+   *
+   * @param snap complete the square first. True on a skip (the visitor asked
+   *   to move on) and on natural completion. False when the grace cap fires:
+   *   the page is not fully loaded, so the readout must not say it is — it
+   *   fades from wherever it genuinely stands.
+   */
+  const finish = (snap = true) => {
     if (done) return;
     done = true;
     cancelAnimationFrame(frame);
     clearTimeout(cap);
-    paint(1);
+    if (snap) paint(STEPS);
 
     const remove = () => root.remove();
     root.setAttribute("data-out", "");
-    root.addEventListener("transitionend", remove, { once: true });
+    // The layers' clip-path transitions bubble up here too and would end the
+    // fade after 180ms; only the overlay's own transition removes it.
+    root.addEventListener("transitionend", (e) => {
+      if (e.target === root) remove();
+    });
     // Belt and braces: remove even if the transition never fires.
     window.setTimeout(remove, 500);
 
@@ -105,31 +144,36 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   };
 
   // A stalled asset must never strand the visitor. Armed immediately.
-  const cap = window.setTimeout(finish, graceMs);
+  const cap = window.setTimeout(() => finish(false), graceMs);
 
   // Skippable at any time.
   const events = ["pointerdown", "keydown", "wheel", "touchstart", "scroll"] as const;
-  events.forEach((ev) => window.addEventListener(ev, finish, { passive: true, once: true }));
+  events.forEach((ev) => window.addEventListener(ev, () => finish(), { passive: true, once: true }));
 
   /**
-   * Ease the displayed value toward true readiness, capped by it so the
-   * readout never overstates how loaded the page is, and held short of 100%
-   * until the minimum dwell has passed.
+   * Paced reveal. Every frame records the highest step the page has genuinely
+   * reached. Step k may go on screen once it has been reached AND its time
+   * slot (k × dwell / STEPS) has opened. On an instant load that walks the
+   * steps across the dwell; on a slow load the slots are already behind, so a
+   * checkpoint shows the frame it lands — and a real jump shows as a jump.
+   * Nothing is ever shown ahead of true readiness: the pacing only decides
+   * when an already-true step is displayed.
    */
   const tick = () => {
     if (done) return;
     const elapsed = performance.now() - start;
-    const dwell = Math.min(1, elapsed / minDwellMs);
-    // On an instant load `readiness()` is already 1, so the dwell ramp is what
-    // paces the sweep; on a slow load readiness is the lower of the two and
-    // the number tracks the real signal instead.
-    const target = Math.min(readiness(), dwell);
+    recorded = Math.max(recorded, toStep(readiness()));
 
-    // Approach the target rather than snapping, so the fill moves smoothly
-    // between the discrete readiness levels.
-    paint(shown + (target - shown) * 0.12);
+    const slotOpen = Math.floor(elapsed / slotMs);
+    const next = Math.min(recorded, slotOpen);
+    // While the slots are what paces the climb, keep each step on screen for
+    // most of a slot even if a long frame delayed the one before it — a hitch
+    // must not collapse two steps into one flicker. Once the slots are all
+    // behind, real checkpoints show the frame they land.
+    const paced = slotOpen < recorded;
+    if (next > displayed && (!paced || performance.now() - lastPaint >= slotMs * 0.75)) paint(next);
 
-    if (shown >= 0.995 && elapsed >= minDwellMs) {
+    if (displayed >= STEPS && elapsed >= minDwellMs) {
       finish();
       return;
     }
