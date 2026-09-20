@@ -80,6 +80,110 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-20 — increment 9
+
+### Last milestone completed
+
+Centre-out concentric loading square, replacing increment 8's bottom-up fill.
+Three stacked layers (`--heading` core, `--accent` ring, `--fg-muted` band) each
+revealed by a single-value `clip-path: inset(N%)`, over a new `--boot-square-bg`
+backdrop, in a `clamp(120px, 20vw, 180px)` box. Progress quantised to 24 steps
+and revealed through time slots across a 2800ms dwell; grace cap 4500ms.
+
+Kept untouched, as briefed: the readiness signal, `boot-seen` gate, both
+reduced-motion bypasses, `<noscript>`, skip-on-interaction, first-paint script,
+noise texture, `STATUS_TEXT` placeholder pattern, fade + DOM removal.
+
+### The status line is STILL a placeholder
+
+`STATUS_TEXT` in `src/scripts/boot-copy.ts` reads `LOADING`. Final copy pending
+the owner. One-line swap.
+
+### Decisions worth knowing before you touch this
+
+- **Three bands, not two.** Built both, screenshotted both (`sq3-*` / `sq2-*` in
+  the session scratchpad). The muted band separates the saturated ring from the
+  near-black backdrop; without it the ring reads as a haloed border rather than
+  a growing band, especially at 120px where 4% is under 5px.
+- **Slot model for pacing.** Step *k* shows once reached AND once `k × dwell/24`
+  has elapsed. Slots are absolute from module start, so on a slow load they are
+  all behind by the time late checkpoints land, and those show the frame they
+  land — no artificial delay outside the dwell window. Measured: `100%` one
+  frame (16ms) after `load` with a resource held to 3.6s.
+- **Floor, not round.** The creep term reaches 0.99; `Math.round(0.99 × 24)` is
+  24, which would let the readout hit 100% without `load`. Floor keeps 0.99 at
+  23. Do not change this to round.
+- **The grace cap no longer paints 100%.** The brief said "reveal anyway
+  regardless of true load state" and also "no checkpoint ever displays before
+  its readiness event". Resolved toward honesty: the cap fades from wherever
+  the readout stands (measured 96%). A *skip* still snaps to full, as the PRD
+  has said since increment 8. Judgement call — flagged in the report.
+- **`transitionend` bubbles.** The layers' 180ms clip-path transitions bubble
+  up to the overlay, whose `transitionend` listener was removing it at 180ms
+  instead of after its 400ms fade. Caught because the mid-fade screenshot kept
+  coming back "already removed". The listener now checks `e.target === root`.
+  Any future child transition inside the overlay is safe.
+- **Minimum hold while paced.** A long frame early in the load delayed step 1
+  by ~80ms, then step 2 landed on its own slot, so step 1 held for 34–66ms and
+  its 180ms transition was retargeted mid-way. Each step now holds ≥ 75% of a
+  slot *only while the slots are pacing*; once they are behind, no hold.
+- **Initial clips are inline `style` attributes**, applied at parse time. This
+  retired the `.boot-fill` critical-paint duplicate in BaseLayout — one fewer
+  copy of the "duplicated outside the token" problem listed above.
+- **New token `--boot-square-bg: #0b0c0e`** — the owner asked for it. Recorded
+  in PRD §4.2. Used nowhere else.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §4.2** — new token. **PRD §5.10** rewritten for the new mechanic and
+  numbers. **PRD §8** overlay-duration note updated.
+- **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+Headless Chrome over CDP, in-page rAF recorder installed via
+`addScriptToEvaluateOnNewDocument`, scripts in the session scratchpad.
+
+- **All five first-paint cases** pass unchanged.
+- **Centre-out:** at all 25 steps, all four insets equal, every visible edge
+  the same distance from the box centre — worst spread **0.000px**. Box 180×180
+  at 1280, 120×120 at 375.
+- **Discrete:** 25 distinct values on a fast load, all from the 24-step set;
+  the inline clip matches the label's step on every frame; every painted step
+  held 100–119ms (slot 117ms). No intermediate values, no glide.
+- **Never ahead of truth:** displayed step ≤ floor(readiness × 24) on **every
+  frame**, unthrottled / 200kb/s / 60kb/s — 0 violations. (Before the grace-cap
+  fix there were 11 per throttled run, all at the cap.)
+- **Late checkpoint:** hero image held to 3.6s → `100%` at `load` + 16ms,
+  removed 434ms later (full fade).
+- **Grace cap:** three resources stalled, `readyState` stuck at `interactive`,
+  last readout **96%**, overlay gone at cap + fade.
+- **Removed, not hidden:** `[data-boot]` absent, focus on `body`, hero present.
+- **Both accents:** ring `#ff3b5c` → `#a78bfa`; core, band, backdrop unchanged.
+- **Client JS: 1570 B gzipped, all inline** (cap 40 KB; inc 8 was 1452 B).
+- Build + `astro check` 0/0/0 at every commit. Longest file 184 lines.
+
+### Harness gotchas recorded for next time
+
+- Eight CDP scripts against one Chrome + one preview server inflate load times
+  enough that throttled runs hit the grace cap and holds jitter. Run the
+  timing-sensitive scripts alone; pinned-state screenshots can go in parallel.
+- `localStorage` is per origin, not per target: the accent test left
+  `accent=violet` behind and the screenshot set came out violet. Set the accent
+  explicitly in any script that captures pixels.
+- The recorder's first frame with the overlay present is *after* module start,
+  so the "hold" it reports for `0%` is an artefact, not a paint. Judge holds
+  from step 1 onward.
+- A child element's `transitionend` reaches the parent. Filter on `e.target`.
+
+### Still open
+
+- **Status-line copy** (`STATUS_TEXT`) — placeholder pending the owner.
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Hero.astro over the 200-line cap (pre-existing).
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain — see
+  the standing constraint at the top.
+
 ## 2026-09-20 — increment 8
 
 ### Last milestone completed
