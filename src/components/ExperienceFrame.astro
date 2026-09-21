@@ -1,13 +1,14 @@
 ---
 // One monitor frame of the Experience section (PRD §5.11): year, keyword
 // title, the owner's verbatim sentence and, when the moment has one, its
-// cover. Stacked with its siblings in ExperienceTimeline's monitor grid;
-// `data-active` (set by the server for the first, then by the script)
-// decides which one is visible.
+// cover. Stacked with its siblings in ExperienceTimeline's fixed-height
+// monitor; `data-active` (set by the server for the first, then by the
+// script) decides which one is visible. The timecode is decoration only.
 import { Image } from "astro:assets";
 
 interface Props {
   id: string;
+  index: number;
   year: string;
   keyword: string;
   body: string;
@@ -16,7 +17,8 @@ interface Props {
   coverAlt?: string;
 }
 
-const { id, year, keyword, body, active = false, cover, coverAlt } = Astro.props;
+const { id, index, year, keyword, body, active = false, cover, coverAlt } = Astro.props;
+const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
 ---
 
 <article
@@ -25,26 +27,29 @@ const { id, year, keyword, body, active = false, cover, coverAlt } = Astro.props
   data-active={active ? "" : undefined}
   data-cover={cover ? "" : undefined}
 >
-  <div class="text">
-    <p class="meta year">{year}</p>
-    <h3 class="title">{keyword}</h3>
-    {/* The id is the clip's aria-describedby target. */}
-    <p class="body" id={`experience-${id}`}>{body}</p>
+  <div class="inner">
+    <div class="text">
+      <p class="meta year">{year}</p>
+      <h3 class="title">{keyword}</h3>
+      {/* The id is the clip's aria-describedby target. */}
+      <p class="body" id={`experience-${id}`}>{body}</p>
+    </div>
+    {
+      cover && (
+        <div class="cover">
+          <Image
+            src={cover}
+            alt={coverAlt ?? ""}
+            widths={[636, 1272]}
+            sizes="(min-width: 768px) 560px, 92vw"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      )
+    }
   </div>
-  {
-    cover && (
-      <div class="cover">
-        <Image
-          src={cover}
-          alt={coverAlt ?? ""}
-          widths={[636, 1272]}
-          sizes="(min-width: 768px) 480px, 92vw"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-    )
-  }
+  <span class="meta timecode" aria-hidden="true">{timecode}</span>
 </article>
 
 <style>
@@ -54,9 +59,10 @@ const { id, year, keyword, body, active = false, cover, coverAlt } = Astro.props
      accessibility tree, so only the active one is read. */
   .frame {
     grid-area: 1 / 1;
+    position: relative;
     display: grid;
-    gap: 1.5rem;
-    align-content: start;
+    place-items: center;
+    padding: 2rem var(--gutter) 3rem;
     opacity: 0;
     visibility: hidden;
     transition:
@@ -70,34 +76,59 @@ const { id, year, keyword, body, active = false, cover, coverAlt } = Astro.props
     transition-delay: 0s;
   }
 
+  .inner {
+    display: grid;
+    gap: 1.5rem;
+    width: min(100%, 64rem);
+  }
+
   @media (min-width: 768px) {
-    .frame[data-cover] {
-      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    .frame[data-cover] .inner {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
       align-items: center;
-      gap: 2.5rem;
+      gap: 3rem;
     }
   }
 
   .text {
     display: grid;
     gap: 0.75rem;
-    align-content: start;
+    align-content: center;
   }
 
-  .year {
+  .year,
+  .title,
+  .body {
     margin: 0;
   }
 
   .title {
-    margin: 0;
-    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    line-height: 1.05;
   }
 
   .body {
-    margin: 0;
-    max-width: 60ch;
-    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    max-width: 44ch;
+    font-size: clamp(1.125rem, 2.2vw, 1.5rem);
     color: var(--fg);
+  }
+
+  /* Never taller than the monitor: width follows the column, height is
+     capped, and the WebP keeps its ratio inside that box. */
+  .cover img {
+    display: block;
+    width: auto;
+    max-width: min(100%, 560px);
+    height: auto;
+    max-height: 30vh;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+
+  .timecode {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 1rem;
   }
 
   /* Instant swap, no fade (CLAUDE.md §4). */

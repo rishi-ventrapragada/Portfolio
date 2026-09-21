@@ -1,14 +1,17 @@
-// Experience track behaviour (PRD §5.11). Click and keyboard focus *commit*
-// a clip: it becomes the pressed one and the monitor shows its frame. Hover
-// only *previews* a frame, on fine pointers, and the track reverts to the
-// committed clip on leave. No aria-live: each clip's accessible name and
-// description already carry what the monitor shows.
+// Experience timeline behaviour (PRD §5.11). Click and keyboard focus
+// *commit* a clip: it becomes the pressed one and the monitor shows its
+// frame. Hover only *previews* a frame, on fine pointers, and the track
+// reverts to the committed clip on leave. The playhead follows whatever the
+// monitor shows. No aria-live: each clip's accessible name and description
+// already carry what the monitor shows.
+import { initPlayhead } from "./experience-playhead";
 
 export function initExperience(root: HTMLElement): void {
   const clips = [...root.querySelectorAll<HTMLButtonElement>("[data-clip]")];
   const frames = [...root.querySelectorAll<HTMLElement>("[data-frame]")];
   const track = root.querySelector<HTMLElement>("[data-track]");
   if (!track || clips.length === 0) return;
+  const movePlayhead = initPlayhead(root);
 
   // The server marks the first clip pressed, so no-JS and JS agree on load.
   let committed =
@@ -18,6 +21,7 @@ export function initExperience(root: HTMLElement): void {
 
   const show = (id: string) => {
     for (const frame of frames) frame.toggleAttribute("data-active", frame.dataset.frame === id);
+    movePlayhead(clips.find((clip) => clip.dataset.clip === id));
   };
 
   const commit = (id: string) => {
@@ -38,9 +42,45 @@ export function initExperience(root: HTMLElement): void {
   // Scrub on hover only where a hover exists (CLAUDE.md §4): a touch pointer
   // would otherwise leave a stale preview after every tap.
   if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    for (const clip of clips) {
-      clip.addEventListener("mouseenter", () => show(clip.dataset.clip ?? ""));
-    }
-    track.addEventListener("mouseleave", () => show(committed));
+    initHoverPreview(track, show, () => committed);
   }
+}
+
+// A preview needs a *real* cursor movement into the clip. Scrolling the page
+// under a stationary cursor fires mouseenter (and, in some engines, a
+// synthetic mousemove at the old coordinates) on whatever passes beneath it,
+// which would look like the clips cycling on their own. So: no mouseenter;
+// only a mousemove whose coordinates differ from the last one seen, and
+// which lands inside the clip's current rect, previews that clip.
+function initHoverPreview(track: HTMLElement, show: (id: string) => void, committed: () => string): void {
+  let last: { x: number; y: number } | undefined;
+  let previewing = "";
+
+  track.addEventListener("mousemove", (event) => {
+    const moved = last
+      ? last.x !== event.clientX || last.y !== event.clientY
+      : event.movementX !== 0 || event.movementY !== 0;
+    last = { x: event.clientX, y: event.clientY };
+    if (!moved) return;
+
+    const clip = (event.target as Element).closest<HTMLElement>("[data-clip]");
+    if (!clip) return;
+    const rect = clip.getBoundingClientRect();
+    const inside =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+    if (!inside) return;
+
+    const id = clip.dataset.clip ?? "";
+    if (id === previewing) return;
+    previewing = id;
+    show(id);
+  });
+
+  track.addEventListener("mouseleave", () => {
+    previewing = "";
+    show(committed());
+  });
 }

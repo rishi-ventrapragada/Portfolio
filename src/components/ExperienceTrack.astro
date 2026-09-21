@@ -1,0 +1,186 @@
+---
+// The Experience timeline (PRD §5.11): a ruler, the V1 track of clip buttons
+// and a decorative A1 track, on one horizontal scroller with sticky track
+// headers, plus the playhead. Every row is `header | lane`, and every lane is
+// the same four-column grid, so ruler ticks, clips and waveforms line up by
+// construction. One clip = ExperienceClip.astro; behaviour lives in
+// scripts/experience-timeline.ts.
+import ExperienceClip from "./ExperienceClip.astro";
+
+interface Props {
+  moments: { id: string; year: string; keyword: string; planned?: boolean }[];
+}
+
+const { moments } = Astro.props;
+// One palette entry per clip (global.css); the fourth is the planned one.
+const tones = ["amber", "sky", "mint", "periwinkle"];
+// Cosmetic ruler timecodes, 15 "seconds" per clip; not a clock.
+const stamp = (i: number) => `00:00:${String(i * 15).padStart(2, "0")}:00`;
+// One squiggle per A1 cell; a polyline, not real audio.
+const wave =
+  "0,12 6,4 12,20 18,8 24,16 30,2 36,22 42,10 48,14 54,5 60,19 66,9 72,15 78,3 84,21 90,11 96,13 100,12";
+---
+
+<div class="timeline">
+  <div class="rows" data-grid>
+    <div class="row ruler" aria-hidden="true">
+      <div class="head"></div>
+      <div class="lane">
+        {moments.map((_, i) => <div class="tick"><span class="meta">{stamp(i)}</span></div>)}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="head">
+        <span class="label">V1</span>
+        <span class="meta">video</span>
+      </div>
+      <div class="lane" role="group" aria-label="Moments" data-track>
+        {moments.map((moment, i) => <ExperienceClip {...moment} tone={tones[i]} pressed={i === 0} />)}
+      </div>
+    </div>
+
+    {/* Decoration only: no controls, out of the accessibility tree. */}
+    <div class="row" aria-hidden="true">
+      <div class="head">
+        <span class="label">A1</span>
+        <span class="meta">notes</span>
+      </div>
+      <div class="lane">
+        {
+          moments.map((_, i) => (
+            <div class="audio" style={`--tone: var(--word-${tones[i]})`}>
+              <svg viewBox="0 0 100 24" preserveAspectRatio="none" focusable="false">
+                <polyline points={wave} />
+              </svg>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Sits on the first clip without JavaScript; the script moves it to the
+        clip the monitor shows. */}
+    <div class="playhead" data-playhead aria-hidden="true"></div>
+  </div>
+</div>
+
+<style>
+  .timeline {
+    --head-w: 90px;
+    --lane-min: 150px;
+    overflow-x: auto;
+    background-color: var(--timeline-bg);
+    border-block: 1px solid var(--line);
+  }
+
+  .rows {
+    position: relative;
+    min-width: max-content;
+  }
+
+  .row {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row:last-of-type {
+    border-bottom: 0;
+  }
+
+  .head {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    flex: 0 0 var(--head-w);
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.125rem;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bg-raised);
+    border-right: 1px solid var(--line);
+  }
+
+  .head .label {
+    color: var(--fg);
+  }
+
+  /* Four equal columns in every lane; the lane grows with the scroller and
+     never drops below four × --lane-min, so phones scroll it sideways. */
+  .lane {
+    display: grid;
+    flex: 1 0 auto;
+    grid-template-columns: repeat(4, minmax(var(--lane-min), 1fr));
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .ruler .lane {
+    padding-block: 0;
+  }
+
+  /* Major tick on the column's left edge, minor ticks every quarter. */
+  .tick {
+    padding: 0.375rem 0.5rem;
+    border-left: 1px solid var(--line);
+    background: repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px 25%) bottom /
+      100% 5px no-repeat;
+  }
+
+  .tick .meta {
+    letter-spacing: 0.06em;
+  }
+
+  .audio {
+    height: 2.5rem;
+    padding: 0.375rem 0.5rem;
+    color: var(--tone);
+    opacity: 0.35;
+  }
+
+  .audio svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .audio polyline {
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* 2px --accent line over every row, flag in the ruler, its left edge on
+     the clip's left edge: head + 2px lane padding + the 1px the script adds.
+     `left` is fixed; the script only ever changes the transform. */
+  .playhead {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: 1;
+    width: 2px;
+    margin-left: -1px;
+    pointer-events: none;
+    background-color: var(--accent);
+    transform: translateX(calc(var(--head-w) + 3px));
+    transition: transform 200ms ease;
+  }
+
+  .playhead::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -5px;
+    border: 6px solid transparent;
+    border-top: 8px solid var(--accent);
+    border-bottom: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .playhead {
+      transition: none;
+    }
+  }
+</style>
