@@ -34,11 +34,15 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
 
 <style>
   /* A 34px block with year and keyword on one line (two stacked lines do
-     not fit legibly at this height). Layered so the shared, unlayered
-     `.planned` utility in global.css wins its border-style and opacity
-     without !important. */
+     not fit legibly at this height): flat tone fill with a 2px darker edge
+     along the bottom, the way NLE clips are drawn — no texture (increment
+     14.1 tried a faint stripe as well; the flat fill read as software, the
+     stripes as a sticker). Layered so the shared, unlayered `.planned`
+     utility in global.css wins its border-style and opacity without
+     !important. */
   @layer components {
     .clip {
+      --edge: color-mix(in srgb, var(--tone) 65%, var(--timeline-bg));
       position: relative;
       display: flex;
       align-items: center;
@@ -53,29 +57,23 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
       background-color: var(--tone);
       border: 1px solid var(--timeline-bg);
       border-radius: 2px;
+      box-shadow: inset 0 -2px 0 var(--edge);
       cursor: pointer;
       transition:
         filter 160ms ease,
         box-shadow 160ms ease;
     }
 
-    /* Faint diagonal texture in currentColor (the dark text colour). */
-    .clip::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: repeating-linear-gradient(-60deg, currentColor 0 1px, transparent 1px 5px);
-      opacity: 0.14;
-    }
-
     .clip:hover {
       filter: brightness(1.08);
     }
 
-    /* Pressed = the site's active state, as an inset --accent ring. */
+    /* Pressed = the site's active state, as an inset --accent ring over
+       the bottom edge. */
     .clip[aria-pressed="true"] {
-      box-shadow: inset 0 0 0 2px var(--accent);
+      box-shadow:
+        inset 0 0 0 2px var(--accent),
+        inset 0 -2px 0 var(--edge);
     }
   }
 

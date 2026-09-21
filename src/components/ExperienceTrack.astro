@@ -16,9 +16,16 @@ const { moments } = Astro.props;
 const tones = ["amber", "sky", "mint", "periwinkle"];
 // Cosmetic ruler timecodes, 15 "seconds" per clip; not a clock.
 const stamp = (i: number) => `00:00:${String(i * 15).padStart(2, "0")}:00`;
-// One squiggle per A1 cell; a polyline, not real audio.
-const wave =
-  "0,12 6,4 12,20 18,8 24,16 30,2 36,22 42,10 48,14 54,5 60,19 66,9 72,15 78,3 84,21 90,11 96,13 100,12";
+// A1 bars: 40 thin rects of varying height about the midline, from a tiny
+// seeded LCG so every build draws the same waveform. Decoration, not audio.
+const bars = (seed: number) => {
+  let x = seed;
+  const next = () => (x = (x * 1103515245 + 12345) % 2147483648) / 2147483648;
+  return Array.from({ length: 40 }, (_, i) => {
+    const h = 3 + Math.round(next() * 19);
+    return { x: i * 2.5 + 0.55, y: 12 - h / 2, h };
+  });
+};
 ---
 
 <div class="timeline">
@@ -44,14 +51,14 @@ const wave =
     <div class="row" aria-hidden="true">
       <div class="head">
         <span class="label">A1</span>
-        <span class="meta">notes</span>
+        <span class="meta">audio</span>
       </div>
       <div class="lane">
         {
           moments.map((_, i) => (
             <div class="audio" style={`--tone: var(--word-${tones[i]})`}>
               <svg viewBox="0 0 100 24" preserveAspectRatio="none" focusable="false">
-                <polyline points={wave} />
+                {bars(i + 1).map((b) => <rect x={b.x} y={b.y} width="1.4" height={b.h} />)}
               </svg>
             </div>
           ))
@@ -94,8 +101,8 @@ const wave =
     z-index: 2;
     display: flex;
     flex: 0 0 var(--head-w);
-    flex-direction: column;
-    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
     padding: 0.25rem 0.75rem;
     background-color: var(--bg-raised);
     border-right: 1px solid var(--line);
@@ -148,20 +155,14 @@ const wave =
     height: 1.5rem;
     padding: 0.25rem 0.5rem;
     color: var(--tone);
-    opacity: 0.35;
+    opacity: 0.4;
   }
 
   .audio svg {
     display: block;
     width: 100%;
     height: 100%;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.5;
-  }
-
-  .audio polyline {
-    vector-effect: non-scaling-stroke;
+    fill: currentColor;
   }
 
   /* 2px --accent line over every row, flag in the ruler, its left edge on
