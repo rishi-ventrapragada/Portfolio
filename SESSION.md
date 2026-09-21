@@ -92,6 +92,97 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 15.1
+
+### Last milestone completed
+
+**Projects: bigger frames, panel below, no year tag** (PRD §5.3). Grid
+minimum 20rem → 32rem (two 573px frames per row at 1280, was three at
+374px); the year tag is gone and the caption row is title + frame number;
+the detail panel no longer overlays the cover — it opens *below* the frame,
+attached to its bottom edge, out of grid flow, over the next row; the frame
+lift is 1.02 (was 1.04). Everything else from 15 unchanged: no client JS,
+`:focus-within`, `display: none` panel + quick links on no-hover devices,
+reduced motion, sprockets, numbering, `.planned`, no panel for Recurzn.
+
+Files: `ProjectFrame.astro` (156), `ProjectDetail.astro` (90),
+`ProjectLinks.astro` (85), `ProjectsSection.astro` (46). Four code commits:
+tag + grid; panel below; padding wrapper; opacity-only reveal; scroll
+cushion.
+
+### Decisions worth knowing before you touch this
+
+- **Opacity reveal, not height.** The first cut animated
+  `grid-template-rows: 0fr → 1fr`. Measured: on the first Tab into a
+  collapsed panel the browser scrolled the link into view while the panel
+  was 0px tall, then the growth pushed the link below the fold
+  (`linkInsideViewport: false`); the second Tab was fine because the panel
+  was already open. The panel is now always laid out at full height,
+  invisible at rest, so focus has a stable target.
+- **`scroll-margin-block: 2rem` on the links.** Even with a stable panel,
+  the browser scrolls the minimum and the frame's 1.02 lift then moves the
+  panel bottom ~6px back below the fold. The cushion absorbs it; the first
+  Tab now lands fully inside the viewport.
+- **Panel padding on an inner `.pad`, not as child margins.** `Pills` and
+  the links list set `margin: 0` with higher specificity, so margins on
+  children would have been lost.
+- **Frame number is in the caption row, right side** (where the tag was);
+  the owner said they would look at this live.
+- **Bottom of the viewport: accepted edge.** The panel extends the
+  document (`scrollHeight` grows past it), never clipped; hovered at the
+  fold it sits 146px below the edge until the user scrolls; keyboard focus
+  scrolls the link in by itself (panel bottom then 410px above the fold).
+  Flipping upward would need JS to know the frame's screen position.
+- **Cover untouched**: the element at the cover's centre is the `<img>` at
+  rest and expanded, opacity 1; its rect changes only by the 1.02 lift.
+- **Harness gotcha**: sample sibling rects only after `img.decode()` on the
+  lazy covers, or a cover finishing loading between samples reads as "the
+  sibling moved".
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.3** — rewritten: grid minimum, caption without the tag, the
+  panel-below mechanic, the opacity-vs-height note, the bottom-edge note.
+  **§10** — line 14. **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`verify15.mjs` (extended: panel geometry, cover centre, bottom edge, link
+in viewport) and `third.mjs` (waits for covers, asserts the panel opens):
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints. Client JS
+  unchanged (3839 B gzipped).
+- **Grid**: 2 columns at 1280, 1 at 375; no `.tag` in the DOM; caption
+  children `H3, P.number` on both frames.
+- **Hover KalaCart**: `matrix(1.02,…)`, z-index 2, shadow; panel opacity 1,
+  pointer-events auto, top on the frame's bottom edge, 183px tall; cover
+  centre is the `<img>`; **Recurzn's rect identical**. Hover Recurzn: no
+  transform, no panel. Mouse off: panel opacity 0, pointer-events none.
+- **Third frame** (throwaway, then removed, tree clean): row 1 KalaCart +
+  Recurzn, row 2 Throwaway at 1280; hovering row 1 opens its panel over
+  row 2 (`elementFromPoint` at row 2's top-left is KalaCart's panel) and
+  **both siblings' rects identical**; stacked at 375.
+- **Keyboard**: Tab → "Live site" (panel open, frame 1.02, link inside the
+  viewport, `:focus-visible`), Tab → "GitHub", Tab → footer Email. Enter
+  fires the click with `https://kalacart-website.vercel.app/`.
+- **Bottom edge**: see above.
+- **Reduced motion**: frame and panel `0s`; transform 1.02 and panel
+  opacity 1 in the same tick.
+- **375 touch**: panel `display: none`; quick links only; cover 301px in
+  a 375 viewport; tab stops are the two quick links; no horizontal
+  overflow.
+- Console clean. Screenshots reviewed: 1280 rest, hover-expanded,
+  bottom-edge hover and focus, keyboard-focus-expanded, reduced-motion
+  hover, 375 rest, three-frame grid and three-frame hover.
+- **Live**: [TODO — filled in after the deploy]
+
+### Known, open
+
+- `ExperienceTrack.astro` is at the 200-line cap.
+- 320px nav collision (standing constraint above).
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain.
+
 ## 2026-09-21 — increment 15
 
 ### Last milestone completed
