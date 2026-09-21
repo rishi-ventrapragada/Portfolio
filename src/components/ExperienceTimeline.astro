@@ -1,0 +1,162 @@
+---
+// Experience section (PRD §5.11): an NLE-style monitor above a track of clip
+// buttons. Each clip is one moment; the monitor shows the committed one.
+// Body sentences are the owner's, verbatim. Clip keywords are words taken
+// from those sentences, not new copy. KalaCart's cover is the projects
+// collection's real screenshot, reused through <Image> — no new asset.
+// One frame = ExperienceFrame.astro; behaviour = scripts/experience-timeline.ts.
+import { getEntry } from "astro:content";
+import ExperienceFrame from "./ExperienceFrame.astro";
+
+const kalacart = await getEntry("projects", "kalacart");
+if (!kalacart) throw new Error("projects/kalacart is missing");
+
+interface Moment {
+  id: string;
+  /** Shown in the monitor and as the first half of the clip label. */
+  year: string;
+  /** One word from the sentence; the clip reads `${year} · ${keyword}`. */
+  keyword: string;
+  body: string;
+  /** Not shipped yet: the clip takes the shared `.planned` treatment. */
+  planned?: boolean;
+  cover?: ImageMetadata;
+  coverAlt?: string;
+}
+
+const moments: Moment[] = [
+  { id: "web", year: "2025", keyword: "JavaScript", body: "2025 — Learnt C, HTML, CSS and JavaScript" },
+  { id: "python", year: "2025", keyword: "Python", body: "2025 — Learnt Python and MySQL" },
+  {
+    id: "kalacart",
+    year: "2026",
+    keyword: "KalaCart",
+    body: "2026 — Built KalaCart: AI Market Linkage for Artisans",
+    cover: kalacart.data.cover,
+    coverAlt: `${kalacart.data.title} project cover`,
+  },
+  {
+    id: "recurzn",
+    year: "Now",
+    keyword: "Recurzn",
+    body: "2026 — Building Recurzn, a cross-platform Self-Improvement App",
+    planned: true,
+  },
+];
+---
+
+<section
+  class="experience shell"
+  id="experience"
+  aria-labelledby="experience-heading"
+  data-experience
+>
+  <p class="label eyebrow">Journey</p>
+  <h2 id="experience-heading" class="heading">Experience</h2>
+
+  {/* Every frame is in the HTML and stacked in one grid cell, so the panel is
+      as tall as its tallest frame and never resizes on a swap. The first is
+      active from the server, so the section reads without JavaScript. */}
+  <div class="monitor" data-monitor>
+    {moments.map((moment, i) => <ExperienceFrame {...moment} active={i === 0} />)}
+  </div>
+
+  {/* Real buttons: keyboard-focusable, Enter/Space activate. The visible
+      label is the accessible name (year + keyword); the verbatim sentence is
+      the description, so a screen reader hears both without a live region. */}
+  <div class="track" role="group" aria-label="Moments" data-track>
+    {
+      moments.map((moment, i) => (
+        <button
+          type="button"
+          class:list={["clip", "label", { planned: moment.planned }]}
+          data-clip={moment.id}
+          aria-pressed={i === 0 ? "true" : "false"}
+          aria-describedby={`experience-${moment.id}`}
+        >
+          {moment.year} &middot; {moment.keyword}
+        </button>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  import { initExperience } from "../scripts/experience-timeline";
+
+  const root = document.querySelector<HTMLElement>("[data-experience]");
+  if (root) initExperience(root);
+</script>
+
+<style>
+  .experience {
+    padding-block: var(--rhythm);
+    border-top: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: var(--size-h2);
+  }
+
+  /* The frames (ExperienceFrame.astro) all take grid-area 1 / 1 here. */
+  .monitor {
+    display: grid;
+    min-height: 14rem;
+    padding: 1.5rem;
+    background-color: var(--bg-raised);
+    border: 1px solid var(--line);
+  }
+
+  /* One row, scrolling sideways on narrow screens. The inset keeps a clip's
+     focus ring (2px + 3px offset) inside the scroll box instead of clipped. */
+  .track {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.375rem;
+    overflow-x: auto;
+  }
+
+  /* Pill conventions from Pills.astro (mono, 1px --line, 2px radius,
+     transparent ground); active takes --accent like the site's other active
+     states. Layered so the shared, unlayered `.planned` utility in global.css
+     wins its border-style and opacity over this scoped rule without
+     !important. */
+  @layer components {
+    .clip {
+      flex: 0 0 auto;
+      padding: 0.5rem 0.875rem;
+      line-height: 1.2;
+      color: var(--fg);
+      background-color: transparent;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition:
+        color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .clip:hover {
+      color: var(--accent);
+    }
+
+    .clip[aria-pressed="true"] {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clip {
+      transition: none;
+    }
+  }
+</style>

@@ -158,6 +158,16 @@ img {
   padding-inline: var(--gutter);
 }
 
+/* Planned, not shipped: the element steps back and its edge goes dashed
+   (PRD §5.3, §5.11). Unlayered on purpose: a component keeps its own defaults
+   in @layer components so this utility wins border-style and opacity
+   without !important. Shared by the Experience clip and any future planned
+   element. */
+.planned {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
