@@ -158,7 +158,10 @@ monitor, 149 lines), `ExperienceFrame.astro` (cqh cover cap, 158), new
   an already-focused button fires no event — blur first; sample playhead
   positions ≥ 260ms after a scroll so the 200ms glide has finished; the
   13.1 scroll-hover regression must park the cursor at a zone-0 scroll
-  position now, or the scroll itself legitimately commits zone 1.
+  position now, or the scroll itself legitimately commits zone 1. And a
+  `scrollTo` followed by a `click()` in the *same frame* lets the scrub's
+  first rAF commit (zone 0) land after the click — a 16ms window no hand
+  can hit, but the harness did once on the live run; settle 300ms first.
 
 ### Doc edits this session (CLAUDE.md §7)
 
@@ -212,7 +215,16 @@ re-run for everything from 13.1) at 1280×900 and 375×667:
   375 (KalaCart 16px from the top, 37px from the bottom); console clean.
 - Screenshots reviewed: 1280 in all four zones and after release (Projects
   entering under the timeline), 375 zone 1, 375 KalaCart.
-- **Live**: [TODO — filled in after the deploy]
+- **Deployed and aliased.** Git integration built
+  `rishi-ventrapragada-fuegmzj6k-rishiventra.vercel.app` (Ready);
+  `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it, and the
+  vanity HTML is byte-identical (sha1) to the deployment, to the
+  `portfolio-gamma-lake` production domain and to the local `dist`. Both
+  harnesses and the no-JS check re-run against the vanity URL: every number
+  above identical — scrub sequences and zone edges at both widths, release
+  into `#projects`, wheel, click-while-pinned, hover revert, keyboard at
+  5 / 40 / 95 %, reduced motion `0s`, no-JS un-pinned (monitor 540 / 400),
+  13.1 suite all green, console clean.
 
 ### Known, open
 
