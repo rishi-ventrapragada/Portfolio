@@ -80,6 +80,86 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 11
+
+### Last milestone completed
+
+Fixed non-uniform pacing and a longer dwell. The uniform `k × dwell / 24`
+slot is gone; `src/scripts/boot-schedule.ts` holds a seven-row segment table
+(linear within each segment) that opens the 24 slots at ~180ms spacing with
+three deliberate holds — **700ms at step 6 (25%), 800ms at step 14 (58%),
+600ms at step 20 (83%)**. Dwell 4200 → 6000ms, grace cap 6500 → 9000ms.
+Commit `7bcd4fd`.
+
+Untouched, as briefed: readiness, floor-not-round, t=0 arming, the no-snap
+grace cap, skip-snaps-to-full, the status stages (still steps 8 / 18), the
+fade path, all five first-paint bypasses and the deep-link skip.
+
+### Decisions worth knowing before you touch this
+
+- **Segment table, not a 25-entry array.** `[{to, at}]` rows make the three
+  pauses visible as the one-step rows (`6→7 @1780`, `14→15 @3840`,
+  `20→21 @5430`); the fast climbs are derived. `slotAt(step, dwell)` scales
+  the table to the dwell the `.astro` passes, so `runBootSequence(6000, 9000)`
+  is still the single place timing is set. Change the shape in the table,
+  the length in the component.
+- **Fixed, not random.** The owner's call: the never-ahead-of-truth harness
+  compares displayed step to true readiness on every frame across repeated
+  runs; a random schedule would only add noise, and this plays once a session.
+- **Minimum hold is now per slot.** The 75% guard against a hitch collapsing
+  two steps used to be 75% of the one uniform slot; it is now 75% of the gap
+  `slotAt(displayed + 1) − slotAt(displayed)`, so it also guarantees a pause
+  cannot be cut short by a late frame. Measured: pauses land within 2ms.
+- **`slotOpen` scans, not divides.** Highest step whose slot has opened, by a
+  25-iteration loop per frame — trivial cost, and it keeps the table the only
+  source of truth.
+- At 200kb/s `load` now arrives (7.1s) *before* the 9s cap, where at 6.5s it
+  used to hit the cap. So that condition now ends at 100% one frame after
+  `load`, not at 96% on the cap. Not a regression — the cap is later.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.10** paced-reveal paragraph rewritten around the table; timing,
+  minimum-hold wording, budget and measured lifetimes updated. **PRD §8**
+  overlay-duration note. **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+Same CDP harness as increment 10 (session scratchpad, `t1`–`t4`, timing runs
+one at a time). `t2` gained a pause assertion: holds at 6 / 14 / 20 must each
+be ≥ 3× the median of the other holds.
+
+- **All five first-paint cases + deep link** pass unchanged.
+- **Never ahead of truth:** step ≤ floor(readiness × 24) on every frame,
+  fast / 200 / 60 — 0 violations. **Status ≤ stage(displayed step):** 0.
+- **Pauses visible:** step 6 **702 / 701 / 700ms**, step 14 **799 / 800 /
+  800ms**, step 20 **600 / 599 / 600ms** (fast / 200 / 60), neighbours
+  166–201ms, fast-step median 184ms. 0 pause points under 3× median.
+- **Discrete:** 25 distinct steps fast; 24 at 60kb/s (cap); single-value
+  insets, ring = core − 4, band = core − 8 at every step.
+- **Stage swaps:** line 2 at 2.14s (step 8), line 3 at 4.61s (step 18);
+  fade-outs ~150ms; 0 overlapping fades.
+- **Lifetime:** 6.44s unthrottled; 7.5s at 200kb/s (`load` at 7.1s, `100%`
+  the frame after); 9.42s at 60kb/s (cap, 96%).
+- **Grace cap:** three resources stalled, `readyState` stuck at `interactive`,
+  last readout 96%, overlay gone 9571ms after nav (expected ~9540).
+- **Late checkpoint:** hero held to 7.2s → `100%` at `load` + 16ms, removed
+  416ms later.
+- **Client JS: 2167 B gzipped, all inline** (cap 40 KB; inc 10 was 2005 B).
+- Build + `astro check` 0/0/0. Longest file 190 (`boot-preloader.ts`).
+- **Deployed and aliased.** Git integration built `1pkumdl9f` (production,
+  Ready); `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it.
+  Verified on the vanity URL itself: HTML byte-identical to the deployment,
+  `(6e3,9e3)` and the 1780 / 3840 / 5430 pause rows in the served page, and
+  a live CDP frame recording on the vanity origin — 25 steps, 0 step / 0
+  stage violations, pauses 700 / 801 / 603ms, gone at 6.42s.
+
+### Still open
+
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain — see
+  the standing constraint at the top.
+
 ## 2026-09-21 — increment 10
 
 ### Last milestone completed
