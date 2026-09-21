@@ -32,7 +32,7 @@ src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
   components/                 Nav, Hero, Wordmark, About, TechStack, Pills,
                               ProjectsSection, ProjectFrame, ProjectDetail,
-                              ProjectLinks, CurrentlyBuilding,
+                              ProjectLinks,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
                               ExperienceClip,
                               Footer, BootPreloader, BootSquare, AccentToggle (dev only)
