@@ -23,16 +23,21 @@ const { summary, stack, links } = Astro.props;
 
 <div class="detail">
   <div class="inner">
-    {summary && <p class="summary">{summary}</p>}
-    {stack && <Pills items={stack} label="Stack" />}
-    <ProjectLinks links={links} variant="full" />
+    <div class="pad">
+      {summary && <p class="summary">{summary}</p>}
+      {stack && <Pills items={stack} label="Stack" />}
+      <ProjectLinks links={links} variant="full" />
+    </div>
   </div>
 </div>
 
 <style>
-  .inner {
+  /* Padding lives on .pad, inside the clipped box, so the collapsed
+     height is truly 0 and the children keep their own margins. */
+  .pad {
     display: grid;
     gap: 1rem;
+    padding: 1.25rem;
   }
 
   .summary {
@@ -69,19 +74,6 @@ const { summary, stack, links } = Astro.props;
       border: 1px solid var(--line);
       border-top: 0;
       box-shadow: 0 24px 48px color-mix(in srgb, var(--monitor-bg) 60%, transparent);
-    }
-
-    /* Padding inside the clipped box, so the collapsed height is truly 0. */
-    .inner > :global(*) {
-      margin-inline: 1.25rem;
-    }
-
-    .inner > :global(:first-child) {
-      margin-top: 1.25rem;
-    }
-
-    .inner > :global(:last-child) {
-      margin-bottom: 1.25rem;
     }
 
     :global([data-expandable]:hover) .detail,
