@@ -174,7 +174,18 @@ in viewport) and `third.mjs` (waits for covers, asserts the panel opens):
 - Console clean. Screenshots reviewed: 1280 rest, hover-expanded,
   bottom-edge hover and focus, keyboard-focus-expanded, reduced-motion
   hover, 375 rest, three-frame grid and three-frame hover.
-- **Live**: [TODO — filled in after the deploy]
+- **Deployed and aliased.** Git integration built
+  `rishi-ventrapragada-h9xg0xblr-rishiventra.vercel.app` (Ready);
+  `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it, and the
+  vanity HTML is byte-identical (sha1) to the deployment, to the
+  `portfolio-gamma-lake` production domain and to the local `dist` (no
+  `.tag`, one `.pad` panel). `verify15.mjs` re-run against the vanity URL:
+  every number above identical — two columns, cover centre is the `<img>`
+  while expanded, panel on the bottom edge at 183px, sibling rect unchanged,
+  first Tab lands inside the viewport, bottom-edge focus scrolls the link
+  in, reduced motion instant, 375 touch quick links only, console clean.
+  The third-frame test cannot run live (it needs the throwaway entry in
+  the build); its local result stands.
 
 ### Known, open
 
