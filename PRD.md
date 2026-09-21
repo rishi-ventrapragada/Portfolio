@@ -48,6 +48,11 @@ Dark editorial. Magazine-cover hero (full-width wordmark behind a cutout subject
 --line:      #2a2b30   hairlines, dividers
 --heading:   #f2f2f2   large headings and wordmarks
 --boot-square-bg: #0b0c0e   boot preloader square backdrop (§5.10) — the only place it is used
+--monitor-bg:  #000000   Experience monitor (§5.11) — the one pure-black surface, chosen so the NLE monitor reads as a screen; nothing else may use it
+--timeline-bg: #0b0c0e   Experience timeline ground (§5.11), between the monitor and --bg
+
+Small palette (used by the Experience clips, §5.11; coral unused):
+  --word-amber: #ffb454; --word-coral: #ff8f6b; --word-sky: #6ec9f5; --word-mint: #4ade80; --word-periwinkle: #8ea9ff
 
 Accent, switched by data-accent on <html>:
   crimson (default): --accent: #ff3b5c; --accent-soft: rgba(255,59,92,0.18)
