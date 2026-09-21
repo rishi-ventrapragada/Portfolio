@@ -186,7 +186,16 @@ fine pointer and 375×667 touch-emulated), `third.mjs` for the grid test:
 - Console clean. Screenshots reviewed: 1280 rest, hover-expanded KalaCart,
   hover on Recurzn (static), keyboard-focus-expanded, reduced-motion hover,
   375 rest, sprocket corners at both widths, three-frame grid at both.
-- **Live**: [TODO — filled in after the deploy]
+- **Deployed and aliased.** Git integration built
+  `rishi-ventrapragada-3z65cnhz9-rishiventra.vercel.app` (Ready);
+  `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it, and the
+  vanity HTML is byte-identical (sha1) to the deployment, to the
+  `portfolio-gamma-lake` production domain and to the local `dist` (two
+  frames, no `.card` markup). `verify15.mjs` and `verify14.mjs` re-run
+  against the vanity URL: every number above identical — hover scale 1.04
+  with the sibling rect unchanged, Tab into the panel expands it, Enter
+  fires the right href, reduced motion instant, 375 touch shows only the
+  quick links, Experience still releases into `#projects`, console clean.
 
 ### Known, open
 
