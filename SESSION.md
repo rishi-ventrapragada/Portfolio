@@ -198,7 +198,19 @@ session scratchpad, headless Chrome over CDP at 1280×900 and 375×667:
 - **Screenshots reviewed**: before (increment 14) vs after at 1280 and 375;
   2× close-ups of the timeline strip at both widths, of the two textures
   side by side, of the A1 bars and the nav hairline.
-- **Live**: [TODO — filled in after the deploy]
+- **Deployed and aliased.** Git integration built
+  `rishi-ventrapragada-muhmg704q-rishiventra.vercel.app` (Ready, 17s);
+  `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it, and the
+  vanity HTML is byte-identical (sha1) to the deployment, to the
+  `portfolio-gamma-lake` production domain and to the local `dist`. Both
+  harnesses and the no-JS check re-run against the vanity URL: every number
+  above identical — pin children, rows 22 / 39 / 29, monitor 744 / 496,
+  anchor landing at 80px with the pin not engaged, 375 labels one line with
+  ≥ 42px spare, scrub sequences and edges, release into `#projects`, wheel,
+  click-while-pinned, hover revert, keyboard, reduced motion `0s`, no-JS
+  un-pinned with the heading in flow (monitor 540 / 400), 13.1 suite green,
+  console clean. Note for the next session: `vercel ls` prints its table on
+  stderr — a poll that silences stderr sees nothing.
 
 ### Known, open
 
