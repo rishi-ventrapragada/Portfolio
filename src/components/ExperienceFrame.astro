@@ -62,7 +62,7 @@ const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
     position: relative;
     display: grid;
     place-items: center;
-    padding: 2rem var(--gutter) 3rem;
+    padding: 1rem var(--gutter) 2.5rem;
     opacity: 0;
     visibility: hidden;
     transition:
@@ -78,11 +78,19 @@ const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
 
   .inner {
     display: grid;
-    gap: 1.5rem;
+    gap: 1rem;
     width: min(100%, 64rem);
   }
 
   @media (min-width: 768px) {
+    .frame {
+      padding-block: 2rem 3rem;
+    }
+
+    .inner {
+      gap: 1.5rem;
+    }
+
     .frame[data-cover] .inner {
       grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
       align-items: center;
@@ -113,16 +121,25 @@ const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
     color: var(--fg);
   }
 
-  /* Never taller than the monitor: width follows the column, height is
-     capped, and the WebP keeps its ratio inside that box. */
+  /* Never taller than the monitor: the cap is in cqh of the monitor (a
+     size container in ExperienceTimeline.astro), so it holds on a 300px
+     phone monitor as well as a 540px desktop one; the WebP keeps its
+     ratio inside that box. Stacked under the text it gets 36% of the
+     height, beside the text from 768px it gets 70%. */
   .cover img {
     display: block;
     width: auto;
     max-width: min(100%, 560px);
     height: auto;
-    max-height: 30vh;
+    max-height: 36cqh;
     margin-inline: auto;
     object-fit: contain;
+  }
+
+  @media (min-width: 768px) {
+    .cover img {
+      max-height: 70cqh;
+    }
   }
 
   .timecode {

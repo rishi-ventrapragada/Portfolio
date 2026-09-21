@@ -1,10 +1,12 @@
-// Experience timeline behaviour (PRD §5.11). Click and keyboard focus
-// *commit* a clip: it becomes the pressed one and the monitor shows its
-// frame. Hover only *previews* a frame, on fine pointers, and the track
-// reverts to the committed clip on leave. The playhead follows whatever the
-// monitor shows. No aria-live: each clip's accessible name and description
-// already carry what the monitor shows.
+// Experience timeline behaviour (PRD §5.11). Scroll through the pinned
+// section (experience-scrub.ts), a click or keyboard focus all *commit* a
+// clip through the one `commit` below: it becomes the pressed one and the
+// monitor shows its frame. Hover only *previews* a frame, on fine pointers,
+// and the track reverts to the committed clip on leave. The playhead follows
+// whatever the monitor shows. No aria-live: each clip's accessible name and
+// description already carry what the monitor shows.
 import { initPlayhead } from "./experience-playhead";
+import { initScrub } from "./experience-scrub";
 
 export function initExperience(root: HTMLElement): void {
   const clips = [...root.querySelectorAll<HTMLButtonElement>("[data-clip]")];
@@ -38,6 +40,14 @@ export function initExperience(root: HTMLElement): void {
     clip.addEventListener("click", () => commit(id));
     clip.addEventListener("focus", () => commit(id));
   }
+
+  // Scroll drives the same commit; a click or focus still wins at once and
+  // the next zone change takes over again.
+  initScrub(
+    root,
+    clips.map((clip) => clip.dataset.clip ?? ""),
+    commit,
+  );
 
   // Scrub on hover only where a hover exists (CLAUDE.md §4): a touch pointer
   // would otherwise leave a stale preview after every tap.
