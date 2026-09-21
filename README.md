@@ -30,7 +30,7 @@ npm run preview  # serve the production build locally
 ```
 src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
-  components/                 Nav, Hero, Wordmark, About, TechStack, Pills,
+  components/                 Nav, Hero, Wordmark, About, AboutPanel, TechStack, Pills,
                               ProjectsSection, ProjectFrame, ProjectDetail,
                               ProjectLinks,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
@@ -39,6 +39,7 @@ src/
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
+  lib/is-url.ts               the href guard shared by ProjectLinks and Footer
   pages/index.astro           the whole site: one page, anchored sections
   scripts/                    boot-*.ts, hero-dissolve.ts, nav.ts,
                               experience-timeline.ts, experience-scrub.ts,

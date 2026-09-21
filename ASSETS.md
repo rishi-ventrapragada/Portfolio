@@ -6,21 +6,24 @@ material that must be replaced before launch.
 
 ---
 
-## About page photo `[PLACEHOLDER]`
+## About comic panels `[PLACEHOLDER]`
 
 | | |
 | --- | --- |
-| Source | None — CSS only, no file |
+| Source | None — CSS only, no files |
 | Licence | N/A |
-| Date | 2026-09-19 |
+| Date | 2026-09-21 |
 
-There is **no image file**. `src/components/About.astro` renders a bordered
-`--bg-raised` box at `aspect-ratio: 3/4` with centred `[TODO: photo]` in mono
-`--fg-muted`. Unlike the KalaCart cover there is no PNG to optimise, so nothing
-goes through `<Image>` until a real photo arrives.
+There are **no image files**. `src/components/AboutPanel.astro` renders each of
+the five panels as a solid fill (a palette word mixed 60% into `--bg-raised`)
+with a centred `[PANEL N — placeholder art]` mono tag, and every caption box
+reads `[TODO: panel N dialogue]`. Nothing goes through `<Image>` until real
+art arrives. This entry replaced the increment 6 "About page photo"
+placeholder (a 3:4 `[TODO: photo]` box) in increment 16.
 
-**[TODO: replace with a real photo.]** When it lands, swap the box for an
-`<Image>` and log the file here.
+**[TODO: owner to supply five panel artworks and five captions.]** When they
+land, swap each fill for an `<Image>` with explicit width and height, put the
+owner's dialogue in the captions verbatim, and log the files here.
 
 ---
 

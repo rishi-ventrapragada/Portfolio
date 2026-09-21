@@ -25,11 +25,11 @@ One page, `/`, with anchored sections in this order. The nav (§5.1) links to th
 | Section | Anchor | Spec |
 | --- | --- | --- |
 | Hero | — (the nav mark's `#top` scrolls here) | §5.2 |
-| About: photo, story, GDG line | `#about` | §5.6 |
+| About: comic page — five placeholder panels, clock-cycled colour grade | `#about` | §5.6 |
 | Tech stack: six category cards of tags | `#skills` | §5.6 |
 | Experience: pinned, scroll-scrubbed monitor + clip timeline of four moments | `#experience` | §5.11 |
-| Projects: film-strip contact sheet, one frame per project, then "currently building" | `#projects` | §5.3, §5.4 |
-| Contact: the footer | `#contact` | §5.8 |
+| Projects: film-strip contact sheet, one frame per project | `#projects` | §5.3 |
+| Contact: the footer — credits roll, then the links | `#contact` | §5.8 |
 
 No `/projects` index, no case study pages, no `/community` page. A Community section is `[later]` (§5.7).
 
@@ -144,11 +144,8 @@ The Projects section (`#projects`, after Experience per §3) is a **film-strip c
 
 **No case study, no demo video** (removed in increment 6). The links are the only way out of a frame; the title is plain text.
 
-### 5.4 Currently building strip `[now, partial]`
-**Increment 2 ships a single static line**, copy hardcoded in `CurrentlyBuilding.astro`:
-"Recurzn — a cross-platform life tracker with a voice assistant."
-
-**Deferred to a later increment:** the horizontal marquee, the `src/content/now.json` source (project, one-line status, date), the pause-on-hover behaviour and the reduced-motion static fallback. A one-entry JSON collection would be overhead with no payoff until the marquee exists.
+### 5.4 Currently building strip `[removed]`
+Removed in increment 16. Increment 2's single static line ("Recurzn — a cross-platform life tracker with a voice assistant.", hardcoded in `CurrentlyBuilding.astro`) never grew into the marquee and the owner cut it; the component is deleted and `src/content/now.json` was never created. What Rishi is building now still shows as the planned Recurzn clip in Experience (§5.11) and the planned Recurzn frame in Projects (§5.3). The marquee idea is in git history if the strip ever returns.
 
 ### 5.5 Case study page `[removed]`
 Removed in increment 6 with the move to a single page. The `/projects/[slug]` route, `CaseStudyMeta.astro`, `CaseStudyToc.astro` and the KalaCart MDX body (Context, What I built, Decisions, What broke, Outcome) are gone from the repo and the public site; the security-disclosure prose in particular is no longer published. `/projects/kalacart/` redirects to `/#projects`. Everything is in git history if a case study ever returns.
@@ -156,7 +153,13 @@ Removed in increment 6 with the move to a single page. The `/projects/[slug]` ro
 ### 5.6 About and Tech stack `[now]`
 Two sections on the single page, directly under the hero.
 
-**About (`#about`)**: h2 "About"; a 240px CSS photo placeholder at 3:4 (`role="img"`, `[TODO: photo]` in mono — logged in ASSETS.md) beside the owner's story paragraph, verbatim; below the story, the GDG one-liner as small plain mono text. No top rule: the hero subject fades into this section.
+**About (`#about`)**: a comic page (increment 16). Eyebrow "Origin story" and h2 "About" in the shell (`About.astro`); below them a full-bleed page of five panels that runs viewport edge to edge like the Experience monitor. One panel = `AboutPanel.astro`, a `<figure>`: a `role="img"` art block and a `<figcaption>` caption box in the panel's top-left corner. From 768px the grid is four columns by two rows at a 2:1 aspect ratio (cells roughly square), the first panel the establishing shot spanning the left half; below 768px a single column with every panel at 4:3, the establishing panel first. Gutters are a 0.75rem gap and outer padding of `--bg` between 1px `--line` panel borders — no new ink token, no hand-drawn borders.
+
+**Structure and mechanic only.** The art is a solid fill (each palette word mixed 60% into `--bg-raised`: amber, sky, mint, periwinkle, coral) tagged `[PANEL N — placeholder art]` in mono, and every caption is a visible `[TODO: panel N dialogue]`. The dialogue is the owner's own narrative and is never invented (CLAUDE.md §7). The placeholders are logged in ASSETS.md.
+
+**Colour grade.** One CSS animation on the grid cycles `filter` through full colour → `grayscale(1)` → a warm duotone (`sepia(1) saturate(1.3) hue-rotate(-15deg)`) and back: three 5s holds with ~0.6s crossfades in a 15s loop, so every panel shifts together. Clock-based, never scroll-tied (owner's decision); no script. Every keyframe lists the same four filter functions in the same order so the browser interpolates instead of snapping. **Reduced motion freezes on full colour**: the animation is removed and the filter stays at `none` — a recurring filter change counts as motion like everything else on the site (CLAUDE.md §4). Measured in increment 16: the filter cycles across nine 1.5s samples with motion allowed and reads `none` on every sample with reduced motion forced.
+
+No top rule: the hero subject fades into this section. The 240px photo placeholder, the story paragraph and the GDG line from increment 6 are gone from the page; the GDG line returns with the Community section (§5.7).
 
 **Tech stack (`#skills`)**: eyebrow "Toolkit", h2 "Tech stack" (`TechStack.astro`, increment 7). Six category cards — `--bg-raised`, 1px `--line` — in a grid that lands three across on desktop, two on a tablet, one on a phone (`auto-fit`, 20rem floor). Each card: the category name as an uppercase mono `--accent` label, then its items as tag pills (`Pills.astro`: mono 12px, not uppercased, 1px `--line` border, `--fg` text, transparent ground). Order and items, verbatim: Languages (C, Python, Java, HTML, CSS, JavaScript, TypeScript, Dart); Frameworks (Flutter, Astro, React, Next.js, Node.js, Django, FastAPI, Tailwind CSS, Vite); AI (Claude, Claude Code, Gemini, GPT-6 Astra, Codex, Ollama, Open Router); Tools (Notion, Canva, Figma); Platforms (Supabase, Firebase, Vercel, Render); Cloud (Google Cloud, AWS). Below the grid, a "Currently learning" `--fg-muted` label with muted pills: Docker, Kubernetes. **Nothing in the section links anywhere** — it is a showcase, not the old "shipped with" list, so the per-skill `#projects` links from increment 6 are gone. `SkillGroups.astro` and `Skills.astro` were deleted.
 
@@ -165,8 +168,10 @@ Cut in increment 6, not deferred: the "How I work" paragraph and the `Timeline.a
 ### 5.7 Community `[later]`
 GDG on Campus VJIT production team work, event media, links. A section on the single page, not a route (§3).
 
-### 5.8 Footer and contact `[now, minimal]`
-Email link (`mailto`), GitHub, LinkedIn, résumé. Mono labels. No form at launch.
+### 5.8 Footer and contact `[now]`
+Contact as a credits roll (`Footer.astro`, increment 16). Still the `<footer>` landmark and still `#contact` for the nav. First a tall, centred block set like film end credits — the owner's line split into rows: "RISHI VENTRAPRAGADA" as an uppercase display title (`--size-h2`, 0.08em tracking), then role over name for "Built with — Astro · Tailwind · Vercel" (Supabase swapped for Vercel at plan review: it is not in this site) and "Directed, developed & edited by — Rishi"; roles are accent mono labels, names display type at `clamp(1.25rem, 2.2vw, 1.75rem)`, 2.5rem between credits, line-height 2, `--rhythm` padding above and below. Plain flow content: it scrolls with the page, nothing pinned, no script (measured: the footer's top moves 500px for a 500px scroll).
+
+Below the roll, "Get in touch" and the links, centred: GitHub (`https://github.com/rishi-ventrapragada`), LinkedIn (`https://www.linkedin.com/in/rishi-ventrapragada`), Gmail (`mailto:rishiventrapragada23@gmail.com`). Values go through the shared `isUrl` guard — `src/lib/is-url.ts`, moved out of `ProjectLinks.astro` in increment 16 and extended to accept `mailto:` — so only an http(s) URL or a mailto address becomes an `<a>`; a `[TODO]` value would render as mono text, never an href. Then the résumé link as built (`/resume.pdf`, outside the guard because a root-relative path is not a URL to it; the PDF is still pending, §7). Last line "© {year} Rishi", the year from `new Date()`. Mono labels throughout. No form at launch.
 
 ### 5.9 Dev accent toggle `[now, dev only]`
 Fixed 28px pill bottom-right, rendered only when `import.meta.env.DEV`, flips `data-accent` between crimson and violet, remembers in localStorage. Removed once a final accent is chosen.
@@ -268,7 +273,7 @@ links?: { live?: string, repo?: string }   plain strings; only http(s) values re
 cover: image()                       relative to the entry file; a planned entry uses a placeholder (§7)
 order: number
 ```
-A `superRefine` enforces "required unless planned" at build time, so a live or in-progress frame cannot ship without a summary and stack (CLAUDE.md §7). `status` is data only — nothing prints it; "planned" dims and dashes the frame (§5.3). `role` and `video` were removed with the case study. `src/content/now.json` (§5.4) is still deferred.
+A `superRefine` enforces "required unless planned" at build time, so a live or in-progress frame cannot ship without a summary and stack (CLAUDE.md §7). `status` is data only — nothing prints it; "planned" dims and dashes the frame (§5.3). `role` and `video` were removed with the case study. `src/content/now.json` was never created; the strip it would have fed was removed in increment 16 (§5.4).
 
 ## 7. Assets
 
@@ -301,7 +306,7 @@ A `superRefine` enforces "required unless planned" at build time, so a live or i
 4. `[dropped]` Life OS and AEGIS case studies, demo videos. Case studies no longer exist (§5.5); further projects are cards (§5.3).
 5. `[done, superseded by 6]` About page. Merged into the single page as the About and Skills sections.
 6. `[done]` Single-page restructure: anchor nav, About and Skills sections under the hero, one project card, case study removed, MDX and ClientRouter dropped, old routes redirected. Résumé PDF still pending from the owner.
-7. `[next]` "Currently building" strip (marquee + `now.json`). OG image and analytics.
+7. `[dropped]` "Currently building" strip (marquee + `now.json`) — the static line was removed in increment 16 (§5.4). OG image and analytics stay `[next]`.
 8. `[later]` Community section, external component adoption (per CLAUDE.md §6), reference-site pattern pass.
 9. `[done]` Increment 13: Experience section (§5.11) and the fourth nav anchor with the phone step-down (§5.1). Increments 7–12 (tech stack, progress bar, boot preloader) are recorded in §5.1, §5.6 and §5.10 rather than here.
 10. `[done]` Increment 13.1: Experience visual rebuild (§5.11) — full-bleed black monitor over a ruler / V1 / A1 timeline with a measured playhead; content and accessibility unchanged from increment 13.
@@ -309,6 +314,7 @@ A `superRefine` enforces "required unless planned" at build time, so a live or i
 12. `[done]` Increment 14.1: Experience heading moved out of the pin, timeline slimmed to 90px, monitor takes the pinned viewport; the sentence leads the monitor (no keyword heading); A1 bar waveform, `audio` label, flat clip fill (§5.11).
 13. `[done]` Increment 15: Projects as a film-strip contact sheet (§5.3) — sprocket frames in an auto-fill grid, hover / focus expand on fine pointers, quick links on no-hover devices, `ProjectCard.astro` removed.
 14. `[done]` Increment 15.1: Projects frames two per row, no year tag, detail panel opens below the frame (opacity reveal, cover untouched, siblings unmoved), 1.02 lift (§5.3).
+15. `[done]` Increment 16: Currently building strip removed (§5.4); About rebuilt as a full-bleed comic page of five placeholder panels with a clock-cycled colour grade, frozen on full colour under reduced motion (§5.6); footer rebuilt as a credits roll over guarded contact links, `isUrl` shared from `src/lib/is-url.ts` (§5.8).
 
 ## 11. Open decisions
 

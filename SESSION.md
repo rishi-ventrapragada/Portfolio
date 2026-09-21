@@ -92,6 +92,125 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 16
+
+### Last milestone completed
+
+Three independent pieces, one commit each, plus this docs commit:
+
+- **A — Currently building strip removed** (PRD §5.4 `[removed]`).
+  `CurrentlyBuilding.astro` deleted, its import and `<CurrentlyBuilding />`
+  gone from `index.astro`, README list updated. No data file existed
+  (`now.json` was only ever deferred). Spacing: the strip carried its own
+  top rule and padding; Projects keeps its rule and the footer's rule now
+  closes `<main>`, so nothing else assumed it.
+- **B — About as a comic page** (PRD §5.6). `About.astro` (116 lines) +
+  new `AboutPanel.astro` (94). Eyebrow "Origin story" + h2 in the shell;
+  five panels full-bleed, 4×2 grid at 2:1 from 768px with panel 1 spanning
+  the left half, single column of 4:3 panels below. Art = palette fills
+  (`color-mix` 60% into `--bg-raised`, all five `--word-*` now used;
+  comment in `global.css` updated), tags `[PANEL N — placeholder art]`,
+  captions `[TODO: panel N dialogue]`. One `@keyframes grade` on the grid,
+  15s loop, three 5s holds (colour → grayscale → warm duotone), no script.
+  `prefers-reduced-motion: reduce` → `animation: none` → filter `none`.
+- **C — Footer as a credits roll** (PRD §5.8). Still `<footer id="contact">`.
+  Title "RISHI VENTRAPRAGADA", credits "Built with — Astro · Tailwind ·
+  Vercel" and "Directed, developed & edited by — Rishi"; then GitHub,
+  LinkedIn (`www.` form), Gmail (mailto) through the guard, the résumé link
+  as built, "© 2026 Rishi". `isUrl` moved to `src/lib/is-url.ts` (new
+  folder), shared with `ProjectLinks.astro`, and now accepts `mailto:`.
+
+### Decisions worth knowing before you touch this
+
+- **Reduced motion freezes the grade on full colour, not grayscale.**
+  Judgment call, stated in the report: a recurring filter change is motion
+  (CLAUDE.md §4), so the animation is removed outright; the rest value of
+  an unanimated `filter` is `none`, which is the full-colour state.
+- **The cycle is clock-based on purpose.** Owner decided earlier in the
+  project that it must not be scroll-tied. It is a plain CSS animation, so
+  it also starts at page load for everyone at once and costs no JS.
+- **Placeholder fills are coloured, not `--bg-raised`.** A flat dark box
+  reads identically in every grade state, so the mechanic would be
+  invisible in screenshots. The five palette words already existed.
+- **375px stacks to one column, establishing panel first** — my call,
+  flagged in the report. A 2-column phone grid would make the caption
+  boxes wider than the panels.
+- **The old About copy is gone from the page**: the story paragraph and
+  the GDG line no longer appear anywhere. The owner asked for the content
+  to be replaced structurally; the GDG line comes back with Community
+  (§5.7). Both are in git history (`git show 4907721^:src/components/About.astro`).
+- **"Supabase" → "Vercel"** in the credits, approved at plan review.
+  "© 2026 Rishi" with a live year and the shortened name, confirmed.
+- **Résumé stays outside the guard.** `/resume.pdf` is root-relative, not
+  a URL to `isUrl`, and the PDF is still pending. It is a plain `<a>` in
+  the same list, labelled `Résumé [TODO]`, as before.
+- **`mailto:` added to the guard.** Without it the Gmail link would have
+  rendered as text. Harmless for project links, where a mailto never
+  appears.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — About, Projects and Contact rows. **§5.4** — `[removed]`.
+  **§5.6** — About rewritten. **§5.8** — rewritten, `[now]`. **§6** — the
+  `now.json` sentence. **§10** — line 7 `[dropped]`, new line 15.
+- **README** — component list (AboutPanel, no CurrentlyBuilding), `lib/`.
+- **ASSETS.md** — "About page photo" entry replaced by "About comic
+  panels". **global.css** — the coral comment. **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`cdp.mjs` + `verify-about.mjs` + `verify-footer.mjs` in the session
+scratchpad (headless Chrome over CDP with its own profile, a tiny static
+server over `dist/`, `boot-seen` pre-set so the preloader is skipped;
+1280×900 / 1280×1100 fine pointer and 375×812 touch-emulated):
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints after each part;
+  `grep -rn CurrentlyBuilding src README.md` → 0 hits.
+- **Headings**: one `<h1>`; `<h2>` = About, Tech stack, Experience,
+  Projects. Landmarks: header, main, four labelled sections, footer —
+  About is a section inside `<main>`, not a second landmark.
+- **About grid**: 4 columns × 2 rows, 1280×640; panel 1 622×640, the
+  four small panels 305×314; 1 column at 375 with five 351×263 panels; no
+  caption overflows; `scrollWidth == clientWidth` at both widths.
+- **Grade cycle, motion allowed**: nine samples 1.5s apart read
+  identity → `grayscale(0.027…)` (a crossfade) → `grayscale(1)` ×3 →
+  `sepia(1) saturate(1.3) hue-rotate(-15deg)` ×2. **Reduced motion
+  forced**: `animation-name: none`, filter `none` on all five samples.
+- **Screenshots**: `about-colour.png`, `about-grayscale.png`,
+  `about-duotone.png` (pinned by an injected negative `animation-delay`
+  + `paused`), `about-reduced-motion.png`, `about-phone.png` (+ `-2`),
+  `footer-desktop.png`, `footer-phone.png`.
+- **Footer**: `FOOTER#contact`, `position: static`, 808px tall at 1280,
+  0 sticky/fixed descendants, 0 clipped scrollers; top moves 500px for a
+  500px instant scroll (a first reading of 31px was smooth-scroll sampled
+  too early, not a pin); bottom lands on the viewport bottom at the end
+  of the document. Anchors: GitHub, LinkedIn, Gmail (all `rel=noopener`)
+  and `Résumé [TODO]` → `/resume.pdf`. Guard unit-tested from node:
+  http/https/mailto true; `[TODO]`, `/resume.pdf`, empty, undefined false.
+  Links on one row at 375.
+- **Client JS**: 0 external scripts, the same 6 inline blocks as
+  increment 15.1; 3077 B gzipping the six blocks concatenated (15.1's
+  3839 B summed per-block gzips, so the two figures are not comparable).
+  The increment adds no script and removes none.
+
+### Harness notes
+
+- `scroll-behavior: smooth` is on unless reduced motion is forced. Any
+  "did it move" measurement must force reduced motion or use
+  `behavior: 'instant'`, or it samples mid-animation.
+- Pin a grade state with
+  `[data-about-page]{animation-delay:-Ns !important;animation-play-state:paused !important}`:
+  −2s colour, −7s grayscale, −12s duotone.
+- Long python/bash heredocs still break in this shell (`unexpected EOF`).
+  Write the script to the scratchpad and run it.
+
+### Still open
+
+- Owner to supply five panel artworks and five captions (ASSETS.md).
+- `public/resume.pdf` still missing; the footer link 404s.
+- The GDG line has no home until Community (§5.7).
+- Vercel alias: set after the docs push (below).
+
 ## 2026-09-21 — increment 15.1
 
 ### Last milestone completed
