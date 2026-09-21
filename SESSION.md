@@ -80,6 +80,88 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 10
+
+### Last milestone completed
+
+Status-line copy is **final, not a placeholder**, and the sequence is slower.
+Three stage lines keyed to the same 24 steps that drive the readout and the
+square — `Rendering first impressions` (0–7), `Cutting the unnecessary parts`
+(8–17), `Final cut. No re-shoots.` (18–24) — written from inside the same
+`paint(step)` call as the percentage and the clip-paths. Dwell 2800 → 4200ms,
+grace cap 4500 → 6500ms. Commit `83315be`, pushed with the three audit
+commits that had been sitting unpushed since 2026-09-20.
+
+### Decisions worth knowing before you touch this
+
+- **No separate timer for the text.** `statusFor(step)` in `boot-copy.ts` is
+  a pure function of the step; `boot-status.ts` only owns the cross-fade. The
+  honesty rule for the percentage therefore covers the line for free.
+- **Fades never overlap.** The writer snapshots the target line when a fade
+  starts, runs a full 160ms-out / 160ms-in, and only then looks again; a
+  threshold crossed mid-fade waits and gets a complete fade of its own to the
+  latest stage. In practice fast loads leave 1.75s between swaps, so this only
+  matters when a late checkpoint jumps two stages at once.
+- **`data-stage`, not `data-status`.** `ProjectCard.astro` already uses
+  `data-status` for the project status; a document-wide `[data-status]` query
+  lands on a card once the overlay is gone. The preloader's query is scoped to
+  the overlay so it was never a product bug, but the harness tripped on it.
+- **Period kept in the third line.** Rendered `FINAL CUT. NO RE-SHOOTS.` in
+  12px JetBrains Mono at 0.12em the full stops read as deliberate. The owner's
+  reserve variant is `FINAL CUT — NO RE-SHOOTS`; note a mono em dash is one
+  cell wide, so it renders closer to a hyphen than a dash. Owner to judge live.
+- Slot is now 175ms (24 × 175 = 4200). The 75%-of-a-slot minimum hold still
+  applies while the slots are pacing.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.10** — status line rewritten for the final copy and mechanism;
+  slot, dwell, grace, budget and measured lifetimes updated. **PRD §8**
+  overlay-duration note updated. **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+Headless Chrome over CDP against `astro preview`, rAF recorder installed via
+`addScriptToEvaluateOnNewDocument`; scripts in the session scratchpad
+(`t1`–`t5`). Timing-sensitive runs were run one at a time.
+
+- **All five first-paint cases** pass unchanged, plus the deep-link case:
+  `/#projects` on a fresh session → overlay absent at DCL, `boot-seen` unset.
+- **Never ahead of truth:** displayed step ≤ floor(readiness × 24) on every
+  frame, fast / 200kb/s / 60kb/s — 0 violations. **Status never ahead of the
+  square:** stage(text) ≤ stage(displayed step) on every frame — 0 violations.
+- **Discrete:** 25 distinct steps on a fast load, holds 165–185ms (slot
+  175ms); ring = core − 4, band = core − 8, single inset value, at all 25.
+- **Stage swaps:** line 2 at 1.58s (step 8), line 3 at 3.33s (step 18); each
+  fade-out ~165ms; zero overlapping fades.
+- **Lifetime:** 4.63s unthrottled; 6.9s at 200kb/s and at 60kb/s, both ended
+  by the grace cap at 96% with `load` never seen.
+- **Grace cap:** three resources stalled, `readyState` stuck at `interactive`,
+  last readout 96% (never 100%), overlay gone at cap + fade (7097ms after nav
+  vs 7054 expected).
+- **Late checkpoint:** hero image held to 5.2s → `100%` at `load` + 19ms,
+  removal 414ms later.
+- **Client JS: 2005 B gzipped, all inline** (cap 40 KB; inc 9 was 1570 B).
+- Build + `astro check` 0/0/0. Longest file 187 (`boot-preloader.ts`).
+- **Deployed and aliased.** Git integration built `mllxelx4y` (production,
+  Ready); `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it.
+  Verified on the vanity URL itself, not the deployment URL: HTML
+  byte-identical to the deployment, `(4200,6500)` and all three lines in the
+  served page, and a live CDP frame recording on the vanity origin — 25
+  steps, 0 step / 0 stage violations, swaps at 1.58s and 3.32s, gone at 4.63s.
+
+### Harness gotchas recorded for next time
+
+- The browser round-trips `inset(N%)` strings, so comparing parsed layer
+  insets needs a ~0.001 tolerance; at 1e-6 five steps "fail" on float noise.
+- `[data-status]` is not unique in the document (see above).
+
+### Still open
+
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain — see
+  the standing constraint at the top.
+
 ## 2026-09-20 — full audit
 
 ### Last milestone completed
