@@ -1,7 +1,8 @@
 ---
-// One monitor frame of the Experience section (PRD §5.11): year, keyword
-// title, the owner's verbatim sentence and, when the moment has one, its
-// cover. Stacked with its siblings in ExperienceTimeline's fixed-height
+// One monitor frame of the Experience section (PRD §5.11): a small year
+// label, the owner's verbatim sentence as the dominant text and, when the
+// moment has one, its cover. The keyword is the clip's label on the track
+// below, not a heading here (increment 14.1). Stacked with its siblings in ExperienceTimeline's fixed-height
 // monitor; `data-active` (set by the server for the first, then by the
 // script) decides which one is visible. The timecode is decoration only.
 import { Image } from "astro:assets";
@@ -10,14 +11,15 @@ interface Props {
   id: string;
   index: number;
   year: string;
-  keyword: string;
+  /** Rendered only by the clip button; accepted so the moment can be spread in. */
+  keyword?: string;
   body: string;
   active?: boolean;
   cover?: ImageMetadata;
   coverAlt?: string;
 }
 
-const { id, index, year, keyword, body, active = false, cover, coverAlt } = Astro.props;
+const { id, index, year, body, active = false, cover, coverAlt } = Astro.props;
 const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
 ---
 
@@ -30,7 +32,6 @@ const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
   <div class="inner">
     <div class="text">
       <p class="meta year">{year}</p>
-      <h3 class="title">{keyword}</h3>
       {/* The id is the clip's aria-describedby target. */}
       <p class="body" id={`experience-${id}`}>{body}</p>
     </div>
@@ -105,19 +106,18 @@ const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
   }
 
   .year,
-  .title,
   .body {
     margin: 0;
   }
 
-  .title {
-    font-size: clamp(1.75rem, 4vw, 3rem);
-    line-height: 1.05;
-  }
-
+  /* The sentence is the frame's primary content, so it takes the display
+     face at heading size; it stays a paragraph, not a heading. */
   .body {
-    max-width: 44ch;
-    font-size: clamp(1.125rem, 2.2vw, 1.5rem);
+    max-width: 24ch;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
     color: var(--fg);
   }
 
