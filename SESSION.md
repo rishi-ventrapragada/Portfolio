@@ -80,6 +80,105 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 12
+
+### Last milestone completed
+
+The square now fills cell by cell. `BootSquare.astro` is an 8×8 CSS grid of
+64 `<span data-cell>` with 2px gaps; `src/scripts/boot-fill.ts` holds
+`FILL_ORDER` (a literal permutation of 0–63, seed 73) and `cellsFor(step)`
+(0, 3, 5 … 61, 64); `paint(step)` toggles `data-on` on the first
+`cellsFor(step)` cells of the order and `data-lead` on the newest two. The
+three clip-path layers, `RING_LEAD` / `BAND_LEAD` and the `[data-core|ring|
+band]` hooks are gone. Timing (6000 / 9000, pause table), readiness, the
+honesty rule, the percentage and the status stages are untouched.
+
+**The centre-out guarantee from increment 9 is gone on purpose** — the
+owner confirmed the trade-off before the build (PRD §5.10 records it).
+
+### Decisions the owner made after seeing it
+
+- **Accent leading edge ships**, not the plain fill. Both were built behind a
+  `data-edge` toggle and screenshotted at 13 / 25 / 50 / 75 / 100 % in both
+  accents and both widths; the owner picked the edge (my recommendation:
+  it puts the accent back in the preloader, which the plain fill dropped).
+  The toggle was then removed — `[data-lead]` is always `--accent`.
+- **8×8 stays.** Offered 6×6 and 10×10 with the pixel sizes; owner kept 8.
+
+### Decisions worth knowing before you touch this
+
+- **Seed 73, and why.** Candidate seeds were screened offline for scatter:
+  first eight cells in ≥ 5 rows, ≥ 5 columns, ≤ 4 per quadrant. 73 gives
+  5 / 6 / [3,2,2,1]. The generator is *not* in the repo; only the literal is.
+  If you regenerate, re-screen, and update the seed note in `boot-fill.ts`
+  and PRD §5.10.
+- **`percentFor` is now the one source of the readout's number**, and
+  `cellsFor` derives from it, so the count and the percentage cannot drift.
+  Both take `steps` as a parameter to avoid importing `STEPS` from
+  `boot-preloader.ts` (circular).
+- **The pale cells in mid-step screenshots are the 120ms settle**, not a
+  third colour: a lead cell going `--accent` → `--heading`, or an unfilled
+  cell going transparent → `--heading`. Screenshot ≥ 140ms after the step.
+- **Gaps are the box colour.** Unfilled cells are transparent, so the 2px
+  gaps and the empty cells are both `--boot-square-bg`; only filled cells
+  draw. No new token.
+- The overlay's `transitionend` filter (`e.target === root`) now guards
+  against 64 bubbling cell transitions instead of three layer ones.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.10** — intro, foreground item 2 rewritten for the grid (cells,
+  gap, order, seed, `cellsFor` table, leading edge) with an explicit
+  "supersedes increment 9's centre-out guarantee" paragraph; quantisation
+  sentence; budget; lifetime intro. **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+Same CDP harness (session scratchpad). `recorder.mjs` now records the
+filled and lead cell indices per frame; `t2` replaced the inset check with
+four grid checks; `t5` pins screenshots by percentage per variant / accent.
+
+- **All five first-paint cases + deep link** pass unchanged; 64 cells in the
+  served HTML, none pre-filled, no layer hooks left.
+- **Never ahead of truth:** step ≤ floor(readiness × 24) on every frame,
+  fast / 200 / 60 — 0 violations. **Status ≤ stage(displayed step):** 0.
+- **Pauses intact:** step 6 700 / 700 / 700ms, step 14 800 / 800 / 800ms,
+  step 20 617 / 600 / 600ms; fast-step median 183–184ms.
+- **Grid:** `FILL_ORDER` is a permutation (64 distinct, 0–63); **0 frames**
+  where a filled cell unfilled; **0 frames** where the count ≠
+  `cellsFor(step)`; **0 frames** with a cell outside the `FILL_ORDER`
+  prefix — on all three network conditions. 64 / 64 at 100%, 61 / 64 at the
+  96% cap.
+- **Scatter:** first 8 = `[5,15,8,25,46,57,43,9]` → 5 rows, 6 columns,
+  quadrants [3,2,2,1], not raster.
+- **Grace cap:** stuck at `interactive`, last readout 96%, gone 9547ms after
+  nav (expected ~9514). **Late checkpoint:** hero held to 7.2s → `100%` at
+  `load` + 17ms, removed 417ms later.
+- **Both accents:** lead cells `#ff3b5c` under crimson, `#a78bfa` under
+  violet; filled cells unchanged.
+- **Client JS: 2340 B gzipped, all inline** (cap 40 KB; inc 11 was 2167 B).
+- Build + `astro check` 0/0/0. Longest file 189 (`boot-preloader.ts`).
+- **Deployed and aliased.** Git integration built `9us508sh8` (production,
+  Ready); `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it.
+  Verified on the vanity URL itself: HTML byte-identical to the deployment,
+  64 cells and the `FILL_ORDER` literal in the served page, no layer hooks,
+  and a live CDP frame recording on the vanity origin — 25 steps, 0 step /
+  0 stage / 0 grid violations, pauses 717 / 799 / 617ms, 64 / 64 at 100%,
+  gone at 6.43s.
+
+### Harness gotchas recorded for next time
+
+- The `FILL_ORDER` literal has a trailing comma; strip it before
+  `JSON.parse`. The recorder's destructured `rows` shadows any local `rows`.
+- `t5` polls the percentage at 20ms; pinned frames are still occasionally
+  missed at 1280 when a step lands between polls. Re-run for the missing one.
+
+### Still open
+
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain — see
+  the standing constraint at the top.
+
 ## 2026-09-21 — increment 11
 
 ### Last milestone completed
