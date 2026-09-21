@@ -50,9 +50,13 @@ const rows = [
     list-style: none;
   }
 
+  /* scroll-margin: when Tab focuses a link inside a frame's panel the
+     browser scrolls it just into view, and the frame's 1.02 lift would then
+     push it a few pixels back below the fold; the cushion absorbs that. */
   .link {
     display: inline-block;
     padding-block: 0.25rem;
+    scroll-margin-block: 2rem;
     color: var(--fg);
     border-bottom: 1px solid var(--line);
     transition:
