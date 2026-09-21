@@ -40,7 +40,8 @@ src/
   layouts/BaseLayout.astro    head, fonts, landmarks
   pages/index.astro           the whole site: one page, anchored sections
   scripts/                    boot-*.ts, hero-dissolve.ts, nav.ts,
-                              experience-timeline.ts, experience-playhead.ts
+                              experience-timeline.ts, experience-scrub.ts,
+                              experience-playhead.ts
   styles/global.css           all design tokens
 ```
 

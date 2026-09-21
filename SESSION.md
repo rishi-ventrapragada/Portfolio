@@ -47,8 +47,8 @@ retire this whole entry.
 
 ### Nav capacity — four links fit on phones only by a step-down (increment 13)
 
-The bar is a `RISHI` mark (`#top`) plus four anchors: Skills, Projects,
-Experience, Contact. At 375px in the normal 12px / 0.12em `.label` style the
+The bar is a `RISHI` mark (`#top`) plus four anchors: Skills, Experience,
+Projects, Contact (document order since increment 14). At 375px in the normal 12px / 0.12em `.label` style the
 row needs **383px of 327px** (mark 43.2 + links 339.9), so increment 13 added a
 phone step-down in `Nav.astro`: below 480px the mark and links are
 `--size-meta` (11px) with 0.06em tracking and a 0.75rem gap. Measured on the
@@ -91,6 +91,134 @@ sanctioned exception. If the background token changes, **both** must change, or
 the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
+
+## 2026-09-21 — increment 14
+
+### Last milestone completed
+
+**Experience is scroll-scrubbed and sits before Projects.** The section
+(PRD §5.11) is now a 250vh scroll track with a sticky 100dvh pin holding the
+heading, monitor and timeline; progress through the track picks the clip in
+four equal zones, through the same `commit()` that click and keyboard use.
+Click, Tab / Enter / Space and the mousemove-gated hover preview are
+unchanged and verified at every scroll position. Owner's required addition
+at plan approval: **Projects now comes after Experience** — `index.astro`
+order is Hero → About → Skills → Experience → Projects (+ the "currently
+building" strip, which belongs to Projects per PRD §3) → footer/Contact, and
+the nav links follow the same order (Skills, Experience, Projects, Contact).
+
+Files: `ExperienceTimeline.astro` (pin wrapper, `<noscript>` un-pin, flex
+monitor, 149 lines), `ExperienceFrame.astro` (cqh cover cap, 158), new
+`experience-scrub.ts` (50), `experience-timeline.ts` (96; wires the scrub),
+`index.astro`, `Nav.astro` (link order only).
+
+### Decisions worth knowing before you touch this
+
+- **`--pin-length: 250vh`** on `.experience` is the one tunable. The pin
+  travels `250vh − 100dvh`; each clip zone is a quarter of that (37.5vh at
+  1280×900 = 337px of scrolling per clip). Zone edges measured at exactly
+  25 / 50 / 75 %.
+- **One commit path.** `experience-scrub.ts` never touches the DOM; it
+  calls the `commit` closure from `experience-timeline.ts` only when the
+  zone *changes*. So a click or key press wins immediately and holds until
+  the next zone edge, and `mouseleave` reverts to whatever scroll (or click)
+  last committed — never to clip 1.
+- **Stateless progress.** `(scrollY − sectionTop) / (height − innerHeight)`
+  from absolute values each rAF; scrolling back reverses exactly. Passive
+  listeners only schedule the frame (hero-dissolve.ts pattern); an
+  `IntersectionObserver` attaches them only while the section is on screen.
+- **Reduced motion keeps the pin.** Sticky is layout, zone changes are
+  discrete; the swap and playhead are already `0s` under reduce (measured
+  after a scroll commit). Alternative considered and rejected: un-pinning
+  under reduce would drop the primary interaction without removing motion.
+  If a user reports the frozen-page feel as disorienting, the alternative is
+  a two-line change in `experience-scrub.ts` plus a media query on `.pin`.
+- **Monitor height is no longer 60vh.** Inside the pin the monitor is
+  `flex: 1` between heading and timeline: 539px at 1280×900, 309px at
+  375×667, constant across states. It is a `container-type: size` box so
+  the KalaCart cover is capped in `cqh` (36 stacked, 70 side-by-side) — a
+  `vh` cap overflowed the 309px phone monitor.
+- **No-JS un-pins via `<noscript><style>`** inside the section, so the
+  pinned CSS is the default and nothing shifts at hydration. The noscript
+  block also restores `60vh / min 340px` on the monitor, because a size
+  container has zero intrinsic height once nothing stretches it (found by
+  measurement: the section was 362px tall without it).
+- **`.head` needs `width: 100%`.** A `.shell` block as a bare flex item
+  shrink-wraps and its auto margins centre it; the heading rendered centred
+  until this was added.
+- **Anchor lands on the pin start** (`scroll-margin-top: 0` beats the global
+  `[id]` rule by specificity); the pin's own `padding-top: var(--nav-height)`
+  keeps the heading out from under the bar.
+- **`100dvh` on the pin, like the hero.** On mobile browsers the dynamic
+  toolbar changes dvh while scrolling, so the pinned content can resize by
+  the toolbar height mid-scrub. `svh` would be stable but leave a gap when
+  the bar hides. Kept dvh for consistency with the hero; revisit if it
+  looks jumpy on a real phone.
+- **Harness gotchas** (both scripts in the session scratchpad): `focus()` on
+  an already-focused button fires no event — blur first; sample playhead
+  positions ≥ 260ms after a scroll so the 200ms glide has finished; the
+  13.1 scroll-hover regression must park the cursor at a zone-0 scroll
+  position now, or the scroll itself legitimately commits zone 1.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — site map rows reordered (Experience before Projects).
+  **§5.11** — rewritten: scroll scrub, click and keyboard as three equal
+  ways into one commit path; monitor height rule; reduced-motion decision;
+  no-JS un-pin. **§10** — line 11 for increment 14.
+- **README** — script list. **SESSION.md** — this entry and the nav-order
+  words in the nav-capacity standing constraint.
+
+### Verified by measurement, not eyeballing
+
+Headless Chrome over CDP (`verify14.mjs` for the new behaviour, `verify.mjs`
+re-run for everything from 13.1) at 1280×900 and 375×667:
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints. Longest
+  Experience file 182.
+- **Client JS: 3829 B gzipped, six inline blocks, no external script**
+  (cap 40 KB; 13.1 was 3585 B).
+- **Order**: `hero > about > skills > experience > projects > now >
+  contact`; nav `#top #skills #experience #projects #contact`.
+- **Scrub**: section height exactly 2.5 × innerHeight (2250 / 1668);
+  stepping the track at 5 % forward gives `web, python, kalacart, recurzn`,
+  backward the reverse, both widths; zone edges `web → python` at 25 %,
+  `python → kalacart` at 50 %, `kalacart → recurzn` at 75 % (±1px); pin
+  `top` 0 while pinned; monitor height one value per width (539 / 308.6);
+  playhead 0px off the pressed clip at every step; `scrollWidth ===
+  clientWidth`.
+- **Release**: 0.6 viewport past the track the pin's `top` is −67 (1280) /
+  −51 (375) and the element at the viewport bottom is `#projects`.
+- **Wheel**: one `mouseWheel` of 30 % of the track from the pin start →
+  python, pin top 0.
+- **Click while pinned**: real mouse click on Recurzn in zone 0 → pressed +
+  frame + playhead on Recurzn at once; scrolling to 20 % (same zone) keeps
+  it; 30 % (zone 1) → python.
+- **Hover on a scroll commit**: at 60 % (kalacart) a real two-step move
+  onto Python previews it (pressed stays kalacart); moving off the track →
+  kalacart / kalacart.
+- **Keyboard** at 5 / 40 / 95 %: focus commits python; with the state made
+  stale by hand Enter recommits, Space recommits; python stays focused.
+- **Reduced motion**: pin `sticky`, scroll commit lands (kalacart), frame
+  and playhead `transition-duration 0s`, new frame opacity 1 at once.
+- **No-JS**: pin `static`, section = content height (not 2.5 × viewport),
+  monitor 540 / 400 (60vh rule restored), first clip pressed and visible,
+  the next section is `#projects`, no horizontal overflow.
+- **13.1 suite re-run**: playhead 0px off in all eight states; ticks 0px
+  off; monitor constant; A1 0 focusables; Tab order web → python → kalacart
+  → recurzn → the next section's first link; Enter / Space; scroll-hover
+  (`mouseenter` ×1, no change; real move previews; leave reverts); reduced
+  motion 0s; both accents; image loads; every frame inside the monitor at
+  375 (KalaCart 16px from the top, 37px from the bottom); console clean.
+- Screenshots reviewed: 1280 in all four zones and after release (Projects
+  entering under the timeline), 375 zone 1, 375 KalaCart.
+- **Live**: [TODO — filled in after the deploy]
+
+### Known, open
+
+- 320px nav collision (standing constraint above).
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain.
 
 ## 2026-09-21 — increment 13.1
 
