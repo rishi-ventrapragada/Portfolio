@@ -4,15 +4,16 @@
 // (CLAUDE.md §7), which must never become an href: only real http(s) URLs
 // render as links. `full` (the desktop detail panel) shows any other value
 // as mono text so the placeholder stays visible; `quick` (the always-visible
-// affordances on no-hover devices) simply skips it. Split from
-// ProjectFrame.astro so the guard lives in exactly one place.
+// affordances on no-hover devices) simply skips it. The guard itself is
+// src/lib/is-url.ts, shared with the footer since increment 16.
+import { isUrl } from "../lib/is-url";
+
 interface Props {
   links?: { live?: string; repo?: string };
   variant: "full" | "quick";
 }
 
 const { links, variant } = Astro.props;
-const isUrl = (value?: string) => !!value && /^https?:\/\//.test(value);
 const rows = [
   { label: "Live site", value: links?.live },
   { label: "GitHub", value: links?.repo },

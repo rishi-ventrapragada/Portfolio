@@ -1,30 +1,72 @@
 ---
-// PRD 5.8 — minimal contact. No form at launch.
+// PRD §5.8 — contact as a credits roll. The footer is still the <footer>
+// landmark and still #contact for the nav. First a tall, centred block of
+// text set like film end credits that scrolls with the page (no pin, no
+// script); below it the real contact links; then the résumé and the
+// copyright line. The credit wording is the owner's, split into rows.
+//
+// Contact values go through the shared isUrl guard (src/lib/is-url.ts):
+// only an http(s) URL or a mailto: address becomes an <a>, anything else
+// (a "[TODO]" placeholder, CLAUDE.md §7) renders as visible mono text.
+// The résumé link stays outside the guard as built: a root-relative path
+// to public/resume.pdf, which is still pending from the owner.
+import { isUrl } from "../lib/is-url";
+
 const year = new Date().getFullYear();
 
-const links = [
-  { label: "Email", href: "mailto:rishiventrapragada23@gmail.com" },
-  { label: "GitHub", href: "https://github.com/rishi-ventrapragada" },
-  { label: "LinkedIn", href: "https://linkedin.com/in/rishi-ventrapragada" },
-  { label: "Résumé [TODO]", href: "/resume.pdf" },
+const credits = [
+  { role: "Built with", name: "Astro · Tailwind · Vercel" },
+  { role: "Directed, developed & edited by", name: "Rishi" },
+];
+
+const contacts = [
+  { label: "GitHub", value: "https://github.com/rishi-ventrapragada" },
+  { label: "LinkedIn", value: "https://www.linkedin.com/in/rishi-ventrapragada" },
+  { label: "Gmail", value: "mailto:rishiventrapragada23@gmail.com" },
 ];
 ---
 
 <footer class="footer" id="contact">
   <div class="shell inner">
-    <p class="label get-in-touch">Get in touch</p>
-    <ul class="links">
-      {
-        links.map((link) => (
-          <li>
-            <a class="meta link" href={link.href}>
-              {link.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-    <p class="meta copyright">&copy; {year} Sai Rishi Ventrapragada</p>
+    <div class="credits">
+      <p class="title">Rishi Ventrapragada</p>
+      <dl class="roll">
+        {
+          credits.map((credit) => (
+            <div class="credit">
+              <dt class="label role">{credit.role}</dt>
+              <dd class="name">{credit.name}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="contact">
+      <p class="label get-in-touch">Get in touch</p>
+      <ul class="links">
+        {
+          contacts.map(({ label, value }) =>
+            isUrl(value) ? (
+              <li>
+                <a class="meta link" href={value} rel="noopener">
+                  {label}
+                </a>
+              </li>
+            ) : (
+              <li class="meta pending">
+                {label} &mdash; {value}
+              </li>
+            ),
+          )
+        }
+        <li>
+          <a class="meta link" href="/resume.pdf">Résumé [TODO]</a>
+        </li>
+      </ul>
+    </div>
+
+    <p class="meta copyright">&copy; {year} Rishi</p>
   </div>
 </footer>
 
@@ -36,17 +78,68 @@ const links = [
 
   .inner {
     display: grid;
+    gap: 3rem;
+    text-align: center;
+  }
+
+  /* The roll: end-credit spacing — one name per line, a role above it,
+     wide gaps and a slow line-height so the block reads as a scroll of
+     credits even though it is plain flow content. */
+  .credits {
+    display: grid;
+    gap: 3rem;
+    padding-block: var(--rhythm);
+    line-height: 2;
+  }
+
+  .title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--size-h2);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--heading);
+  }
+
+  .roll {
+    display: grid;
+    gap: 2.5rem;
+    margin: 0;
+  }
+
+  .credit {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .role {
+    color: var(--accent);
+  }
+
+  .name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+    font-weight: 500;
+    color: var(--fg);
+  }
+
+  .contact {
+    display: grid;
     gap: 1.5rem;
   }
 
   .get-in-touch {
-    color: var(--accent);
     margin: 0;
+    color: var(--accent);
   }
 
   .links {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 1.5rem;
     margin: 0;
     padding: 0;
