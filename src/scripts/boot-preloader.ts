@@ -5,6 +5,7 @@
  * Progress is read from the page's real load state rather than played off a
  * fixed clock, so the number the visitor sees means something.
  */
+import { FILL_ORDER, cellsFor, percentFor } from "./boot-fill";
 import { slotAt, slotOpen } from "./boot-schedule";
 import { createStatusWriter } from "./boot-status";
 
@@ -13,13 +14,6 @@ import { createStatusWriter } from "./boot-status";
  * 75 % exactly on steps 6 / 12 / 18.
  */
 const STEPS = 24;
-
-/**
- * How far ahead of the core each outer layer is revealed, in percent of the
- * box per side. The ring leads the core by one width; the band leads the ring.
- */
-const RING_LEAD = 4;
-const BAND_LEAD = 8;
 
 /** Module load time, used as the origin for the creep below. */
 const navStart = performance.now();
@@ -90,9 +84,11 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   }
 
   const pct = root.querySelector<HTMLElement>("[data-pct]");
-  const core = root.querySelector<HTMLElement>("[data-core]");
-  const ring = root.querySelector<HTMLElement>("[data-ring]");
-  const band = root.querySelector<HTMLElement>("[data-band]");
+  /** Grid cells by row-major index, the space FILL_ORDER is written in. */
+  const cells: HTMLElement[] = [];
+  root.querySelectorAll<HTMLElement>("[data-cell]").forEach((el) => {
+    cells[Number(el.dataset.cell)] = el;
+  });
   const status = createStatusWriter(root.querySelector<HTMLElement>("[data-stage]"));
   const start = performance.now();
   /** Highest step the page has genuinely reached. */
@@ -104,18 +100,21 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   let frame = 0;
   let done = false;
 
-  /** Write one step to the readout, the status line and every layer together. */
+  /** Write one step to the readout, the status line and every cell together. */
   const paint = (step: number) => {
     displayed = step;
     lastPaint = performance.now();
-    if (pct) pct.textContent = `${Math.round((step / STEPS) * 100)}%`;
+    if (pct) pct.textContent = `${percentFor(step, STEPS)}%`;
     status(step);
-    // One inset value clips all four sides equally, so growth is centre-out.
-    const inset = (1 - step / STEPS) * 50;
-    const clip = (n: number) => `inset(${Math.max(0, n)}%)`;
-    if (core) core.style.clipPath = clip(inset);
-    if (ring) ring.style.clipPath = clip(inset - RING_LEAD);
-    if (band) band.style.clipPath = clip(inset - BAND_LEAD);
+    // Cells accumulate along FILL_ORDER and never unfill. The newest two carry
+    // data-lead, the accent leading edge in BootSquare.astro.
+    const filled = cellsFor(step, STEPS);
+    FILL_ORDER.forEach((index, i) => {
+      const el = cells[index];
+      if (!el) return;
+      el.toggleAttribute("data-on", i < filled);
+      el.toggleAttribute("data-lead", i < filled && i >= filled - 2);
+    });
   };
 
   /**
@@ -135,8 +134,8 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
 
     const remove = () => root.remove();
     root.setAttribute("data-out", "");
-    // The layers' clip-path transitions bubble up here too and would end the
-    // fade after 180ms; only the overlay's own transition removes it.
+    // The cells' background transitions bubble up here too and would end the
+    // fade after 120ms; only the overlay's own transition removes it.
     root.addEventListener("transitionend", (e) => {
       if (e.target === root) remove();
     });

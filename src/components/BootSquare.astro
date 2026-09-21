@@ -1,60 +1,59 @@
 ---
-// The loading square (PRD §5.10). Three stacked layers grow out from the
-// centre as the page loads: a --heading core, an --accent ring revealed one
-// step ahead of it, and a --fg-muted band one step ahead of that. Split out of
-// BootPreloader.astro for the CLAUDE.md §5 line cap; boot-preloader.ts drives
-// the layers by data attribute, which style scoping leaves untouched.
+// The loading square (PRD §5.10). An 8×8 grid of cells that fill one by one
+// in the fixed, scattered order in boot-fill.ts — chunk-by-chunk pop-in like
+// the reference footage, replacing increment 9's centre-out layers. Split out
+// of BootPreloader.astro for the CLAUDE.md §5 line cap; boot-preloader.ts
+// flips each cell's data-on and data-lead, which style scoping leaves
+// untouched.
 //
-// Each layer's starting clip is an inline attribute so it applies at parse
-// time, before global.css lands — otherwise the layers paint fully revealed
-// for a few frames on a slow connection. inset() with one value clips all
-// four sides equally, which is what makes the growth centre-out rather than
-// directional.
+// Every cell renders unfilled, so the frame before script runs shows the
+// empty box and never a filled one.
+import { CELLS } from "../scripts/boot-fill";
+const cells = Array.from({ length: CELLS }, (_, i) => i);
 ---
 
 <div class="boot-square" data-square>
-  <div class="boot-layer boot-band" data-band style="clip-path: inset(42%)"></div>
-  <div class="boot-layer boot-ring" data-ring style="clip-path: inset(46%)"></div>
-  <div class="boot-layer boot-core" data-core style="clip-path: inset(50%)"></div>
+  {cells.map((i) => <span class="boot-cell" data-cell={i}></span>)}
 </div>
 
 <style>
   .boot-square {
-    position: relative;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    /* 2px gaps so the cells read as distinct blocks, not a smooth surface. */
+    gap: 2px;
     width: clamp(120px, 20vw, 180px);
     aspect-ratio: 1;
-    /* Darker than --bg so the unrevealed area reads as a distinct object
-       against the noise texture behind it. */
+    /* Darker than --bg so the unfilled box reads as a distinct object against
+       the noise texture behind it. The gaps show this colour too. */
     background-color: var(--boot-square-bg);
   }
 
-  .boot-layer {
-    position: absolute;
-    inset: 0;
-    /* Each step lands as a chunky jump that settles, not a tween: short,
-       ease-out, and only ever between the quantised values the script writes. */
-    transition: clip-path 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  .boot-cell {
+    /* Unfilled: invisible over the box, so only filled cells draw. */
+    background-color: transparent;
+    /* A pop that settles, not a slide: short and ease-out. */
+    transition: background-color 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  /* Stacking is source order: band at the back, core in front. The ring and
-     band are only visible in the margin each leaves beyond the layer above. */
-  .boot-band {
-    background-color: var(--fg-muted);
-  }
-
-  .boot-ring {
-    background-color: var(--accent);
-  }
-
-  /* Not --accent, so the core reads the same under both accents. */
-  .boot-core {
+  /* Not --accent, so a filled cell reads the same under both accents. */
+  .boot-cell[data-on] {
     background-color: var(--heading);
+  }
+
+  /* The two newest cells carry the accent until the next step lands, then
+     settle to --heading: a leading edge that shows where the fill is now, and
+     the one accent-switchable element on the boot screen (the old ring's job).
+     Chosen over a plain fill by eye, both built (increment 12). */
+  .boot-cell[data-lead] {
+    background-color: var(--accent);
   }
 
   /* The overlay never renders under reduced motion (BootPreloader.astro), so
      this is belt and braces per CLAUDE.md §4. */
   @media (prefers-reduced-motion: reduce) {
-    .boot-layer {
+    .boot-cell {
       transition: none;
     }
   }
