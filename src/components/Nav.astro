@@ -1,11 +1,14 @@
 ---
 // PRD §5.1 — a fixed bar, transparent over the hero, solid once past it.
 // Single-page site: every entry is an anchor on this page, so there is no
-// current-page state, no hamburger and no responsive collapse. Three short
-// labels fit at every width (measured in SESSION.md, increment 6).
+// current-page state, no hamburger and no responsive collapse. Four labels
+// fit only because the bar steps its type down one size below 480px
+// (measured in SESSION.md, increment 13 — the margin is tight; a fifth link
+// needs a real overflow pattern, not another shrink).
 const links = [
   { label: "Skills", href: "#skills" },
   { label: "Projects", href: "#projects" },
+  { label: "Experience", href: "#experience" },
   { label: "Contact", href: "#contact" },
 ];
 ---
@@ -37,50 +40,11 @@ const links = [
 </header>
 
 <script>
-  // Adds .is-scrolled once the hero is behind the bar (PRD §4.4). Module
-  // scope is fine here: there is no client router swapping the DOM out from
-  // under it, so the observer is bound once and stays bound.
-  const nav = document.querySelector<HTMLElement>("[data-nav]");
-  if (nav) {
-    const sentinel = document.createElement("div");
-    sentinel.setAttribute("aria-hidden", "true");
-    sentinel.style.cssText = "position:absolute;top:100dvh;height:1px;width:1px;";
-    document.body.prepend(sentinel);
+  // Scroll state and the progress-fill fallback live in scripts/nav.ts
+  // (CLAUDE.md §5 cap).
+  import { initNav } from "../scripts/nav";
 
-    new IntersectionObserver(
-      ([entry]) => nav.classList.toggle("is-scrolled", !entry.isIntersecting),
-      { rootMargin: "0px" },
-    ).observe(sentinel);
-  }
-
-  // Progress fill, script branch: only where scroll-driven CSS is unavailable
-  // (Firefox as of 152). Same shape as the hero fallback — rAF-throttled,
-  // reads only, one style write per frame. Everywhere else the @supports
-  // block in <style> drives the fill with no script at all.
-  if (!CSS.supports("animation-timeline: scroll()")) {
-    const fill = document.querySelector<HTMLElement>("[data-progress-fill]");
-    if (fill) {
-      let ticking = false;
-
-      const update = () => {
-        ticking = false;
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
-        fill.style.setProperty("--scroll-progress", progress.toFixed(4));
-      };
-
-      const onScroll = () => {
-        if (!ticking) {
-          ticking = true;
-          requestAnimationFrame(update);
-        }
-      };
-
-      update();
-      addEventListener("scroll", onScroll, { passive: true });
-      addEventListener("resize", onScroll, { passive: true });
-    }
-  }
+  initNav();
 </script>
 
 <style>
@@ -141,6 +105,22 @@ const links = [
 
   .link:hover {
     color: var(--accent);
+  }
+
+  /* Phone step-down (PRD §5.1). At 375px the mark plus four 12px / 0.12em
+     labels need 383px of 327px; at --size-meta (the footer links' size) with
+     the pills' 0.06em tracking and a 0.75rem gap they fit 375 and 360 with
+     22px and 7px to spare. Measured, not assumed — see SESSION.md. */
+  @media (max-width: 479.98px) {
+    .mark,
+    .link {
+      font-size: var(--size-meta);
+      letter-spacing: 0.06em;
+    }
+
+    .links {
+      gap: 0.75rem;
+    }
   }
 
   /* --- Scroll progress (PRD §5.1) ---------------------------------------
