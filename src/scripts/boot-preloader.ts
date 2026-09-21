@@ -5,6 +5,7 @@
  * Progress is read from the page's real load state rather than played off a
  * fixed clock, so the number the visitor sees means something.
  */
+import { slotAt, slotOpen } from "./boot-schedule";
 import { createStatusWriter } from "./boot-status";
 
 /**
@@ -68,8 +69,9 @@ const toStep = (r: number) => Math.floor(r * STEPS);
 /**
  * Run the loading sequence over an already-rendered overlay.
  *
- * @param minDwellMs the window the steps are paced across. An instant load
- *   still walks every step rather than flashing to 100%.
+ * @param minDwellMs the window the steps are paced across, on the fixed
+ *   rhythm in boot-schedule.ts. An instant load still walks every step rather
+ *   than flashing to 100%.
  * @param graceMs hard cap on the whole sequence. Armed at t=0, not after the
  *   dwell: a `load` that never fires must not strand the visitor behind the
  *   overlay (the increment 1.7 bug — do not move this back inside a callback).
@@ -93,7 +95,6 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   const band = root.querySelector<HTMLElement>("[data-band]");
   const status = createStatusWriter(root.querySelector<HTMLElement>("[data-stage]"));
   const start = performance.now();
-  const slotMs = minDwellMs / STEPS;
   /** Highest step the page has genuinely reached. */
   let recorded = 0;
   /** Step currently on screen. Never exceeds `recorded`. */
@@ -156,7 +157,7 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   /**
    * Paced reveal. Every frame records the highest step the page has genuinely
    * reached. Step k may go on screen once it has been reached AND its time
-   * slot (k × dwell / STEPS) has opened. On an instant load that walks the
+   * slot (boot-schedule.ts) has opened. On an instant load that walks the
    * steps across the dwell; on a slow load the slots are already behind, so a
    * checkpoint shows the frame it lands — and a real jump shows as a jump.
    * Nothing is ever shown ahead of true readiness: the pacing only decides
@@ -167,14 +168,16 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
     const elapsed = performance.now() - start;
     recorded = Math.max(recorded, toStep(readiness()));
 
-    const slotOpen = Math.floor(elapsed / slotMs);
-    const next = Math.min(recorded, slotOpen);
+    const open = slotOpen(elapsed, minDwellMs);
+    const next = Math.min(recorded, open);
     // While the slots are what paces the climb, keep each step on screen for
-    // most of a slot even if a long frame delayed the one before it — a hitch
-    // must not collapse two steps into one flicker. Once the slots are all
-    // behind, real checkpoints show the frame they land.
-    const paced = slotOpen < recorded;
-    if (next > displayed && (!paced || performance.now() - lastPaint >= slotMs * 0.75)) paint(next);
+    // most of its own slot even if a long frame delayed the one before it — a
+    // hitch must not collapse two steps into one flicker, and a scheduled
+    // pause is never cut short. Once the slots are all behind, real
+    // checkpoints show the frame they land.
+    const paced = open < recorded;
+    const hold = 0.75 * (slotAt(displayed + 1, minDwellMs) - slotAt(displayed, minDwellMs));
+    if (next > displayed && (!paced || performance.now() - lastPaint >= hold)) paint(next);
 
     if (displayed >= STEPS && elapsed >= minDwellMs) {
       finish();

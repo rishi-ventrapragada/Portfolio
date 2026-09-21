@@ -55,11 +55,11 @@ import { statusFor } from "../scripts/boot-copy";
 <script>
   import { runBootSequence } from "../scripts/boot-preloader";
 
-  // 4200ms dwell: an instant load still walks every step rather than
-  // flashing (raised from 2800 in increment 10 — the owner found it too
-  // fast). 6500ms grace cap so a stalled resource can never strand the
-  // visitor.
-  runBootSequence(4200, 6500);
+  // 6000ms dwell, paced on the fixed pause points in boot-schedule.ts: an
+  // instant load still walks every step rather than flashing (2800 in
+  // increment 9, 4200 in 10 — both read too fast). 9000ms grace cap so a
+  // stalled resource can never strand the visitor.
+  runBootSequence(6000, 9000);
 </script>
 
 <style>
