@@ -3,9 +3,9 @@
 // and full links in a panel that opens *below* the frame, attached to its
 // bottom edge and out of grid flow, so the cover stays untouched and no
 // sibling moves. Rendered only when the entry has something real to show.
-// On fine-pointer devices it is collapsed at rest — a 0fr grid row, so its
-// links stay in the tab order and focus can open it — and opens (row 1fr,
-// opacity 1) while the frame — `[data-expandable]`, set by
+// On fine-pointer devices it is laid out at full size but invisible at rest
+// (opacity 0, no pointer events; its links stay in the tab order so focus
+// can open it) and fades in while the frame — `[data-expandable]`, set by
 // ProjectFrame.astro — is hovered or has focus within; on no-hover devices
 // it is `display: none`, out of both the visual and the accessibility
 // tree, so nothing desktop-only can be tapped or tabbed into.
@@ -32,8 +32,6 @@ const { summary, stack, links } = Astro.props;
 </div>
 
 <style>
-  /* Padding lives on .pad, inside the clipped box, so the collapsed
-     height is truly 0 and the children keep their own margins. */
   .pad {
     display: grid;
     gap: 1rem;
@@ -47,29 +45,23 @@ const { summary, stack, links } = Astro.props;
     color: var(--fg);
   }
 
-  /* The height reveal is the grid row going 0fr → 1fr (animatable, no
-     fixed height); the inner box clips (not hides: a scroll container
-     would shift its content when a link inside is focused) and carries the
-     visuals, so at 0fr there is nothing to see. Opacity on the panel keeps
-     the shadow and edge from showing while collapsed. */
+  /* Opacity reveal over a panel that is always laid out at full height.
+     A height animation was tried (increment 15.1): when a keyboard user
+     Tabs into a collapsed panel the browser scrolls the link into view
+     *before* the height grows, and the link ends up below the fold. With a
+     stable box, focus scrolls straight to the right place. */
   @media (hover: hover) and (pointer: fine) {
     .detail {
       position: absolute;
       top: 100%;
       inset-inline: -1px;
       z-index: 3;
-      display: grid;
-      grid-template-rows: 0fr;
       opacity: 0;
       pointer-events: none;
-      transition:
-        grid-template-rows 200ms ease,
-        opacity 160ms ease;
+      transition: opacity 160ms ease;
     }
 
     .inner {
-      min-height: 0;
-      overflow: clip;
       background-color: var(--bg-raised);
       border: 1px solid var(--line);
       border-top: 0;
@@ -78,7 +70,6 @@ const { summary, stack, links } = Astro.props;
 
     :global([data-expandable]:hover) .detail,
     :global([data-expandable]:focus-within) .detail {
-      grid-template-rows: 1fr;
       opacity: 1;
       pointer-events: auto;
     }
