@@ -1,14 +1,15 @@
 ---
-// Experience section (PRD §5.11): an NLE-style monitor above a timeline of
-// clip buttons, pinned while the page scrolls through it. Scrolling scrubs
-// the timeline (scripts/experience-scrub.ts); click, keyboard and hover
-// still work (scripts/experience-timeline.ts). Each clip is one moment; the
-// monitor shows the committed one. Body sentences are the owner's, verbatim.
-// Clip keywords are words taken from those sentences, not new copy.
-// KalaCart's cover is the projects collection's real screenshot, reused
-// through <Image> — no new asset. One frame = ExperienceFrame.astro; ruler,
-// tracks and playhead = ExperienceTrack.astro. Only the heading block sits
-// in the shell: the monitor and the timeline run viewport edge to edge.
+// Experience section (PRD §5.11): a heading in normal flow, then a scroll
+// track whose sticky pin holds only an NLE-style monitor and its timeline.
+// Scrolling the track scrubs the timeline (scripts/experience-scrub.ts);
+// click, keyboard and hover still work (scripts/experience-timeline.ts).
+// Each clip is one moment; the monitor shows the committed one. Body
+// sentences are the owner's, verbatim. Clip keywords are words taken from
+// those sentences, not new copy. KalaCart's cover is the projects
+// collection's real screenshot, reused through <Image> — no new asset. One
+// frame = ExperienceFrame.astro; ruler, tracks and playhead =
+// ExperienceTrack.astro. Only the heading sits in the shell: the monitor and
+// the timeline run viewport edge to edge.
 import { getEntry } from "astro:content";
 import ExperienceFrame from "./ExperienceFrame.astro";
 import ExperienceTrack from "./ExperienceTrack.astro";
@@ -50,37 +51,39 @@ const moments: Moment[] = [
 ];
 ---
 
-{/* The section is the tall scroll track; .pin sticks inside it for the
-    whole distance (the Wordmark.astro technique). Without JavaScript nothing
-    maps scroll to clips, so the <noscript> style makes it a normal
-    content-height block instead (the BootPreloader.astro pattern). */}
 <section class="experience" id="experience" aria-labelledby="experience-heading" data-experience>
+  {/* Without JavaScript nothing maps scroll to clips, so the <noscript>
+      style (the BootPreloader.astro pattern) makes the track a normal
+      content-height block with the increment-13.1 monitor height; flex:
+      none, or the flex basis would override that height. */}
   <noscript>
     <style>
-      [data-experience] { height: auto !important; }
+      [data-scrub] { height: auto !important; }
       [data-pin] { position: static !important; height: auto !important; }
-      /* A size container has no intrinsic height, so give the monitor the
-         increment-13.1 fixed height when nothing pins it (flex: none, or the
-         flex basis would override the height). */
       [data-monitor] { flex: none !important; height: 60vh !important; min-height: 340px !important; }
     </style>
   </noscript>
-  <div class="pin" data-pin>
-    <div class="shell head">
-      <p class="label eyebrow">Journey</p>
-      <h2 id="experience-heading" class="heading">Experience</h2>
-    </div>
 
-    {/* A black screen filling the pinned viewport between heading and
-        timeline. Every frame is in the HTML, stacked in one grid cell, so a
-        swap is a cross-fade inside a box that never changes size. The first
-        is active from the server, so the section reads without JavaScript. */}
-    <div class="monitor" data-monitor>
-      {moments.map((moment, i) => <ExperienceFrame {...moment} index={i} active={i === 0} />)}
-    </div>
+  <div class="shell head">
+    <p class="label eyebrow">Journey</p>
+    <h2 id="experience-heading" class="heading">Experience</h2>
+  </div>
 
-    <div class="track-slot">
-      <ExperienceTrack moments={moments} />
+  {/* The scroll track; .pin sticks inside it for the whole distance (the
+      Wordmark.astro technique) and holds only the monitor and the timeline. */}
+  <div class="scrub" data-scrub>
+    <div class="pin" data-pin>
+      {/* A black screen filling the pinned viewport above the timeline.
+          Every frame is in the HTML, stacked in one grid cell, so a swap is a
+          cross-fade inside a box that never changes size. The first is
+          active from the server, so the section reads without JavaScript. */}
+      <div class="monitor" data-monitor>
+        {moments.map((moment, i) => <ExperienceFrame {...moment} index={i} active={i === 0} />)}
+      </div>
+
+      <div class="track-slot">
+        <ExperienceTrack moments={moments} />
+      </div>
     </div>
   </div>
 </section>
@@ -93,17 +96,35 @@ const moments: Moment[] = [
 </script>
 
 <style>
-  /* --pin-length is the one number to tune: the scroll distance the section
-     occupies. The pin travels (--pin-length − 100dvh); each of the four clip
-     zones is a quarter of that. The anchor lands on the pin start (progress
-     0 = first clip); the pin pads for the fixed nav itself. */
+  /* The anchor keeps the global scroll-margin (nav + 1rem), so the heading
+     lands under the bar and the pin engages once it has scrolled past. */
   .experience {
-    --pin-length: 250vh;
-    height: var(--pin-length);
     border-top: 1px solid var(--line);
-    scroll-margin-top: 0;
   }
 
+  .head {
+    padding-top: var(--rhythm);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: var(--size-h2);
+  }
+
+  /* --pin-length is the one number to tune: the scroll distance the track
+     occupies. The pin travels (--pin-length − 100dvh); each of the four clip
+     zones is a quarter of that. */
+  .scrub {
+    --pin-length: 250vh;
+    height: var(--pin-length);
+  }
+
+  /* 100dvh less the fixed nav, which is opaque past the hero. */
   .pin {
     position: sticky;
     top: 0;
@@ -111,24 +132,6 @@ const moments: Moment[] = [
     flex-direction: column;
     height: 100dvh;
     padding-top: var(--nav-height);
-  }
-
-  /* width: 100% so the shell's auto side margins have no free space to
-     absorb; as a bare flex item it would shrink-wrap and centre. */
-  .head {
-    flex: none;
-    width: 100%;
-    padding-top: 1.5rem;
-  }
-
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--accent);
-  }
-
-  .heading {
-    margin: 0 0 1.25rem;
-    font-size: var(--size-h2);
   }
 
   /* The frames (ExperienceFrame.astro) all take grid-area 1 / 1 here and

@@ -1,8 +1,8 @@
 ---
 // One clip on the Experience timeline's V1 track (PRD §5.11): a real button
-// styled as a solid, textured NLE clip block. Split from ExperienceTrack.astro
-// for the CLAUDE.md §5 line cap. The tone is one of the small palette tokens
-// in global.css, passed in as a custom property.
+// styled as a slim, solid NLE clip block with a one-line label. Split from
+// ExperienceTrack.astro for the CLAUDE.md §5 line cap. The tone is one of
+// the small palette tokens in global.css, passed in as a custom property.
 interface Props {
   id: string;
   year: string;
@@ -33,22 +33,22 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
 </button>
 
 <style>
-  /* Solid block with a faint diagonal texture (currentColor = dark text on
-     the tone). Layered so the shared, unlayered `.planned` utility in
-     global.css wins its border-style and opacity without !important. */
+  /* A 34px block with year and keyword on one line (two stacked lines do
+     not fit legibly at this height). Layered so the shared, unlayered
+     `.planned` utility in global.css wins its border-style and opacity
+     without !important. */
   @layer components {
     .clip {
       position: relative;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.75rem;
+      align-items: center;
+      gap: 0.5rem;
       min-width: 0;
-      min-height: 4.5rem;
-      padding: 0.5rem 0.625rem;
+      min-height: 2.125rem;
+      padding: 0.25rem 0.5rem;
       overflow: hidden;
       color: var(--bg);
+      white-space: nowrap;
       text-align: left;
       background-color: var(--tone);
       border: 1px solid var(--timeline-bg);
@@ -59,6 +59,7 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
         box-shadow 160ms ease;
     }
 
+    /* Faint diagonal texture in currentColor (the dark text colour). */
     .clip::after {
       content: "";
       position: absolute;
@@ -79,15 +80,20 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
   }
 
   .year {
+    flex: none;
+    font-size: 0.625rem;
     color: inherit;
     opacity: 0.8;
   }
 
   .keyword {
+    min-width: 0;
+    overflow: hidden;
     font-family: var(--font-display);
-    font-size: 0.875rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 600;
     line-height: 1.2;
+    text-overflow: ellipsis;
   }
 
   @media (prefers-reduced-motion: reduce) {

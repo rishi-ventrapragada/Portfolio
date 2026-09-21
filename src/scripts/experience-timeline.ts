@@ -44,7 +44,7 @@ export function initExperience(root: HTMLElement): void {
   // Scroll drives the same commit; a click or focus still wins at once and
   // the next zone change takes over again.
   initScrub(
-    root,
+    root.querySelector<HTMLElement>("[data-scrub]") ?? root,
     clips.map((clip) => clip.dataset.clip ?? ""),
     commit,
   );

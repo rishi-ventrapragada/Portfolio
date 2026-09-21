@@ -1,10 +1,11 @@
-// Scroll scrub for the Experience section (PRD §5.11). While the section is
+// Scroll scrub for the Experience section (PRD §5.11). While the track is
 // pinned, progress through its scroll distance picks the clip: four equal
 // zones, one per clip. Only a zone *change* commits, and it commits through
 // the same function click and keyboard use, so there is one path, not two.
 // Reads only, one requestAnimationFrame per scroll event, absolute scrollY
 // each frame so direction does not matter (the hero-dissolve.ts pattern).
-// Listeners are live only while the section is on screen.
+// Listeners are live only while the track is on screen. `section` is the
+// scroll track ([data-scrub]) — the heading above it is ordinary flow.
 
 export function initScrub(section: HTMLElement, ids: readonly string[], commit: (id: string) => void): void {
   let zone = -1;

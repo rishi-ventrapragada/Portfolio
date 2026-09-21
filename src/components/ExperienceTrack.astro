@@ -96,14 +96,20 @@ const wave =
     flex: 0 0 var(--head-w);
     flex-direction: column;
     justify-content: center;
-    gap: 0.125rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.25rem 0.75rem;
     background-color: var(--bg-raised);
     border-right: 1px solid var(--line);
   }
 
   .head .label {
+    font-size: 0.6875rem;
+    line-height: 1.3;
     color: var(--fg);
+  }
+
+  .head .meta {
+    font-size: 0.625rem;
+    line-height: 1.3;
   }
 
   /* Four equal columns in every lane; the lane grows with the scroller and
@@ -121,20 +127,26 @@ const wave =
   }
 
   /* Major tick on the column's left edge, minor ticks every quarter. */
+  /* Font and line-height on the cell itself: the line box follows the
+     block, not the span, so the row stays ~22px. */
   .tick {
-    padding: 0.375rem 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    line-height: 1.3;
     border-left: 1px solid var(--line);
     background: repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px 25%) bottom /
       100% 5px no-repeat;
   }
 
   .tick .meta {
+    font-size: inherit;
     letter-spacing: 0.06em;
   }
 
   .audio {
-    height: 2.5rem;
-    padding: 0.375rem 0.5rem;
+    box-sizing: border-box;
+    height: 1.5rem;
+    padding: 0.25rem 0.5rem;
     color: var(--tone);
     opacity: 0.35;
   }
