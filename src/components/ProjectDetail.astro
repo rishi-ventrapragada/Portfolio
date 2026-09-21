@@ -1,12 +1,14 @@
 ---
 // The expandable detail of a project frame (PRD §5.3): summary, stack pills
-// and full links, laid over the cover. Rendered only when the entry has
-// something real to show. On fine-pointer devices it is invisible at rest
-// (its links stay in the tab order, so focus can open it) and revealed while
-// the frame — `[data-expandable]`, set by ProjectFrame.astro — is hovered or
-// has focus within; on no-hover devices it is `display: none`, out of both
-// the visual and the accessibility tree, so nothing desktop-only can be
-// tapped or tabbed into. Split from ProjectFrame.astro for the line cap.
+// and full links in a panel that opens *below* the frame, attached to its
+// bottom edge and out of grid flow, so the cover stays untouched and no
+// sibling moves. Rendered only when the entry has something real to show.
+// On fine-pointer devices it is collapsed at rest — a 0fr grid row, so its
+// links stay in the tab order and focus can open it — and opens (row 1fr,
+// opacity 1) while the frame — `[data-expandable]`, set by
+// ProjectFrame.astro — is hovered or has focus within; on no-hover devices
+// it is `display: none`, out of both the visual and the accessibility
+// tree, so nothing desktop-only can be tapped or tabbed into.
 import Pills from "./Pills.astro";
 import ProjectLinks from "./ProjectLinks.astro";
 
@@ -20,40 +22,71 @@ const { summary, stack, links } = Astro.props;
 ---
 
 <div class="detail">
-  {summary && <p class="summary">{summary}</p>}
-  {stack && <Pills items={stack} label="Stack" />}
-  <ProjectLinks links={links} variant="full" />
+  <div class="inner">
+    {summary && <p class="summary">{summary}</p>}
+    {stack && <Pills items={stack} label="Stack" />}
+    <ProjectLinks links={links} variant="full" />
+  </div>
 </div>
 
 <style>
+  .inner {
+    display: grid;
+    gap: 1rem;
+  }
+
   .summary {
     margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
+    font-size: 1rem;
+    line-height: 1.6;
     color: var(--fg);
   }
 
+  /* The height reveal is the grid row going 0fr → 1fr (animatable, no
+     fixed height); the inner box clips (not hides: a scroll container
+     would shift its content when a link inside is focused) and carries the
+     visuals, so at 0fr there is nothing to see. Opacity on the panel keeps
+     the shadow and edge from showing while collapsed. */
   @media (hover: hover) and (pointer: fine) {
     .detail {
       position: absolute;
-      inset: 0;
+      top: 100%;
+      inset-inline: -1px;
+      z-index: 3;
       display: grid;
-      gap: 0.75rem;
-      align-content: end;
-      padding: 1rem;
-      overflow: auto;
-      background: linear-gradient(
-        to top,
-        color-mix(in srgb, var(--bg) 92%, transparent) 70%,
-        color-mix(in srgb, var(--bg) 45%, transparent)
-      );
+      grid-template-rows: 0fr;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 160ms ease;
+      transition:
+        grid-template-rows 200ms ease,
+        opacity 160ms ease;
+    }
+
+    .inner {
+      min-height: 0;
+      overflow: clip;
+      background-color: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-top: 0;
+      box-shadow: 0 24px 48px color-mix(in srgb, var(--monitor-bg) 60%, transparent);
+    }
+
+    /* Padding inside the clipped box, so the collapsed height is truly 0. */
+    .inner > :global(*) {
+      margin-inline: 1.25rem;
+    }
+
+    .inner > :global(:first-child) {
+      margin-top: 1.25rem;
+    }
+
+    .inner > :global(:last-child) {
+      margin-bottom: 1.25rem;
     }
 
     :global([data-expandable]:hover) .detail,
     :global([data-expandable]:focus-within) .detail {
+      grid-template-rows: 1fr;
       opacity: 1;
       pointer-events: auto;
     }

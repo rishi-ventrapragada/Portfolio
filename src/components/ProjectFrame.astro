@@ -1,8 +1,9 @@
 ---
 // One film frame of the Projects contact sheet (PRD §5.3): sprocket strips
 // top and bottom, the cover, then a caption of title and frame number. On
-// fine-pointer devices, hovering or focusing a link inside expands the
-// frame in place and reveals the summary, stack and links over the cover;
+// fine-pointer devices, hovering or focusing a link inside lifts the frame
+// a little and opens a panel of summary, stack and links below it — the
+// cover itself is never covered;
 // everywhere else the links sit under the caption as small always-visible
 // affordances and nothing expands. `status` is never printed: a planned
 // entry takes the shared `.planned` utility and renders no detail at all,
@@ -43,7 +44,6 @@ const expandable = !!(summary || stack || links);
       loading="lazy"
       decoding="async"
     />
-    {expandable && <ProjectDetail summary={summary} stack={stack} links={links} />}
   </div>
 
   {/* h3: the section owns the h2 and the hero owns the page's only h1.
@@ -56,6 +56,10 @@ const expandable = !!(summary || stack || links);
   <div class="quick">
     <ProjectLinks links={links} variant="quick" />
   </div>
+
+  {/* Absolutely positioned under the frame's bottom edge, so it never
+      takes grid space. */}
+  {expandable && <ProjectDetail summary={summary} stack={stack} links={links} />}
 </article>
 
 <style>
@@ -120,9 +124,10 @@ const expandable = !!(summary || stack || links);
     padding: 0 0.75rem 0.5rem;
   }
 
-  /* Hover / focus expand, only where a hover exists: the frame scales in
-     place (transform only), so siblings never move. The panel itself is
-     ProjectDetail.astro. */
+  /* Hover / focus expand, only where a hover exists: the frame lifts a
+     little (transform only, so siblings never move) and its panel opens
+     below it (ProjectDetail.astro). The panel is the main event, so the
+     scale stays modest. z-index puts the open panel over the next row. */
   @media (hover: hover) and (pointer: fine) {
     .quick {
       display: none;
@@ -137,7 +142,7 @@ const expandable = !!(summary || stack || links);
     .frame[data-expandable]:hover,
     .frame[data-expandable]:focus-within {
       z-index: 2;
-      transform: scale(1.04);
+      transform: scale(1.02);
       box-shadow: 0 24px 48px color-mix(in srgb, var(--monitor-bg) 60%, transparent);
     }
   }
