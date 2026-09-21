@@ -201,7 +201,16 @@ to auto) at 1280×900 and 375×667:
 - Console clean on every run. Screenshots reviewed: desktop × four states
   (playhead in each position), keyboard-focus, violet, reduced motion, 375
   web and KalaCart.
-- **Live**: [TODO — filled in after the deploy below]
+- **Deployed and aliased.** Git integration built
+  `rishi-ventrapragada-1yx5nzc7f-rishiventra.vercel.app` (Ready, 21s);
+  `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it, and the
+  vanity HTML is byte-identical (sha1) to the deployment, to the
+  `portfolio-gamma-lake` production domain and to the local `dist`. The
+  same harness run against the vanity URL: every number above identical —
+  playhead delta 0 in all eight states, ticks 0px off, monitor 540 /
+  400.19, A1 0 focusables, Tab order, Enter / Space, scroll-hover
+  (`mouseenter` ×1, no change; real move previews; leave reverts), reduced
+  motion `0s`, no-JS first frame, both accents, console clean.
 
 ### Known, open
 
