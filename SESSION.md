@@ -209,7 +209,11 @@ server over `dist/`, `boot-seen` pre-set so the preloader is skipped;
 - Owner to supply five panel artworks and five captions (ASSETS.md).
 - `public/resume.pdf` still missing; the footer link 404s.
 - The GDG line has no home until Community (§5.7).
-- Vercel alias: set after the docs push (below).
+- Vercel alias: pointed at the docs deployment and verified on the vanity
+  URL itself (curl: no "Currently building", `data-about-page`, credits,
+  all four hrefs; live CDP: `animation-name: grade` with motion allowed,
+  `none / none` with reduced motion forced; `live-about.png`,
+  `live-footer.png`). Re-pointed once more after this line landed.
 
 ## 2026-09-21 — increment 15.1
 
