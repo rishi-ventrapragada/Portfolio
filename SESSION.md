@@ -92,6 +92,121 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 14.1
+
+### Last milestone completed
+
+**Experience: layout, hierarchy, polish** (PRD §5.11), three commits in
+order. *Layout:* the "Journey / Experience" heading is normal flow ahead of
+the scroll track; the sticky pin holds only the monitor and the timeline;
+the timeline is a 90px strip (ruler 22, V1 39 with 34px clips, A1 29) and
+the monitor takes the rest — 744px at 1280×900 (was 539), 496px at 375×667
+(was 309). *Hierarchy:* the monitor no longer repeats the clip keyword as an
+`<h3>`; the verbatim sentence is the dominant text (display 700, heading
+size, ≤ 24ch) under a small year label. *Polish:* the A1 row is a seeded
+bar waveform (40 rects per clip), its label is `A1 audio` (uppercased by
+`.meta`, matching `V1 video`), and the clips are a flat tone fill with a
+2px darker bottom edge — no stripes.
+
+Files: `ExperienceTimeline.astro` (154 lines), `ExperienceFrame.astro`
+(151), `ExperienceTrack.astro` (**200 — at the CLAUDE.md §5 cap**; the next
+addition must split the A1 row or the ruler out), `ExperienceClip.astro`
+(103), `experience-timeline.ts` (one line: the scrub measures
+`[data-scrub]`), `experience-scrub.ts` (comment only).
+
+### Premise correction, recorded
+
+The brief for the A1 row asked to reuse "the top nav's scroll-progress
+waveform (many thin vertical bars)". **The nav has no such thing**: its
+progress indicator is one 2px hairline whose fill is `scaleX(--scroll-
+progress)` (`Nav.astro`, `.progress` / `.fill`), and nothing in `src/` drew
+vertical bars. The bars were built new, as the brief described them, in
+`ExperienceTrack.astro`'s frontmatter. Flagged in the plan before building.
+
+### Decisions worth knowing before you touch this
+
+- **Texture: flat fill + darker edge won.** Both were screenshotted at 2×
+  on the built page (`shots141/texture-*.png` in the session scratchpad):
+  a faint stripe (opacity 0.05, 6px period) still read as a pattern laid
+  over the block; the flat fill with `inset 0 -2px 0 color-mix(tone 65%,
+  timeline-bg)` reads like an NLE clip. The pressed ring is layered over
+  the edge in the same `box-shadow`. "Accent-coloured bottom border" in the
+  brief was read as *a darker accent of the clip's own tone*, not
+  `--accent`: the site's accent already means "active" here (pressed ring,
+  playhead).
+- **Clip label is one line** (year · keyword, 10px / 12px). Two stacked
+  lines do not fit 34px. At 375 the four labels leave 42 / 62 / 55 / 64px
+  spare in their 150px columns — no wrap (`white-space: nowrap`), no
+  ellipsis reached. `.keyword` has `text-overflow: ellipsis` as the guard
+  for any longer future keyword.
+- **Track headers are one line too** (`V1 video`): a two-line header made
+  the A1 row 36px because the header, not the 24px cell, set the row
+  height. Same for the ruler: font-size and line-height sit on `.tick`
+  itself, or the parent's 16px line box makes the row 34px.
+- **Year label + sentence starting with the year** ("2025" above "2025 —
+  Learnt…") is now visibly redundant in the monitor. Both are as specified
+  (year label stays, sentence verbatim); dropping the label or the sentence
+  prefix is the owner's call, not mine.
+- **Anchor landing**: section top at 80px, heading 81–260, monitor top at
+  292; the pin engages when the track's top reaches 0, about 210px of
+  scrolling later. Progress is 0 until then, so the first clip is already
+  committed.
+- **`--pin-length` moved from the section to the track** (`.scrub`) and is
+  still 250vh: the pin travels the same 150vh, zones are the same 37.5vh;
+  the heading simply adds its own scroll before the track. The no-JS
+  `<noscript>` block targets `[data-scrub]` now.
+- **`keyword` stays in `ExperienceFrame`'s Props** (optional, unused) so the
+  moment can still be spread into it.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.11** — rewritten in full: heading outside the pin, pin contents,
+  anchor landing, monitor hierarchy and heights, row dimensions, waveform
+  and its premise note, texture decision. **§10** — line 12.
+- **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`verify14.mjs` (re-pointed at `[data-scrub]`, plus layout, anchor and
+375-label checks), `verify.mjs` (13.1 suite) and `polish.mjs` in the
+session scratchpad, headless Chrome over CDP at 1280×900 and 375×667:
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints.
+- **Pin children**: `monitor`, `track-slot` — nothing else.
+- **Heading**: bottom at 260 on anchor landing (visible), −437 while pinned
+  at 30 %, −1450 after release (above the viewport throughout the pin).
+- **Rows**: 22 / 39 / 29, timeline 90; clip 34; at 375 identical.
+- **Monitor**: 744.1 at 1280, 496.1 at 375, one value across all four
+  states; every frame's content inside the box at 375.
+- **Scrub**: track height 2.5 × innerHeight; forward `web, python,
+  kalacart, recurzn`, backward the reverse; edges `web → python` at 25 %,
+  `python → kalacart` at 50 %, `kalacart → recurzn` at 75 % (±1px); pin
+  `top` 0 while pinned; playhead 0px off at every step; `scrollWidth ===
+  clientWidth`.
+- **Release**: 0.6 viewport past the track, pin top −68 / −51, element at
+  the viewport bottom `#projects`.
+- **Wheel** → python; **click Recurzn in zone 0** → committed at once,
+  held through a same-zone scroll, python at zone 1; **hover at 60 %**
+  previews python and reverts to kalacart; **keyboard** at 5 / 40 / 95 %
+  focus / Enter / Space all commit.
+- **Reduced motion**: pin sticky, scroll commit lands, frame and playhead
+  `0s`. **No-JS**: pin static, track = content height (696), monitor 540,
+  heading in flow above the track, first clip pressed.
+- **13.1 suite**: playhead 0px off in all eight states, ticks 0px off, A1 0
+  focusables, Tab order, Enter / Space, scroll-hover guard, both accents,
+  image loads, console clean.
+- **Screenshots reviewed**: before (increment 14) vs after at 1280 and 375;
+  2× close-ups of the timeline strip at both widths, of the two textures
+  side by side, of the A1 bars and the nav hairline.
+- **Live**: [TODO — filled in after the deploy]
+
+### Known, open
+
+- `ExperienceTrack.astro` is at the 200-line cap.
+- 320px nav collision (standing constraint above).
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain.
+
 ## 2026-09-21 — increment 14
 
 ### Last milestone completed
