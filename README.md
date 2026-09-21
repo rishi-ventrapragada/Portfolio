@@ -32,14 +32,15 @@ src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
   components/                 Nav, Hero, Wordmark, About, TechStack, Pills,
                               ProjectsSection, ProjectCard, CurrentlyBuilding,
-                              ExperienceTimeline, ExperienceFrame,
+                              ExperienceTimeline, ExperienceFrame, ExperienceTrack,
+                              ExperienceClip,
                               Footer, BootPreloader, BootSquare, AccentToggle (dev only)
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
   pages/index.astro           the whole site: one page, anchored sections
   scripts/                    boot-*.ts, hero-dissolve.ts, nav.ts,
-                              experience-timeline.ts
+                              experience-timeline.ts, experience-playhead.ts
   styles/global.css           all design tokens
 ```
 

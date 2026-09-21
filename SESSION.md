@@ -92,6 +92,123 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 13.1
+
+### Last milestone completed
+
+**Visual-only correction to increment 13.** The Experience section (PRD
+§5.11) now looks like an editing timeline instead of a content card: a
+full-bleed black monitor (60vh, min 340px) over a near-black timeline with a
+ruler, a V1 track of solid colour-coded clip buttons, a decorative A1 track
+of waveform squiggles, sticky track headers and a measured, animated
+playhead. **Content and accessibility are unchanged**: the same four
+moments, the same verbatim sentences, the same KalaCart cover through
+`<Image>`, real buttons with `aria-pressed` / `aria-describedby`, Tab /
+Enter / Space, no-JS first frame, reduced motion. Owner's one change at
+plan approval: the monitor and timeline run viewport edge to edge (the
+heading stays at shell width).
+
+Files: `ExperienceTimeline.astro` (section, data, monitor box — 101 lines),
+`ExperienceFrame.astro` (one frame, 140), new `ExperienceTrack.astro`
+(ruler, rows, playhead, 182) and `ExperienceClip.astro` (one clip, 98 —
+split out when the track file hit 267), `experience-timeline.ts` (86) and
+new `experience-playhead.ts` (35). Tokens: `--monitor-bg: #000000` and
+`--timeline-bg: #0b0c0e` added in `global.css`; the clips consume the
+previously unused `--word-amber / sky / mint / periwinkle`.
+
+### Decisions worth knowing before you touch this
+
+- **`--monitor-bg` is the site's one pure-black surface.** CLAUDE.md §3
+  says "never pure black"; the owner asked for `#000` on the monitor
+  explicitly (increment 13.1 brief) so it reads as a screen. It is a token
+  so no component hardcodes the hex, and PRD §4.2 says nothing else may use
+  it. That rule in CLAUDE.md was *not* edited — this is a recorded
+  exception, not a new standing rule.
+- **The playhead follows the hover preview**, not only the committed clip:
+  a playhead sits wherever the monitor is. It snaps back on `mouseleave`.
+- **No `mouseenter` anywhere.** Scrolling the page under a stationary
+  cursor fires `mouseenter` on whatever lands under it (Chrome fired
+  exactly one in the regression run), which looked like the clips cycling
+  by themselves. Preview now needs a `mousemove` whose coordinates differ
+  from the last one *and* land inside the clip's rect. Keep it that way.
+- **Playhead x is measured, never index math.** `getBoundingClientRect()`
+  of the active clip minus the rows' rect, applied as `translateX`, with a
+  `ResizeObserver` on the rows and the V1 lane. Its CSS default
+  (`--head-w + 3px`) equals the measured first-clip position, so the no-JS
+  page matches: 0px off at both widths.
+- **Alignment is structural.** Every row is `header (90px sticky) | lane`,
+  every lane the same `repeat(4, minmax(150px, 1fr))` grid. If you change
+  one lane's columns or padding, change all three or the ticks drift.
+- **Fixed-height monitor**: the frames are still stacked in one grid cell
+  (that is the cross-fade mechanism), but the height no longer depends on
+  them. The KalaCart cover is capped at `30vh` tall so it cannot overflow
+  the 340px minimum; measured fit at 1280×900 and 375×667.
+- **Accessible name changed shape, not content**: the clip's name is now
+  "2025 JavaScript" (two spans) instead of "2025 · JavaScript"; the
+  description is still the sentence.
+- **Screenshot harness artefact**: `captureBeyondViewport` with a clip
+  paints the fixed nav as a ghost band inside section captures. A plain
+  viewport capture shows no band. Not a page bug.
+- At 1280×900 the section is taller than the viewport (heading + 60vh +
+  timeline ≈ 930px), so the timeline sits just under the fold when the
+  anchor lands the section top at 80px. Expected with 60vh; owner's call if
+  it should be shorter.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §4.2** — `--monitor-bg`, `--timeline-bg`, and the small palette
+  listed as used by §5.11. **§5.11** — rewritten in full for the new
+  structure (content table unchanged). **§10** — line 10 for 13.1.
+- **README** — component and script lists. **global.css** — the palette
+  comment no longer says UNUSED. **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+Headless Chrome over CDP (`verify.mjs` + `cdp.mjs` in the session
+scratchpad; preloader skipped via `sessionStorage`, scroll-behavior forced
+to auto) at 1280×900 and 375×667:
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints. Longest
+  Experience file 182.
+- **Client JS: 3585 B gzipped, six inline blocks, no external script**
+  (cap 40 KB; increment 13 was 3272 B).
+- **Playhead**: left edge exactly on the active clip's left edge (delta
+  0.00) in all four states at 1280 (92 / 385.25 / 678.5 / 971.75) and at
+  375 (92 / 244 / 396 / 548). Transition `0.2s`; `0s` under reduced motion.
+- **Ruler**: each tick's left edge 0px off its clip's, both widths.
+- **Monitor**: height 540 at 1280 and 400.19 at 375 in every state; `left`
+  0 and width = `clientWidth` (1265 / 360 with headless scrollbars);
+  `scrollWidth` = `clientWidth` (no page overflow); every frame's content
+  inside the box.
+- **A1 row**: 0 focusable elements. **Tab order** from the last project
+  link: web → python → kalacart → recurzn → footer Email → GitHub; each
+  focus commits and `:focus-visible` matches; nothing inside the A1 row.
+- **Enter / Space** on a stale state recommit (`aria-pressed` true, frame
+  active).
+- **Scroll-hover regression**: cursor parked over where the KalaCart clip
+  would land, page scrolled under it → `mouseenter` fired once,
+  `mousemove` zero times, state stayed web / web. A real 3px move →
+  kalacart previewed, web still pressed, playhead on kalacart. Move off →
+  web / web.
+- **Reduced motion**: frame and playhead `transition-duration 0s`; after a
+  click the new frame is at opacity 1 and the old at 0 / hidden at once.
+- **No-JS**: first frame visible, first clip pressed, playhead 0px off the
+  first clip; KalaCart `<img>` has `width` / `height` (1272 × 700),
+  `loading="lazy"`, alt; every image has `alt`; one `<h1>`.
+- **Image** loads: 636w WebP, natural 560 × 308, rendered 491 × 270.
+- **Accents**: playhead and pressed ring `#ff3b5c` under crimson,
+  `#a78bfa` under violet; planned clip `opacity 0.5`, `dashed` in both.
+- Console clean on every run. Screenshots reviewed: desktop × four states
+  (playhead in each position), keyboard-focus, violet, reduced motion, 375
+  web and KalaCart.
+- **Live**: [TODO — filled in after the deploy below]
+
+### Known, open
+
+- 320px nav collision (standing constraint above).
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain.
+
 ## 2026-09-21 — increment 13
 
 ### Last milestone completed
