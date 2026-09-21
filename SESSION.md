@@ -92,6 +92,109 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-21 — increment 15
+
+### Last milestone completed
+
+**Projects is a film-strip contact sheet** (PRD §5.3): one `ProjectFrame`
+per collection entry in an `auto-fill` grid, each with sprocket strips, a
+frame number, the cover, the title and a year tag; on fine-pointer devices a
+frame with real detail expands in place on hover or keyboard focus (scale
+1.04, shadow, summary + `Pills` stack + links over the cover); on no-hover
+devices nothing expands and small "Live site ↗ / GitHub ↗" affordances sit
+under the caption. Zero client JavaScript. The projects collection, its
+schema and both entries are unchanged. Owner's change at approval: the tag
+shows **only the year**; `status` stays unprinted and `.planned` on the
+article is the planned frame's only signal.
+
+Files: new `ProjectFrame.astro` (162), `ProjectDetail.astro` (73),
+`ProjectLinks.astro` (81); `ProjectsSection.astro` rewritten (45);
+`ProjectCard.astro` **deleted** (only `ProjectsSection` imported it; the
+comment in `content.config.ts` now names `ProjectLinks`).
+
+### Decisions worth knowing before you touch this
+
+- **Keyboard expand is `:focus-within`, not a focusable article.** The
+  panel's links are in the tab order while the panel is at `opacity: 0`;
+  focusing one reveals it in the same tick. No `tabindex` on the frame, so
+  there is no non-interactive tab stop. A frame with no links (planned) is
+  not reachable, and has nothing to reach.
+- **The panel is `display: none` on no-hover devices, not conditionally
+  rendered.** The server cannot know the pointer; `display: none` under
+  `@media not all and (hover: hover) and (pointer: fine)` removes the
+  panel from the accessibility tree and the tab order (measured with touch
+  emulation at 375: the section's tab stops are only the two quick links).
+  The quick row is hidden the same way on fine pointers.
+- **Planned frame: static.** No `.detail` is rendered (`data-expandable`
+  absent), so no hover transform either. Nothing fabricated.
+- **One tag tone for every frame** (`--word-amber`). Colour-coding the tag
+  by status was in the plan; the owner struck status from the tag, and a
+  status-coloured tag would have been a status signal by another name.
+- **Sprockets: `background-repeat: space`.** Whole 16px tiles only, the
+  remainder spread between them, so the last hole is never clipped at the
+  frame's edge at any width (2× corner close-ups at 1280 and 375).
+- **`auto-fill`, not `auto-fit`.** Two frames occupy two of three slots at
+  1280; a third entry drops into the empty one. Verified with a throwaway
+  `zzz-test.json` (+ a copied cover): three on one row at 1280, stacked at
+  375, no overflow; then deleted and rebuilt, `git status` clean.
+- **The `.detail` reveal rule lives in `ProjectDetail.astro`** as
+  `:global([data-expandable]:hover) .detail` (and `:focus-within`): the
+  child cannot see the parent's scoped class, and the attribute is set by
+  the frame only when a panel exists.
+- **Harness gotcha:** `Emulation.setEmulatedMedia` ignores `hover` /
+  `pointer`; `Emulation.setTouchEmulationEnabled` (maxTouchPoints ≥ 1) with
+  a `mobile: true` viewport is what flips those queries in headless Chrome.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.3** — rewritten in full for the contact sheet. **§5.11** — the
+  "ProjectCard still uses its own data-status rule" note is gone (the
+  frame uses `.planned`). **§6** — "dims the card" → "dims and dashes the
+  frame". **§10** — line 13.
+- **README** — component list. **`content.config.ts`** — two comments.
+  **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`verify15.mjs` in the session scratchpad (headless Chrome over CDP, 1280×900
+fine pointer and 375×667 touch-emulated), `third.mjs` for the grid test:
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints; `grep
+  ProjectCard src` → 0 hits; no `.card` in the DOM.
+- **Client JS unchanged: 3839 B gzipped, six inline blocks** — the section
+  adds none.
+- **Grid**: 3 columns at 1280, 1 at 375; Experience precedes Projects.
+- **Rest**: KalaCart `transform none`, panel opacity 0 / pointer-events
+  none, links "Live site", "GitHub"; Recurzn `.planned` → opacity 0.5,
+  dashed border, no panel; sprockets `space no-repeat / 14px` on both.
+- **Hover KalaCart** (real two-step `mouseMoved`): `matrix(1.04,…)`,
+  z-index 2, shadow on, panel opacity 1 / pointer-events auto; **Recurzn's
+  rect identical** before, during and after. Hover Recurzn: no transform,
+  no shadow. Mouse off: KalaCart back to `none`, panel 0.
+- **Keyboard**: from the Recurzn clip, Tab → "Live site" (in the panel,
+  frame at 1.04, panel opacity 1, `:focus-visible`), Tab → "GitHub", Tab →
+  footer Email (out of the section). Enter on "Live site" fires a click
+  with `https://kalacart-website.vercel.app/`.
+- **Reduced motion**: frame and panel `transition-duration 0s`; transform
+  already `1.04` and panel opacity `1` immediately after the hover moves.
+- **375 touch**: `(hover: hover) and (pointer: fine)` false; panel
+  `display: none`; quick links "Live site ↗", "GitHub ↗" visible on
+  KalaCart, none on Recurzn; no pills visible; tab order from the last
+  clip: the two quick links, then the footer; `scrollWidth ===
+  clientWidth`.
+- **Third project**: see above.
+- Console clean. Screenshots reviewed: 1280 rest, hover-expanded KalaCart,
+  hover on Recurzn (static), keyboard-focus-expanded, reduced-motion hover,
+  375 rest, sprocket corners at both widths, three-frame grid at both.
+- **Live**: [TODO — filled in after the deploy]
+
+### Known, open
+
+- `ExperienceTrack.astro` is at the 200-line cap.
+- 320px nav collision (standing constraint above).
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain.
+
 ## 2026-09-21 — increment 14.1
 
 ### Last milestone completed

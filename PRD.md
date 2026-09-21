@@ -28,7 +28,7 @@ One page, `/`, with anchored sections in this order. The nav (§5.1) links to th
 | About: photo, story, GDG line | `#about` | §5.6 |
 | Tech stack: six category cards of tags | `#skills` | §5.6 |
 | Experience: pinned, scroll-scrubbed monitor + clip timeline of four moments | `#experience` | §5.11 |
-| Projects: one card per project, then "currently building" | `#projects` | §5.3, §5.4 |
+| Projects: film-strip contact sheet, one frame per project, then "currently building" | `#projects` | §5.3, §5.4 |
 | Contact: the footer | `#contact` | §5.8 |
 
 No `/projects` index, no case study pages, no `/community` page. A Community section is `[later]` (§5.7).
@@ -126,15 +126,20 @@ Scroll behaviour over the first 40% of the hero's height:
 - Reduced motion: opacity fade only, no blur or movement.
 - Mobile: wordmark at 88vw, pushed down from the nav so the figure still reaches into it; subject scaled to fit height.
 
-### 5.3 Project cards `[now]`
-One card per project in the Projects section, from the projects collection (§6). Each card: cover image (`<Image>`, lazy; the image sets its own aspect ratio so a screenshot is never cropped), then a heading line `Title · Year` (one `<h3>`, the year in `--fg-muted`), the one-line summary, the stack as tag pills (`Pills.astro`, shared with §5.6), and a links row.
+### 5.3 Project frames `[now]`
+The Projects section (`#projects`, after Experience per §3) is a **film-strip contact sheet** (increment 15; the split-layout card from increments 6–7 is gone). `ProjectsSection.astro` reads the collection (§6), sorts by `order` and lays one `ProjectFrame.astro` per entry in a grid; `ProjectDetail.astro` is a frame's expandable panel and `ProjectLinks.astro` its links. **No client script**: hover, `:focus-within` and a pointer media query do everything.
 
-- **`status` is never printed.** Increment 7 removed the `status · year` eyebrow; the field only drives the planned state below.
-- **Links row.** `links.live` renders as "Live site" and `links.repo` as "GitHub", each an `<a>` only when the value is a real `http(s)` URL; any other value renders as visible mono text, never as an href (CLAUDE.md §7). The row is omitted when `links` is absent. KalaCart's repo is public as of increment 7, so both of its links are real.
-- **Planned projects.** `status: "planned"` renders the card at `opacity: 0.5` with only the cover (a placeholder, §7), the title and the year if known — no summary, no stack, no links. The schema makes those fields optional and, for every other status, required (§6), so a shipped project can never silently render empty.
-- **No case study, so no stretched link and no card hover.** The links row is the only way out of the card; the title is plain text.
-- **No demo video.** Removed in increment 6.
-- The grid is `repeat(auto-fit, minmax(28rem, 1fr))`: two cards sit side by side from roughly 60rem and stack below it. A lone card splits into cover + text at ≥768px via `:only-child`, which stops matching the moment a second card exists.
+**Grid.** `repeat(auto-fill, minmax(min(100%, 20rem), 1fr))`, 1.5rem gap: three slots at 1280 (two filled today, the third empty like a contact sheet), one column at 375. `auto-fill`, not `auto-fit`, so frames keep their slot size and a later entry drops into the next slot with no rewrite — measured with a throwaway third entry: three frames on one row at 1280, stacked at 375, no overflow. The increment-6 `:only-child` split is gone; a lone frame in a three-slot sheet is the intended look.
+
+**Frame (rest state, every device, every status).** An `<article>` on `--bg-raised` with a 1px `--line` edge, in this order: a **sprocket strip** (`::before`, 14px, `radial-gradient` holes in `--bg` on 16px tiles with `background-repeat: space`, so only whole holes render and none is clipped at the frame's edge at any width); the frame number `Frame 001` (`.meta`, zero-padded from the sheet index); the cover through `<Image>` (own ratio, never cropped, inset 0.75rem, `sizes` 400px from 768px); a caption row with the `<h3>` title and a **year tag** (`.label`, `--word-amber` ground, `--bg` text); a second sprocket strip (`::after`). **`status` is never printed** (the increment-7 rule stands): a planned entry takes the shared `.planned` utility on the article — `opacity: 0.5` and a dashed edge — and that is its only signal. The frame's own defaults sit in `@layer components` so the unlayered utility wins.
+
+**Hover / focus expand — fine pointers only** (`@media (hover: hover) and (pointer: fine)`). A frame with something real to show (`summary`, `stack` or `links`; marked `data-expandable`) carries a `.detail` panel absolutely positioned over its cover: the summary at 0.875rem, the stack as `Pills.astro`, and the full links row. At rest the panel is `opacity: 0; pointer-events: none` — invisible, but its links stay in the tab order, which is what lets keyboard focus open it. `.frame:hover` or `.frame:focus-within` → `transform: scale(1.04)`, `z-index: 2`, a `color-mix(--monitor-bg 60%)` drop shadow, panel `opacity: 1; pointer-events: auto`; 200ms / 160ms transitions. **Transform only, so siblings never move**: measured, Recurzn's rect is identical before, during and after KalaCart's hover. Tab from the Experience clips lands on "Live site" inside KalaCart's panel and expands the frame the same way hover does; the next Tab reaches "GitHub", the one after leaves the section; Enter activates the link natively. Mouse-off or blur reverts. **A planned frame renders no panel and never expands** — its schema gives it no summary, stack or links, and nothing is invented to fill the gap. Under `prefers-reduced-motion: reduce` there is no transition: the scale and the panel are at their final values in the same tick as the hover (measured).
+
+**No-hover devices** (the query above fails: phones, tablets, coarse pointers). The panel is `display: none` — out of the visual *and* the accessibility tree, so nothing desktop-only can be tapped or tabbed into (measured at 375 with touch emulation: the section's only tab stops are the quick links). Instead a **quick links row** under the caption shows `Live site ↗` / `GitHub ↗` (`.label` at `--size-meta`), only for real URLs; Recurzn shows none. No summary, no stack there — that detail is deliberately desktop-only. Both rows are in the HTML: which one shows is decided by the device's pointer capability, which only the client knows, and `display: none` removes the unused one from both trees without JavaScript.
+
+**Links** (`ProjectLinks.astro`). `links.live` → "Live site", `links.repo` → "GitHub". A value may hold a visibly marked "[TODO]" placeholder (CLAUDE.md §7), so only real `http(s)` URLs render as `<a>`: the full variant (desktop panel) renders any other value as mono text so the placeholder stays visible; the quick variant simply skips it. KalaCart's two links are real.
+
+**No case study, no demo video** (removed in increment 6). The links are the only way out of a frame; the title is plain text.
 
 ### 5.4 Currently building strip `[now, partial]`
 **Increment 2 ships a single static line**, copy hardcoded in `CurrentlyBuilding.astro`:
@@ -239,7 +244,7 @@ The moments are a typed const in the component, not a collection: nothing render
 - **A1 / audio** (`aria-hidden`): one cell per column with an inline SVG of **40 thin bars** (`<rect>`s 1.4 wide in a 100 × 24 viewBox, heights 3–22 centred on the midline, `preserveAspectRatio="none"`) in `--tone` at 0.4 opacity. The heights come from a tiny seeded LCG in the component's frontmatter (seed = clip index + 1), so every build draws the same waveform. Decoration only: no controls, no tab stops (0 focusable nodes measured). Note: the nav's scroll progress (§5.1) is a single hairline fill, not a bar waveform — there was no bar pattern to reuse, so this is the site's only one.
 - **Playhead** (`aria-hidden`): a 2px `--accent` line spanning all three rows with a triangle flag in the ruler, absolutely positioned inside the rows. Its CSS default puts it on the first clip's left edge so the no-JS page is right; the script only ever sets `transform: translateX()` from the active clip's `getBoundingClientRect()` relative to the rows (0px off in every state at both widths, after scroll, click or key), re-measured by a `ResizeObserver`. The move is a 200ms transform transition; `0s` under reduced motion.
 
-**Planned clip.** The Recurzn clip carries the shared `.planned` utility from `global.css`: `opacity: 0.5` plus `border-style: dashed`. The clip's own defaults sit in `@layer components`, so the unlayered utility wins without `!important`. `ProjectCard.astro` still uses its own `data-status="planned"` rule; moving it onto `.planned` is a separate change.
+**Planned clip.** The Recurzn clip carries the shared `.planned` utility from `global.css`: `opacity: 0.5` plus `border-style: dashed`. The clip's own defaults sit in `@layer components`, so the unlayered utility wins without `!important`. The project frames (§5.3) use the same utility since increment 15.
 
 **Reduced motion.** The pin stays active: `position: sticky` is layout, not animation, and a zone change is a discrete state change, so the mechanic adds no motion beyond the user's own scroll. What it triggers obeys the existing rules — the cross-fade and the playhead glide are `0s` under `prefers-reduced-motion: reduce`, measured after a scroll-driven commit. The alternative (un-pin the section under reduce, leaving click / keyboard only) was considered and rejected in increment 14.
 
@@ -260,7 +265,7 @@ links?: { live?: string, repo?: string }   plain strings; only http(s) values re
 cover: image()                       relative to the entry file; a planned entry uses a placeholder (§7)
 order: number
 ```
-A `superRefine` enforces "required unless planned" at build time, so a live or in-progress card cannot ship without a summary and stack (CLAUDE.md §7). `status` is data only — nothing prints it (§5.3). `role` and `video` were removed with the case study. `src/content/now.json` (§5.4) is still deferred.
+A `superRefine` enforces "required unless planned" at build time, so a live or in-progress frame cannot ship without a summary and stack (CLAUDE.md §7). `status` is data only — nothing prints it; "planned" dims and dashes the frame (§5.3). `role` and `video` were removed with the case study. `src/content/now.json` (§5.4) is still deferred.
 
 ## 7. Assets
 
@@ -299,6 +304,7 @@ A `superRefine` enforces "required unless planned" at build time, so a live or i
 10. `[done]` Increment 13.1: Experience visual rebuild (§5.11) — full-bleed black monitor over a ruler / V1 / A1 timeline with a measured playhead; content and accessibility unchanged from increment 13.
 11. `[done]` Increment 14: Experience pinned and scroll-scrubbed (§5.11) through the same commit path as click and keyboard; section order corrected so Experience precedes Projects (§3), nav links to match (§5.1).
 12. `[done]` Increment 14.1: Experience heading moved out of the pin, timeline slimmed to 90px, monitor takes the pinned viewport; the sentence leads the monitor (no keyword heading); A1 bar waveform, `audio` label, flat clip fill (§5.11).
+13. `[done]` Increment 15: Projects as a film-strip contact sheet (§5.3) — sprocket frames in an auto-fill grid, hover / focus expand on fine pointers, quick links on no-hover devices, `ProjectCard.astro` removed.
 
 ## 11. Open decisions
 
