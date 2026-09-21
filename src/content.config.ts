@@ -24,11 +24,11 @@ const projects = defineCollection({
         // silently render empty (CLAUDE.md §7).
         summary: z.string().max(140).optional(),
         stack: z.array(z.string()).optional(),
-        // Never printed (PRD §5.3); "planned" dims the card.
+        // Never printed (PRD §5.3); "planned" dims and dashes the frame.
         status: z.enum(["live", "in-progress", "archived", "planned"]),
         year: z.number().optional(),
         // Plain strings, not URLs: a value may be a visibly marked "[TODO]"
-        // placeholder per CLAUDE.md §7. ProjectCard renders only real URLs
+        // placeholder per CLAUDE.md §7. ProjectLinks renders only real URLs
         // as hrefs and everything else as text.
         links: z
           .object({

@@ -1,0 +1,162 @@
+---
+// One film frame of the Projects contact sheet (PRD §5.3): sprocket strips
+// top and bottom, a frame number, the cover, the title and a year tag. On
+// fine-pointer devices, hovering or focusing a link inside expands the
+// frame in place and reveals the summary, stack and links over the cover;
+// everywhere else the links sit under the caption as small always-visible
+// affordances and nothing expands. `status` is never printed: a planned
+// entry takes the shared `.planned` utility and renders no detail at all,
+// because its schema gives it nothing real to reveal. No client script.
+// The detail panel is ProjectDetail.astro (split for the line cap).
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import ProjectDetail from "./ProjectDetail.astro";
+import ProjectLinks from "./ProjectLinks.astro";
+
+interface Props {
+  entry: CollectionEntry<"projects">;
+  /** Position in the sheet, for the frame number. */
+  index: number;
+}
+
+const { entry, index } = Astro.props;
+const { title, summary, stack, status, year, links, cover } = entry.data;
+const planned = status === "planned";
+const number = `Frame ${String(index + 1).padStart(3, "0")}`;
+// Anything real to reveal? A planned entry has none of these by schema.
+const expandable = !!(summary || stack || links);
+---
+
+<article
+  class:list={["frame", { planned }]}
+  data-status={status}
+  data-expandable={expandable ? "" : undefined}
+>
+  <p class="meta number">{number}</p>
+
+  <div class="cover">
+    {/* The cover is a screenshot, so it sets its own ratio rather than
+        being cropped. */}
+    <Image
+      src={cover}
+      alt={`${title} project cover`}
+      widths={[636, 1272]}
+      sizes="(min-width: 768px) 400px, 92vw"
+      loading="lazy"
+      decoding="async"
+    />
+    {expandable && <ProjectDetail summary={summary} stack={stack} links={links} />}
+  </div>
+
+  {/* h3: the section owns the h2 and the hero owns the page's only h1. */}
+  <div class="caption">
+    <h3 class="title">{title}</h3>
+    {year !== undefined && <span class="label tag">{year}</span>}
+  </div>
+
+  <div class="quick">
+    <ProjectLinks links={links} variant="quick" />
+  </div>
+</article>
+
+<style>
+  /* Layered so the shared, unlayered `.planned` utility in global.css wins
+     its border-style and opacity without !important. */
+  @layer components {
+    .frame {
+      position: relative;
+      display: grid;
+      gap: 0.5rem;
+      align-content: start;
+      background-color: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 2px;
+    }
+  }
+
+  /* Sprocket strips: whole holes only. `space` lays complete 16px tiles
+     across the width and spreads the remainder between them, so the last
+     hole is never clipped at the frame's edge at any width. */
+  .frame::before,
+  .frame::after {
+    content: "";
+    display: block;
+    height: 14px;
+    background-image: radial-gradient(circle, var(--bg) 0 3px, transparent 3.5px);
+    background-size: 16px 100%;
+    background-repeat: space no-repeat;
+  }
+
+  .number {
+    margin: 0;
+    padding: 0.125rem 0.75rem 0;
+  }
+
+  .cover {
+    position: relative;
+    margin-inline: 0.75rem;
+    overflow: hidden;
+  }
+
+  .cover :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  .title {
+    margin: 0;
+    font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  }
+
+  /* Year only, one clip tone for every frame (PRD §5.3): the planned state
+     is signalled by `.planned` alone. */
+  .tag {
+    flex: none;
+    padding: 0.2rem 0.5rem;
+    font-size: var(--size-meta);
+    color: var(--bg);
+    background-color: var(--word-amber);
+    border-radius: 2px;
+  }
+
+  .quick {
+    padding: 0 0.75rem 0.5rem;
+  }
+
+  /* Hover / focus expand, only where a hover exists: the frame scales in
+     place (transform only), so siblings never move. The panel itself is
+     ProjectDetail.astro. */
+  @media (hover: hover) and (pointer: fine) {
+    .quick {
+      display: none;
+    }
+
+    .frame[data-expandable] {
+      transition:
+        transform 200ms ease,
+        box-shadow 200ms ease;
+    }
+
+    .frame[data-expandable]:hover,
+    .frame[data-expandable]:focus-within {
+      z-index: 2;
+      transform: scale(1.04);
+      box-shadow: 0 24px 48px color-mix(in srgb, var(--monitor-bg) 60%, transparent);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame[data-expandable] {
+      transition: none;
+    }
+  }
+</style>

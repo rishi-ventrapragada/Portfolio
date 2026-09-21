@@ -1,0 +1,81 @@
+---
+// Project links (PRD §5.3): "Live site" from links.live, "GitHub" from
+// links.repo. A value may hold a visibly marked "[TODO]" placeholder
+// (CLAUDE.md §7), which must never become an href: only real http(s) URLs
+// render as links. `full` (the desktop detail panel) shows any other value
+// as mono text so the placeholder stays visible; `quick` (the always-visible
+// affordances on no-hover devices) simply skips it. Split from
+// ProjectFrame.astro so the guard lives in exactly one place.
+interface Props {
+  links?: { live?: string; repo?: string };
+  variant: "full" | "quick";
+}
+
+const { links, variant } = Astro.props;
+const isUrl = (value?: string) => !!value && /^https?:\/\//.test(value);
+const rows = [
+  { label: "Live site", value: links?.live },
+  { label: "GitHub", value: links?.repo },
+].filter((row) => (variant === "quick" ? isUrl(row.value) : !!row.value));
+---
+
+{
+  rows.length > 0 && (
+    <ul class:list={["links", variant]}>
+      {rows.map(({ label, value }) =>
+        isUrl(value) ? (
+          <li>
+            <a class="label link" href={value} rel="noopener">
+              {label}
+              {variant === "quick" && <span aria-hidden="true"> &#8599;</span>}
+            </a>
+          </li>
+        ) : (
+          <li class="meta pending">
+            {label} &mdash; {value}
+          </li>
+        ),
+      )}
+    </ul>
+  )
+}
+
+<style>
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .link {
+    display: inline-block;
+    padding-block: 0.25rem;
+    color: var(--fg);
+    border-bottom: 1px solid var(--line);
+    transition:
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .link:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .quick .link {
+    font-size: var(--size-meta);
+  }
+
+  .pending {
+    align-self: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link {
+      transition: none;
+    }
+  }
+</style>

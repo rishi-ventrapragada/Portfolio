@@ -1,24 +1,23 @@
 ---
-// Projects section (PRD §5.3). Reads the collection, so adding an entry is
-// the only work needed to add a card. `id="projects"` is the nav and skills
-// anchor; the heading keeps its own id for aria-labelledby.
+// Projects section (PRD §5.3): a film-strip contact sheet. Reads the
+// collection, so adding an entry is the only work needed to add a frame.
+// `id="projects"` is the nav and skills anchor; the heading keeps its own id
+// for aria-labelledby. One frame = ProjectFrame.astro.
 import { getCollection } from "astro:content";
-import ProjectCard from "./ProjectCard.astro";
+import ProjectFrame from "./ProjectFrame.astro";
 
-// Loader order is not `order`, so sort explicitly even with one entry.
-const projects = (await getCollection("projects")).sort(
-  (a, b) => a.data.order - b.data.order,
-);
+// Loader order is not `order`, so sort explicitly.
+const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <section class="projects shell" id="projects" aria-labelledby="projects-heading">
   <p class="label eyebrow">Selected work</p>
   <h2 id="projects-heading" class="heading">Projects</h2>
 
-  {/* auto-fit means one entry fills the row and later entries form columns
-      with no rewrite. The card itself splits when it is the only child. */}
-  <div class="grid">
-    {projects.map((entry) => <ProjectCard entry={entry} />)}
+  {/* auto-fill, not auto-fit: frames keep their slot size and a later entry
+      drops into the next empty slot, like a contact sheet. */}
+  <div class="sheet">
+    {projects.map((entry, i) => <ProjectFrame entry={entry} index={i} />)}
   </div>
 </section>
 
@@ -38,23 +37,9 @@ const projects = (await getCollection("projects")).sort(
     font-size: var(--size-h2);
   }
 
-  .grid {
+  .sheet {
     display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
-  }
-
-  /* A lone card stretched across the full width reads as a banner, so it
-     splits into cover + text instead. Self-disabling: the moment a second
-     project lands :only-child stops matching and the grid takes over. The
-     rule lives here because this component owns the grid; :global reaches
-     the child component's scoped root. */
-  @media (min-width: 768px) {
-    .grid > :global(.card:only-child) {
-      grid-template-columns: 3fr 2fr;
-      align-items: center;
-      gap: 2.5rem;
-      padding: 2rem;
-    }
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
   }
 </style>
