@@ -28,6 +28,7 @@ One page, `/`, with anchored sections in this order. The nav (§5.1) links to th
 | About: photo, story, GDG line | `#about` | §5.6 |
 | Tech stack: six category cards of tags | `#skills` | §5.6 |
 | Projects: one card per project, then "currently building" | `#projects` | §5.3, §5.4 |
+| Experience: monitor + clip track of four moments | `#experience` | §5.11 |
 | Contact: the footer | `#contact` | §5.8 |
 
 No `/projects` index, no case study pages, no `/community` page. A Community section is `[later]` (§5.7).
@@ -83,17 +84,19 @@ Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, li
 ### 5.1 Nav `[now]`
 Fixed top bar, 64px tall, transparent over the hero and `--bg-raised` after scrolling past it (§4.4). Its bottom edge is the scroll progress bar below, so the bar carries no border of its own.
 
-Single-page site, so every entry is an anchor. Left: a small `.label` mark, **RISHI**, `href="#top"` — per the HTML spec a `#top` fragment with no matching element scrolls to the document top, so the hero carries no id and nothing reloads. Right: three links, `.label` mono uppercase. **No hamburger, no menu overlay, no responsive collapse**: three short labels fit at every width (measured in SESSION.md, increment 6).
+Single-page site, so every entry is an anchor. Left: a small `.label` mark, **RISHI**, `href="#top"` — per the HTML spec a `#top` fragment with no matching element scrolls to the document top, so the hero carries no id and nothing reloads. Right: four links, `.label` mono uppercase. **No hamburger, no menu overlay, no responsive collapse.** Four labels fit at 375 and 360px only because the bar steps its type down below 480px (phone step-down bullet below; measured in SESSION.md, increment 13).
 
 | Label | Target |
 | --- | --- |
 | Skills | `#skills` |
 | Projects | `#projects` |
+| Experience | `#experience` |
 | Contact | `#contact` |
 
 - **No active state.** Anchors are positions on a page, not destinations, so nothing carries `aria-current`. Scroll-spy (highlighting the section in view) is deliberately not implemented — it would be client JS for a four-section page.
 - Anchor targets carry `scroll-margin-top: calc(var(--nav-height) + 1rem)` in `global.css`, so a jump lands 80px below the top edge, clear of the fixed bar — measured, not assumed. `html { scroll-behavior: smooth }` applies under `prefers-reduced-motion: no-preference` only.
-- The scroll observer runs at module scope. There is no client router swapping the DOM, so it is bound once and stays bound.
+- The scroll observer runs at module scope. There is no client router swapping the DOM, so it is bound once and stays bound. Since increment 13 it and the progress fallback live in `src/scripts/nav.ts` (200-line cap).
+- **Phone step-down (increment 13).** Below 480px the mark and the links drop to `--size-meta` (11px, the footer links' size) with `0.06em` tracking (the pills' value) and a 0.75rem gap; from 480px they are the normal 12px / 0.12em `.label` at 1.5rem (2rem from 768px). Measured at 375px: mark 36.3px + links 261.1px of 327px available, **29.6px spare**; at 360px **14.6px spare**; **at 320px the row is 25.4px too wide and the links run into the mark** — a known limit, recorded in SESSION.md. This is a deliberate, documented bend of CLAUDE.md §3's 0.12em label rule for the phone nav only. A fifth link needs a real overflow pattern for narrow phones, not another shrink.
 
 **Scroll progress** (increment 7). A 2px track across the bar's full width at its bottom edge, `--line` at every scroll position — it *is* the nav's hairline, from the very top of the page rather than only after the hero. Inside it a `--accent` fill grows left to right with document scroll, `scrollY / (scrollHeight − innerHeight)`: 0 at the top, exactly 100% at the bottom, 0 on a page that cannot scroll. Rendered as `transform: scaleX()` from the left edge with no transition — a progress indicator tracks scroll, it never eases toward it. Primary branch is a CSS scroll-driven animation (`animation-timeline: scroll(root)`, longhands in their own rule per CLAUDE.md §4); where that is unsupported, the same `requestAnimationFrame`-throttled script pattern as the hero dissolve writes `--scroll-progress`. It stays on under reduced motion: it follows the visitor's own scroll 1:1 and never moves by itself, so it is state, not decoration. `aria-hidden` — it duplicates the scrollbar.
 
@@ -199,6 +202,30 @@ Behaviour:
 
 Measured overlay lifetime after module start (increment 12, unchanged from 11 — the grid changed nothing in the timing): **6.43s unthrottled** (6.0s paced dwell + 0.4s fade; 25 distinct steps, fast steps held 166–201ms, the three pauses **702 / 799 / 600ms**); **7.5s at 200kb/s** (`load` arrived at 7.1s, after the dwell, and `100%` showed the frame it landed); **9.4s at 60kb/s**, ended by the grace cap at 96% because `load` never arrived; with the hero image held and released at 7.2s, `100%` at `load` + 16ms and removal 416ms later. The pauses measure the same under all three conditions. Stage lines landed at 2.14s (step 8) and 4.61s (step 18) on the fast run.
 
+### 5.11 Experience timeline `[now]`
+A section between the "currently building" strip and the footer (`#experience`, increment 13): eyebrow "Journey", h2 "Experience", then an NLE-style **monitor** above a horizontal **track** of clips. `ExperienceTimeline.astro` owns the section, the monitor box and the track; `ExperienceFrame.astro` renders one monitor frame; `src/scripts/experience-timeline.ts` holds the behaviour.
+
+**Content.** Four moments in this order, each a year label, a one-word keyword taken from its own sentence, and the owner's sentence verbatim as the body:
+
+| Clip label | Year | Keyword | Body (verbatim) | Cover |
+| --- | --- | --- | --- | --- |
+| `2025 · JavaScript` | 2025 | JavaScript | 2025 — Learnt C, HTML, CSS and JavaScript | — |
+| `2025 · Python` | 2025 | Python | 2025 — Learnt Python and MySQL | — |
+| `2026 · KalaCart` | 2026 | KalaCart | 2026 — Built KalaCart: AI Market Linkage for Artisans | the projects collection's `kalacart` cover through `<Image>` (lazy, 636 / 1272 widths, the same two renditions the project card emits) — no new asset |
+| `Now · Recurzn` | Now | Recurzn | 2026 — Building Recurzn, a cross-platform Self-Improvement App | none: planned, no asset exists |
+
+The moments are a typed const in the component, not a collection: nothing renders a per-entry body and the four rows change together with this table. A fifth "2025 · VJIT" clip was offered in planning and declined.
+
+**Monitor.** `--bg-raised`, 1px `--line`, 1.5rem padding, `min-height: 14rem`. Every frame is in the HTML and stacked in the same grid cell (`grid-area: 1 / 1`), so the box is always as tall as its tallest frame — 290.8px at 1280 and 347.6px at 375 in every state — and never resizes on a swap. A frame: `.meta` year, `<h3>` keyword, the body at `clamp(1.125rem, 2vw, 1.375rem)`; the KalaCart frame splits 3fr / 2fr with the cover on the right from 768px. Inactive frames are `opacity: 0; visibility: hidden`, so only the active one is in the accessibility tree. A swap is a 180ms opacity cross-fade (`visibility` flips after the fade on the way out, at once on the way in); under `prefers-reduced-motion: reduce` there is no transition and the swap is instant. The first frame is active from the server, so the section reads without JavaScript.
+
+**Track.** Four real `<button type="button">` clips in one `role="group"` row (`aria-label="Moments"`), `overflow-x: auto` so it scrolls sideways on phones (657px of clips in a 327px row at 375) with a 0.375rem inset so a focus ring is never clipped. Pill conventions from `Pills.astro`: `.label` mono uppercase, 1px `--line`, 2px radius, transparent ground, `--fg` text. Hover → `--accent` text; pressed (`aria-pressed="true"`) → `--accent` text and border, the site's active-state rule; the focus ring is the global `:focus-visible`. The accessible name is the visible label (year + keyword) and `aria-describedby` points at the frame's body sentence, so a screen reader hears "2026 · KalaCart, button, pressed, 2026 — Built KalaCart…" on focus.
+
+**Planned clip.** The Recurzn clip carries the shared `.planned` utility from `global.css` (increment 13): `opacity: 0.5` — the project card's planned treatment — plus `border-style: dashed`. The clip's own defaults sit in `@layer components`, so the unlayered utility wins without `!important`; any future planned element takes the same class. `ProjectCard.astro` still uses its own `data-status="planned"` rule (solid border); moving it onto `.planned` is a separate change.
+
+**Behaviour** (`experience-timeline.ts`). Click and keyboard focus **commit** a clip: it becomes the pressed one and its frame shows. On fine pointers only (`(hover: hover) and (pointer: fine)`), hovering a clip **previews** its frame without changing the pressed clip, and leaving the track restores the committed frame. **No `aria-live`**, on purpose: the clip's name and description already say exactly what the monitor shows, so a live region would announce every focus twice and every hover once. Enter and Space activate the button natively — the script handles no keys.
+
+Verified in increment 13 (SESSION.md): Tab reaches the four clips in order and each focus commits; Enter and Space commit; the fade samples 0 → 0.64 → 1 at 4 / 71 / 372ms and is `0s` under reduced motion; hover previews and reverts; both accents; the `#experience` anchor lands 80px under the top. Client JS **3272 B gzipped, all inline** (2340 B at increment 12), against the 40 KB cap.
+
 ## 6. Content model
 
 `src/content/projects/*.json`, one file per project, loaded by `glob({ pattern: "*.json" })` from `src/content.config.ts` (Content Layer API; `src/content/config.ts` throws in Astro 7). The id is the filename, so `kalacart.json` → `kalacart`. Entries are data only — nothing renders a body, so MDX was dropped in increment 6 and `@astrojs/mdx` is uninstalled.
@@ -247,6 +274,7 @@ A `superRefine` enforces "required unless planned" at build time, so a live or i
 6. `[done]` Single-page restructure: anchor nav, About and Skills sections under the hero, one project card, case study removed, MDX and ClientRouter dropped, old routes redirected. Résumé PDF still pending from the owner.
 7. `[next]` "Currently building" strip (marquee + `now.json`). OG image and analytics.
 8. `[later]` Community section, external component adoption (per CLAUDE.md §6), reference-site pattern pass.
+9. `[done]` Increment 13: Experience section (§5.11) and the fourth nav anchor with the phone step-down (§5.1). Increments 7–12 (tech stack, progress bar, boot preloader) are recorded in §5.1, §5.6 and §5.10 rather than here.
 
 ## 11. Open decisions
 

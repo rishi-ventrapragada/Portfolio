@@ -45,18 +45,30 @@ The local Vercel CLI is authenticated as `rishi-ventrapragada` and this works.
 A custom domain added in the dashboard tracks production automatically and would
 retire this whole entry.
 
-### Nav capacity — resolved by increment 6 (kept for the numbers)
+### Nav capacity — four links fit on phones only by a step-down (increment 13)
 
-The five-route nav is gone. Since the single-page restructure the bar is a
-`RISHI` mark (`#top`) plus three anchors: Skills, Projects, Contact. Measured at
-375px: **43px mark + 229px links = 272px of 327px available, 55px spare.** The
-old bar needed 306 of 312px. Projects are cards under `#projects`, so there is no
-per-project nav entry either — the "further case studies" sub-concern is moot.
+The bar is a `RISHI` mark (`#top`) plus four anchors: Skills, Projects,
+Experience, Contact. At 375px in the normal 12px / 0.12em `.label` style the
+row needs **383px of 327px** (mark 43.2 + links 339.9), so increment 13 added a
+phone step-down in `Nav.astro`: below 480px the mark and links are
+`--size-meta` (11px) with 0.06em tracking and a 0.75rem gap. Measured on the
+built site, headless Chrome:
 
-**A fourth link does not automatically fit.** A "Community" label in 12px mono
-at 0.12em tracking is roughly 80px plus a 24px gap, against 55px spare at 375px.
-Measure before adding it; a shorter label or a smaller mobile gap is the likely
-answer, not a hamburger.
+| Viewport | Available | Mark | Links | Spare |
+| --- | --- | --- | --- | --- |
+| 480px (normal style) | 432 | 43.2 | 339.9 | 48.9 |
+| 375px | 327 | 36.3 | 261.1 | **29.6** |
+| 360px | 312 | 36.3 | 261.1 | **14.6** |
+| 320px | 272 | 36.3 | 261.1 | **−25.4 — the links run into the mark** |
+
+**This is a known-tight fix, not a permanent one** (owner's words on
+approval). It bends CLAUDE.md §3's 0.12em label rule for the phone nav only,
+and the spare at 360px is one short label away from nothing. **320px phones
+(iPhone SE 1st gen / 5s) already collide** — the previous three-link bar fit
+there with 0px spare. Open: hide the mark below ~340px (links alone fit,
+249px of 272), or accept. **The next nav addition (Community, whenever it
+returns) needs a real overflow pattern for narrow phones — not another
+text-size shrink.** Measure before adding anything.
 
 ### `#111214` is duplicated outside the token — change every copy together
 
@@ -79,6 +91,118 @@ sanctioned exception. If the background token changes, **both** must change, or
 the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
+
+## 2026-09-21 — increment 13
+
+### Last milestone completed
+
+Experience section (PRD §5.11) between the "currently building" strip and
+the footer: an NLE-style monitor above a track of four clip buttons, and an
+"Experience" anchor in the nav. New: `ExperienceTimeline.astro` (section,
+monitor box, track), `ExperienceFrame.astro` (one frame),
+`src/scripts/experience-timeline.ts` (commit on click / focus, preview on
+hover), the shared `.planned` utility in `global.css`. `Nav.astro` gained
+the link and the phone step-down (standing constraint above); its script
+moved to `src/scripts/nav.ts` for the 200-line cap.
+
+### Decisions the owner made in planning
+
+- **Four clips, not five.** The brief named five clips but supplied four
+  sentences. Offered the increment-5 "Started VJIT, CSE with Data Science"
+  line as the fifth; the owner chose four.
+- **Nav fit: shrink the phone nav text** over hiding the mark or a shorter
+  label, with the fragility recorded (above).
+- **`.planned` is a real shared class**, not a one-off on the clip.
+
+### Decisions worth knowing before you touch this
+
+- **Copy.** The four body sentences are the owner's, verbatim. The clip
+  keywords (JavaScript, Python, KalaCart, Recurzn) are words from those
+  sentences, picked by me; so are the "Journey" eyebrow and "Experience" h2.
+  Nothing else is new text.
+- **No `aria-live`.** A clip's accessible name is its visible label and its
+  `aria-describedby` is the frame's sentence, so focusing a clip already
+  announces what the monitor shows. A live region would say it twice per
+  focus and once per hover. Enter / Space are native button activation; the
+  script handles no keys.
+- **Hover previews, click / focus commit.** Hover only under
+  `(hover: hover) and (pointer: fine)`; leaving the track restores the
+  committed frame. A pointer click also fires `focus` in Chrome / Firefox,
+  so commit runs twice there — idempotent by design; Safari (no focus on
+  click) takes the click path.
+- **Monitor height = tallest frame.** All four frames sit in one grid cell,
+  so the box never resizes: 290.8px at 1280 in every state. The text-only
+  frames therefore leave empty space below their three lines on desktop.
+  Centring them was considered and rejected: the three text frames would
+  then shift by a few pixels between each other, which is the jump the spec
+  forbids. If it looks too empty, that is the trade-off to revisit.
+- **`.planned` beats a scoped rule via layers, not `!important`.** Astro's
+  scoping (`.clip[data-astro-cid-…]`, 0,2,0) would outrank a global class,
+  so the clip's defaults are wrapped in `@layer components` (Tailwind already
+  declares the layer order) and the unlayered utility wins. Any component
+  that wants `.planned` to override its own border must do the same.
+- **No dashed treatment existed before.** The brief described the planned
+  card as "dashed, dimmed"; the card is opacity 0.5 with a solid border.
+  The clip is dimmed *and* dashed as briefed. `ProjectCard.astro` still
+  uses its own `data-status` rule — moving it onto `.planned` is a separate
+  decision.
+- **The monitor's KalaCart image adds no image output**: same source, same
+  two WebP renditions (636 / 1272) the project card already emits; the
+  monitor's `sizes` is 480px from 768px up.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — Experience row in the site map. **§5.1** — four links, the
+  Experience row, a phone step-down bullet with the numbers, the
+  `nav.ts` note. **§5.11** — new, the full component spec. **§10** — line 9
+  for increment 13 (and a note that 7–12 are recorded under §5, not §10).
+- **README** — component and script lists. **SESSION.md** — this entry and
+  the rewritten nav-capacity standing constraint.
+
+### Verified by measurement, not eyeballing
+
+Headless Chrome over CDP (`verify.mjs` in the session scratchpad; preloader
+removed over CDP, scroll-behavior forced to auto) at 1280×900 and 375 / 360
+/ 320 / 480 phones, reduced motion emulated per case:
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints. Longest file 189.
+  `ExperienceTimeline` 162, `ExperienceFrame` 109, `Nav` 177.
+- **Client JS: 3272 B gzipped, six inline blocks, no external script**
+  (cap 40 KB; increment 12 was 2340 B).
+- **Keyboard:** from the last project-card link, Tab lands on the four clips
+  in order; each focus commits (`aria-pressed` on exactly that clip,
+  `data-active` on exactly its frame) and `:focus-visible` matches. With
+  the state made stale by hand, **Enter** on the focused clip recommits it and
+  **Space** likewise. Focus ring fully inside the track's inset.
+- **Cross-fade:** frame `transition-duration` "0.18s, 0s"; after a click
+  the entering frame's opacity sampled **0 at 4ms, 0.64 at 71ms, 1 at
+  372ms**. Under `prefers-reduced-motion: reduce`: duration `0s`, the new
+  frame is at opacity 1 and the old at 0 / hidden in the same tick.
+- **Hover** (fine pointer): moving onto "2025 · Python" shows its frame while
+  "web" stays pressed; moving off the track restores the web frame.
+- **Monitor height** identical in all four states: 290.8px at 1280, 347.6px
+  at 375 (text-only and KalaCart alike).
+- **Image:** `/_astro/kalacart-cover.D0KbdiRf_1NMcbk.webp` (the 636w
+  candidate) loads, `naturalWidth` 479 × 264 at the 438px slot, `width` /
+  `height` attributes present, `loading="lazy"`, alt set. Every image has
+  `alt`; one `<h1>`.
+- **Planned clip:** computed `opacity 0.5`, `border-style dashed`; pressed
+  colour `#ff3b5c` under crimson and `#a78bfa` under violet (eyebrow too).
+- **Nav:** the numbers in the standing constraint; `document.scrollWidth`
+  equals the viewport at every width (no page overflow, even at 320 where the
+  bar itself collides). Clicking "Experience" lands the section top at
+  **80px**.
+- **Track:** 657px of clips in a 327px row at 375 — scrolls inside the
+  track, the document does not.
+- Console clean on every run.
+- Screenshots reviewed: desktop × four states, keyboard-focus state, violet,
+  reduced-motion, 375 nav + section (web and KalaCart), 360 and 320 nav.
+
+### Known, open
+
+- **320px nav collision** (standing constraint above).
+- `public/resume.pdf` still missing; About photo still a CSS placeholder.
+- Final accent, custom domain (PRD §11). Vanity URL as a project domain.
 
 ## 2026-09-21 — increment 12
 
