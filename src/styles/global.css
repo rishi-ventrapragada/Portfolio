@@ -35,7 +35,8 @@
   /* Small colour palette. First chosen for the boot preloader's greeting
      cycle (retired in increment 8, PRD §5.10) and kept by the owner's
      decision; since increment 13.1 the Experience timeline's clips use
-     amber, sky, mint and periwinkle (PRD §5.11). Coral is still unused. */
+     amber, sky, mint and periwinkle (PRD §5.11), and since increment 16
+     the About comic panels' placeholder fills use all five (PRD §5.6). */
   --word-amber: #ffb454;
   --word-coral: #ff8f6b;
   --word-sky: #6ec9f5;

@@ -1,0 +1,91 @@
+---
+// One comic panel for About.astro (PRD §5.6). A figure: the art block, then
+// a caption box laid over its top-left corner the way a comic caption sits
+// inside the panel. Both are placeholders until the owner supplies art and
+// dialogue (CLAUDE.md §7): the art is a solid fill from the small palette
+// with a mono tag, the caption is a visible [TODO]. The placement of the
+// establishing panel in the grid belongs to About.astro; this file only
+// carries the class.
+interface Props {
+  n: number;
+  tone: "amber" | "sky" | "mint" | "periwinkle" | "coral";
+  establishing?: boolean;
+}
+
+const { n, tone, establishing = false } = Astro.props;
+---
+
+<figure class:list={["panel", { establishing }]}>
+  <div class="art" data-tone={tone} role="img" aria-label={`Panel ${n} placeholder art`}>
+    <span class="meta tag">[PANEL {n} &mdash; placeholder art]</span>
+  </div>
+  <figcaption class="label caption">[TODO: panel {n} dialogue]</figcaption>
+</figure>
+
+<style>
+  .panel {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    /* Phone: the grid has no fixed height, so each panel sets its own. */
+    aspect-ratio: 4 / 3;
+    background-color: var(--bg-raised);
+    border: 1px solid var(--line);
+  }
+
+  /* Desktop: the grid's rows decide the height (About.astro). */
+  @media (min-width: 768px) {
+    .panel {
+      aspect-ratio: auto;
+    }
+  }
+
+  .art {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  /* Each fill is a palette word mixed down into the raised surface: still
+     clearly a colour (so the grade cycle reads), not a flat swatch. */
+  .art[data-tone="amber"] {
+    background-color: color-mix(in srgb, var(--word-amber) 60%, var(--bg-raised));
+  }
+
+  .art[data-tone="sky"] {
+    background-color: color-mix(in srgb, var(--word-sky) 60%, var(--bg-raised));
+  }
+
+  .art[data-tone="mint"] {
+    background-color: color-mix(in srgb, var(--word-mint) 60%, var(--bg-raised));
+  }
+
+  .art[data-tone="periwinkle"] {
+    background-color: color-mix(in srgb, var(--word-periwinkle) 60%, var(--bg-raised));
+  }
+
+  .art[data-tone="coral"] {
+    background-color: color-mix(in srgb, var(--word-coral) 60%, var(--bg-raised));
+  }
+
+  /* Dark tag on the bright fill; the scoped rule outranks .meta's muted grey. */
+  .tag {
+    color: var(--bg);
+  }
+
+  .caption {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    max-width: calc(100% - 1.5rem);
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    line-height: 1.5;
+  }
+</style>
