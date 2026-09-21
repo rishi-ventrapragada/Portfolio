@@ -40,6 +40,7 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
   .sheet {
     display: grid;
     gap: 1.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    /* 32rem minimum: two frames per row at 1280, one column on phones. */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 32rem), 1fr));
   }
 </style>
