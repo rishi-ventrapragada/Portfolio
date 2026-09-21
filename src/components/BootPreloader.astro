@@ -6,7 +6,7 @@
 // The texture and the square are drawn from this site's own tokens; nothing
 // here is derived from any third-party asset.
 import BootSquare from "./BootSquare.astro";
-import { STATUS_TEXT } from "../scripts/boot-copy";
+import { statusFor } from "../scripts/boot-copy";
 ---
 
 {/* Without JS nothing would ever remove the overlay, so hide it for no-JS
@@ -22,7 +22,9 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
 
     <BootSquare />
 
-    <p class="boot-status label">{STATUS_TEXT}</p>
+    {/* Stage line, driven by the same step as the readout and the square.
+        Rendered at stage 0 so it is never blank before the script runs. */}
+    <p class="boot-status label" data-stage>{statusFor(0)}</p>
   </div>
 </div>
 
@@ -53,10 +55,11 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
 <script>
   import { runBootSequence } from "../scripts/boot-preloader";
 
-  // 2800ms dwell: an instant load still walks every step rather than
-  // flashing. 4500ms grace cap so a stalled resource can never strand the
+  // 4200ms dwell: an instant load still walks every step rather than
+  // flashing (raised from 2800 in increment 10 — the owner found it too
+  // fast). 6500ms grace cap so a stalled resource can never strand the
   // visitor.
-  runBootSequence(2800, 4500);
+  runBootSequence(4200, 6500);
 </script>
 
 <style>
@@ -124,6 +127,13 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
     margin: 0;
     color: var(--fg-muted);
     text-align: center;
+    /* Half of the stage cross-fade; the script swaps the text between the
+       two halves. Keep in step with STATUS_FADE_MS in boot-status.ts. */
+    transition: opacity 160ms ease;
+  }
+
+  .boot-status[data-fading] {
+    opacity: 0;
   }
 
   /* --- Reduced motion: the script removes the overlay outright, so this is
@@ -133,6 +143,10 @@ import { STATUS_TEXT } from "../scripts/boot-copy";
   @media (prefers-reduced-motion: reduce) {
     .boot {
       display: none;
+    }
+
+    .boot-status {
+      transition: none;
     }
   }
 </style>

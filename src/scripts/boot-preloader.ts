@@ -5,6 +5,7 @@
  * Progress is read from the page's real load state rather than played off a
  * fixed clock, so the number the visitor sees means something.
  */
+import { createStatusWriter } from "./boot-status";
 
 /**
  * Discrete levels the readout and the square move through. 24 puts 25 / 50 /
@@ -90,6 +91,7 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   const core = root.querySelector<HTMLElement>("[data-core]");
   const ring = root.querySelector<HTMLElement>("[data-ring]");
   const band = root.querySelector<HTMLElement>("[data-band]");
+  const status = createStatusWriter(root.querySelector<HTMLElement>("[data-stage]"));
   const start = performance.now();
   const slotMs = minDwellMs / STEPS;
   /** Highest step the page has genuinely reached. */
@@ -101,11 +103,12 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
   let frame = 0;
   let done = false;
 
-  /** Write one step to the readout and every layer together. */
+  /** Write one step to the readout, the status line and every layer together. */
   const paint = (step: number) => {
     displayed = step;
     lastPaint = performance.now();
     if (pct) pct.textContent = `${Math.round((step / STEPS) * 100)}%`;
+    status(step);
     // One inset value clips all four sides equally, so growth is centre-out.
     const inset = (1 - step / STEPS) * 50;
     const clip = (n: number) => `inset(${Math.max(0, n)}%)`;
