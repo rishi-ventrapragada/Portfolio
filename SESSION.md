@@ -197,6 +197,14 @@ removed over CDP, scroll-behavior forced to auto) at 1280×900 and 375 / 360
 - Console clean on every run.
 - Screenshots reviewed: desktop × four states, keyboard-focus state, violet,
   reduced-motion, 375 nav + section (web and KalaCart), 360 and 320 nav.
+- **Deployed and aliased.** Git integration built
+  `rishi-ventrapragada-c8kj0q6ls-rishiventra.vercel.app` (Ready 27s after the
+  push); `vercel alias set` moved `rishi-ventrapragada.vercel.app` to it and
+  the vanity HTML is byte-identical to the deployment and to the
+  `portfolio-gamma-lake` production domain. The same harness run against the
+  vanity URL: Tab / Enter / Space / hover / reduced-motion / anchor / image /
+  both accents all as above; fade 0.08 → 0.76 → 1 at 8 / 76 / 387ms; nav
+  spare 29.6 / 14.6 / −25.4 at 375 / 360 / 320; console clean.
 
 ### Known, open
 
