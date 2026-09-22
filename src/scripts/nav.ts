@@ -5,28 +5,45 @@
  */
 
 /**
- * Adds .is-scrolled once the hero is behind the bar (PRD §4.4), and
- * [data-past-hero] once its bottom edge has passed (PRD §5.1 — the progress
- * bar is hidden over the hero). Both come off the hero's real box: the
- * sentinel this used to prepend sat at a hardcoded 100dvh, which only
- * happened to match because the hero is one viewport tall.
+ * Adds .is-scrolled once the hero's bottom edge reaches the bar's bottom edge
+ * (PRD §4.4), and [data-past-hero] once it has passed the top of the viewport
+ * (PRD §5.1 — the progress bar is hidden over the hero). Both come off the
+ * hero's real box.
+ *
+ * The two used to share one trigger at y = 0, which left the bar transparent
+ * — white links, no ground — over the top of the light About section for the
+ * last 64px of the hero (increment 23). Solid from the bar's own bottom edge,
+ * nothing light ever shows through it.
  */
 function watchHero(nav: HTMLElement): void {
   // Module scope is fine here: there is no client router swapping the DOM
-  // out from under it, so the observer is bound once and stays bound.
+  // out from under it, so the observers are bound once and stay bound.
   const hero = document.querySelector<HTMLElement>("[data-hero]");
   if (!hero) return;
 
-  new IntersectionObserver(
-    ([entry]) => {
-      const past = !entry.isIntersecting;
-      nav.classList.toggle("is-scrolled", past);
-      nav.toggleAttribute("data-past-hero", past);
-    },
-    // A zero-height strip at the hero's bottom edge: it stops intersecting
-    // the moment that edge leaves the top of the viewport.
-    { rootMargin: "0px 0px -100% 0px" },
-  ).observe(hero);
+  // A zero-height strip at the hero's bottom edge crossing the top of the
+  // viewport.
+  new IntersectionObserver(([entry]) => nav.toggleAttribute("data-past-hero", !entry.isIntersecting), {
+    rootMargin: "0px 0px -100% 0px",
+  }).observe(hero);
+
+  // The same strip one bar-height lower. rootMargin takes no calc(), so the
+  // pixel margins are rebuilt when the viewport height changes (mobile
+  // browser chrome collapsing does this).
+  let solid: IntersectionObserver | undefined;
+  let boundHeight = -1;
+  const bind = () => {
+    if (innerHeight === boundHeight) return;
+    boundHeight = innerHeight;
+    solid?.disconnect();
+    const bar = nav.offsetHeight;
+    solid = new IntersectionObserver(([entry]) => nav.classList.toggle("is-scrolled", !entry.isIntersecting), {
+      rootMargin: `-${bar}px 0px -${Math.max(innerHeight - bar, 0)}px 0px`,
+    });
+    solid.observe(hero);
+  };
+  bind();
+  addEventListener("resize", () => requestAnimationFrame(bind), { passive: true });
 }
 
 /**

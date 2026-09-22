@@ -1,10 +1,8 @@
 ---
-// PRD §5.1 — a fixed bar, transparent over the hero, solid once past it.
-// Single-page site: every entry is an anchor on this page, so there is no
-// current-page state, no hamburger and no responsive collapse. Four labels
-// fit only because the bar steps its type down one size below 480px
-// (measured in SESSION.md, increment 13 — the margin is tight; a fifth link
-// needs a real overflow pattern, not another shrink).
+// PRD §5.1 — a fixed bar, transparent over the hero, solid from the moment
+// the hero's bottom edge reaches its own. Anchors only: no current-page
+// state, no hamburger. Four labels fit phones only by a type step-down
+// (SESSION.md, increment 13); a fifth needs a real overflow pattern.
 const links = [
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
@@ -56,7 +54,11 @@ const links = [
     z-index: 50;
     height: var(--nav-height);
     background-color: transparent;
-    transition: background-color 200ms ease;
+    /* Colours only, never geometry, so the fixed box never moves (§5.1). */
+    transition:
+      background-color 300ms ease,
+      color 300ms ease,
+      border-color 300ms ease;
   }
 
   .nav.is-scrolled {
@@ -109,10 +111,8 @@ const links = [
     color: var(--accent);
   }
 
-  /* Phone step-down (PRD §5.1). At 375px the mark plus four 12px / 0.12em
-     labels need 383px of 327px; at --size-meta (the footer links' size) with
-     the pills' 0.06em tracking and a 0.75rem gap they fit 375 and 360 with
-     22px and 7px to spare. Measured, not assumed — see SESSION.md. */
+  /* Phone step-down (PRD §5.1): at 375px four 12px / 0.12em labels need
+     383px of 327px. Measured, not assumed — see SESSION.md. */
   @media (max-width: 479.98px) {
     .mark,
     .link {
@@ -126,15 +126,10 @@ const links = [
   }
 
   /* --- Scroll progress (PRD §5.1) ---------------------------------------
-     The track doubles as the bar's bottom hairline, so .nav has no border of
-     its own. No transition on the fill: a progress indicator tracks scroll
-     exactly, it never eases toward it. Deliberately on under reduced motion
-     too — it follows the visitor's own scroll 1:1 and never moves by itself.
-
-     Hidden over the hero with visibility/opacity, never `display: none`:
-     the track *is* the bar's hairline, so removing it from layout would
-     collapse the nav's bottom edge. Reversible — scrolling back up drops
-     [data-past-hero] and it hides again. */
+     The track is the bar's bottom hairline. No transition on the fill: it
+     tracks scroll 1:1, also under reduced motion — it never moves by itself.
+     Hidden over the hero with visibility/opacity, never `display: none`,
+     which would collapse the hairline out of layout. */
   .progress {
     position: absolute;
     inset: auto 0 0 0;
@@ -142,12 +137,18 @@ const links = [
     background-color: var(--line);
     visibility: hidden;
     opacity: 0;
-    transition: opacity 200ms ease;
+    /* Hide: fade, then drop visibility. Show (below): visibility at once. */
+    transition:
+      opacity 300ms ease,
+      visibility 0s linear 300ms;
   }
 
   .nav[data-past-hero] .progress {
     visibility: visible;
     opacity: 1;
+    transition:
+      opacity 300ms ease,
+      visibility 0s linear 0s;
   }
 
   .fill {
@@ -190,7 +191,9 @@ const links = [
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .nav {
+    .nav,
+    .progress,
+    .nav[data-past-hero] .progress {
       transition: none;
     }
   }
