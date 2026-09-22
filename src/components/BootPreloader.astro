@@ -6,6 +6,7 @@
 // The texture and the square are drawn from this site's own tokens; nothing
 // here is derived from any third-party asset.
 import BootSquare from "./BootSquare.astro";
+import Starfield from "./Starfield.astro";
 import { statusFor } from "../scripts/boot-copy";
 ---
 
@@ -15,6 +16,8 @@ import { statusFor } from "../scripts/boot-copy";
 
 {/* aria-hidden: decorative. The real <h1> already carries the name. */}
 <div class="boot" data-boot aria-hidden="true">
+  <Starfield />
+
   <div class="boot-inner">
     {/* Live readout, directly above the square. Starts at 0% so the overlay is
         never blank in the frame before the script runs. */}

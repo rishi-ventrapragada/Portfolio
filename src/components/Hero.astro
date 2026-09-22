@@ -4,6 +4,7 @@
 // line cap). This file owns the section and Layer B, the subject cutout.
 import { Image } from "astro:assets";
 import heroSubject from "../assets/hero-subject.png";
+import Starfield from "./Starfield.astro";
 import Wordmark from "./Wordmark.astro";
 ---
 
@@ -11,6 +12,8 @@ import Wordmark from "./Wordmark.astro";
     global.css, and nothing links here (the nav mark uses `#top`). The nav
     observes this box to hide its progress bar over the hero (PRD §5.1). */}
 <section class="hero" data-hero>
+  <Starfield />
+
   <Wordmark />
 
   {/* Layer B — real cutout, bottom-anchored, LCP element.

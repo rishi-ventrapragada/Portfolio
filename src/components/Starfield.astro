@@ -1,0 +1,199 @@
+---
+// A drifting star sky behind a section (PRD §5.14), ported from the Recurzn /
+// Life OS effect. Three parallax layers drift left at different speeds; the
+// two nearer ones twinkle; three meteors cross on coprime periods. Positions
+// are generated at build time (lib/starfield-data.ts) — no client script.
+//
+// Monochrome on purpose: every star, twinkle and streak is --heading, the
+// wordmark's off-white. The accent belongs to the interface, not the sky.
+//
+// Bounded to its own section: contain: strict plus overflow: clip means it
+// can never paint into a neighbour, so the dividers stay the visible seam.
+import { layers, meteors } from "../lib/starfield-data";
+---
+
+<div class="sky" aria-hidden="true">
+  {
+    layers.map((layer) => (
+      <div class="layer" data-layer={layer.name} style={`--drift: ${layer.drift}s; --layer-opacity: ${layer.opacity}`}>
+        {/* 200% wide and translated -50%: the second half is the first
+            half's copy, so the wrap is invisible. */}
+        <div class="track">
+          {layer.stars.map((star) => (
+            <span
+              class="star"
+              data-twinkle={layer.twinkles ? "" : undefined}
+              data-bloom={star.size > 1 ? "" : undefined}
+              style={`left: ${star.x}%; top: ${star.y}%; --s: ${star.size}px; --dur: ${star.duration}s; --delay: ${star.delay}s`}
+            />
+          ))}
+        </div>
+      </div>
+    ))
+  }
+
+  <div class="meteors">
+    {
+      meteors.map((m) => (
+        <span
+          class="meteor"
+          style={`top: ${m.top}%; left: ${m.left}%; --dur: ${m.duration}s; --delay: ${m.delay}s; --len: ${m.length}px; --angle: ${m.angle}deg`}
+        />
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  /* contain: strict — the sky is decorative and fixed-size, so the browser
+     can skip it entirely when off-screen, and nothing inside can affect
+     layout outside. */
+  .sky {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: clip;
+    contain: strict;
+    pointer-events: none;
+  }
+
+  /* A size container so each star's seam copy can be offset by exactly one
+     layer width (100cqw), whatever the section's width turns out to be. */
+  .layer {
+    position: absolute;
+    inset: 0;
+    container-type: inline-size;
+    opacity: var(--layer-opacity);
+  }
+
+  /* will-change on the two moving wrappers only, never on the hundreds of
+     stars inside them: a layer is one composited surface. */
+  .layer[data-layer="near"],
+  .layer[data-layer="mid"] {
+    will-change: transform;
+  }
+
+  .track {
+    position: absolute;
+    inset: 0;
+    width: 200%;
+    animation: drift var(--drift) linear infinite;
+  }
+
+  /* Half the track is one full repeat, so ending at -50% lands the copy
+     exactly where the original began — no seam at the loop point. */
+  @keyframes drift {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .star {
+    position: absolute;
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background-color: var(--heading);
+  }
+
+  /* Each star is authored once in the track's left half and repeated by a
+     sibling exactly one half-track to the right, so when the animation ends
+     at -50% the copy sits where the original started. The offset is in the
+     layer's own width (the track is 200% of it), which is what `100cqw`
+     resolves to here — hence the inline-size container on .layer. */
+  .star::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 100cqw;
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background-color: inherit;
+    box-shadow: inherit;
+  }
+
+  /* Bloom is a static shadow on the 2px and 3px stars only — it is depth,
+     not animation, so it costs nothing per frame. */
+  .star[data-bloom] {
+    box-shadow: 0 0 calc(var(--s) * 3) calc(var(--s) / 3) color-mix(in srgb, var(--heading) 45%, transparent);
+  }
+
+  .star[data-twinkle] {
+    animation: twinkle var(--dur) ease-in-out var(--delay) infinite;
+  }
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .meteors {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* A streak is a short gradient rotated along its own travel. It is off
+     screen for most of its period; the visible window is the 0–18% band. */
+  .meteor {
+    position: absolute;
+    width: var(--len);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--heading));
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(-50%);
+    animation: meteor var(--dur) linear var(--delay) infinite;
+  }
+
+  @keyframes meteor {
+    0% {
+      opacity: 0;
+      transform: rotate(var(--angle)) translate3d(-60%, -60%, 0) scaleX(0.4);
+    }
+    4% {
+      opacity: 0.9;
+    }
+    18% {
+      opacity: 0;
+      transform: rotate(var(--angle)) translate3d(320%, 320%, 0) scaleX(1);
+    }
+    100% {
+      opacity: 0;
+      transform: rotate(var(--angle)) translate3d(320%, 320%, 0) scaleX(1);
+    }
+  }
+
+  /* --- Reduced motion --------------------------------------------------
+     The drift freezes at frame 0 and the twinkle settles to its base
+     opacity, leaving a complete, still sky rather than an empty box.
+
+     Meteors are slowed by half and dimmed to 35% instead of being removed.
+     That is deliberate: a large share of mobile visitors have reduced
+     motion set as an OS-level battery default rather than as a vestibular
+     need, and deleting the streaks outright would silently take the
+     feature away from them. Halved and dimmed is the compromise the
+     original shipped, and it is preserved here. */
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+    }
+
+    .star[data-twinkle] {
+      animation: none;
+      opacity: 0.8;
+    }
+
+    .meteor {
+      animation-duration: calc(var(--dur) * 2);
+      opacity: 0.35;
+    }
+  }
+</style>

@@ -7,6 +7,7 @@
 // list, so nothing here links anywhere. Category order and items are the
 // owner's, verbatim. One SkillGroup.astro per category; no client script.
 import SkillGroup from "./SkillGroup.astro";
+import Starfield from "./Starfield.astro";
 
 const categories = [
   {
@@ -30,6 +31,8 @@ const learning = { name: "Currently learning", items: ["Docker", "Kubernetes"] }
 ---
 
 <section class="skills shell" id="skills" aria-labelledby="skills-heading">
+  <Starfield />
+
   <p class="label eyebrow">Toolkit</p>
   <h2 id="skills-heading" class="heading">Skills</h2>
 
@@ -40,8 +43,18 @@ const learning = { name: "Currently learning", items: ["Docker", "Kubernetes"] }
 </section>
 
 <style>
+  /* Positioned so the Starfield can bound itself to this section, and the
+     content lifted above it. */
   .skills {
+    position: relative;
     padding-block: var(--rhythm);
+  }
+
+  .eyebrow,
+  .heading,
+  .tree {
+    position: relative;
+    z-index: 1;
   }
 
   .eyebrow {

@@ -9,6 +9,7 @@
 // the same percentages, so the type never scales with the box. Static text
 // in a shape: every name is visible and is its star's accessible name, no
 // hover, no links, no animation, no client script.
+import Starfield from "./Starfield.astro";
 
 interface Star {
   name: string;
@@ -62,6 +63,8 @@ const specks: [number, number, number][] = [
 ---
 
 <section class="video shell" id="skills-video" aria-labelledby="skills-video-heading">
+  <Starfield />
+
   <p class="label eyebrow">Also</p>
   <h2 id="skills-video-heading" class="heading">Video editing</h2>
 
@@ -87,8 +90,17 @@ const specks: [number, number, number][] = [
 </section>
 
 <style>
+  /* Positioned so the Starfield bounds itself here; content sits above it. */
   .video {
+    position: relative;
     padding-block: var(--rhythm);
+  }
+
+  .eyebrow,
+  .heading,
+  .sky {
+    position: relative;
+    z-index: 1;
   }
 
   .eyebrow {
