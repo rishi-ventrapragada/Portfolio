@@ -165,7 +165,16 @@ CDP, static server over `dist/`; 1280×1250, 960×1400, 768×1400, 375×812):
 - The video-editing constellation section (next increment): separate
   section, separate anchor, Canva goes there.
 - `public/resume.pdf`, the About panels, the no-JS nav transparency.
-- Vercel alias: see below once the deploy is verified.
+- Vercel alias: pointed at `rishi-ventrapragada-q0pdnp0ij` (Git deploy of
+  the code + docs push, Ready in 24s) and verified on the vanity URL
+  itself with `live19.mjs`: h2 "Skills", 3 × `viewBox="0 0 3 1"` and
+  4 × `"0 0 2 1"` in the served HTML, 34 leaves + 7 roots at 1280 and
+  375, none clipped or wrapped, every leaf 128px at 1280, fan lines and
+  heads 3/3/3/2/2/2/2, rows at y 2418 / 2666 / 2913, no overflow, nav
+  "Skills" lands at 80px. `live-skills19-1280.png`,
+  `live-skills19-375.png`. Re-pointed once more after this line landed.
+  (Harness note: the deploy poll must skip the *previous* deployment's
+  row — the first `Ready` row is the old one until the new build lands.)
 
 ## 2026-09-22 — increment 18
 
