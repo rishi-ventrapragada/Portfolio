@@ -31,9 +31,11 @@ const links = [
     </ul>
   </nav>
 
-  {/* Scroll progress (PRD §5.1). The track is the bar's bottom hairline at
-      every scroll position; the fill grows left to right with document
-      scroll. aria-hidden: it duplicates what the scrollbar already says. */}
+  {/* Scroll progress (PRD §5.1). The fill grows left to right, but only
+      past the hero: inside it the bar would read as a broken near-empty
+      line, so it is hidden until [data-past-hero] (nav.ts) and its range
+      starts at the hero's bottom edge. aria-hidden: it duplicates what the
+      scrollbar already says. */}
   <div class="progress" aria-hidden="true">
     <span class="fill" data-progress-fill></span>
   </div>
@@ -127,12 +129,25 @@ const links = [
      The track doubles as the bar's bottom hairline, so .nav has no border of
      its own. No transition on the fill: a progress indicator tracks scroll
      exactly, it never eases toward it. Deliberately on under reduced motion
-     too — it follows the visitor's own scroll 1:1 and never moves by itself. */
+     too — it follows the visitor's own scroll 1:1 and never moves by itself.
+
+     Hidden over the hero with visibility/opacity, never `display: none`:
+     the track *is* the bar's hairline, so removing it from layout would
+     collapse the nav's bottom edge. Reversible — scrolling back up drops
+     [data-past-hero] and it hides again. */
   .progress {
     position: absolute;
     inset: auto 0 0 0;
     height: 2px;
     background-color: var(--line);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  .nav[data-past-hero] .progress {
+    visibility: visible;
+    opacity: 1;
   }
 
   .fill {
@@ -164,8 +179,13 @@ const links = [
       animation-fill-mode: both;
     }
 
+    /* Range starts at the hero's bottom (one viewport) rather than 0, so the
+       fill reads 0% exactly where the bar appears and still reaches 100% at
+       the document's end — the same end point as before, only the start
+       moved. Its own rule: animation-range folds into the shorthand too. */
     .fill {
       animation-timeline: scroll(root block);
+      animation-range: 100dvh 100%;
     }
   }
 

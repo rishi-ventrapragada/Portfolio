@@ -7,7 +7,10 @@ import heroSubject from "../assets/hero-subject.png";
 import Wordmark from "./Wordmark.astro";
 ---
 
-<section class="hero">
+{/* data-hero, not an id: every [id] inherits a 5rem scroll-margin from
+    global.css, and nothing links here (the nav mark uses `#top`). The nav
+    observes this box to hide its progress bar over the hero (PRD §5.1). */}
+<section class="hero" data-hero>
   <Wordmark />
 
   {/* Layer B — real cutout, bottom-anchored, LCP element.
