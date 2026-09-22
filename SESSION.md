@@ -185,7 +185,14 @@ pre-set; 1280×1150, 960×1150, 768×1400 fine pointer, 375×812 touch):
   section, separate anchor, Canva goes there.
 - `public/resume.pdf` still missing; the five About panels; the no-JS nav
   transparency noted in increment 17.
-- Vercel alias: see below once the deploy is verified.
+- Vercel alias: pointed at `rishi-ventrapragada-opbwxp4eb` (Git deploy of
+  the code + docs push, Ready in 20s) and verified on the vanity URL
+  itself with `live18.mjs`: 34 leaves + 7 roots at 1280 and 375, none
+  clipped or wrapped, 14px leaves, root `rgb(255,59,92)` / dark text,
+  connectors `rgb(255,59,92)`, fan shown at 1280 and hidden at 375,
+  Docker / Kubernetes at 0.5, no overflow, nav "Skills" lands at 80px.
+  `live-skills-1280.png`, `live-skills-375.png`. Re-pointed once more
+  after this line landed.
 
 ## 2026-09-22 — increment 17
 
