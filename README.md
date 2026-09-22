@@ -30,7 +30,8 @@ npm run preview  # serve the production build locally
 ```
 src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
-  components/                 Nav, Hero, Wordmark, About, AboutPanel, TechStack, Pills,
+  components/                 Nav, Hero, Wordmark, About, AboutPanel, SkillTree, SkillGroup,
+                              SkillChain, Pills,
                               ProjectsSection, ProjectFrame, ProjectDetail,
                               ProjectLinks,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,

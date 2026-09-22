@@ -92,6 +92,101 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-22 — increment 18
+
+### Last milestone completed
+
+**Tech stack is a skill tree** (PRD §5.6), one code commit
+(`skills: replace the pill cards with a skill tree`) plus this docs commit.
+`TechStack.astro` deleted (nothing else referenced it; `Pills.astro` stays
+for `ProjectDetail.astro`). New `SkillTree.astro` (section, data, the
+six-column grid), `SkillGroup.astro` (root + fan SVG) and
+`SkillChain.astro` (the leaves, both layouts, connectors). Same
+`id="skills"`, same nav anchor. Canva is out of Tools — it belongs to the
+video-editing constellation, which is the **next increment and a separate
+section**; do not fold it into this tree.
+
+### Decisions worth knowing before you touch this
+
+- **Legibility set the numbers.** 14px mono leaves with 12-character
+  labels ("Tailwind CSS", "Google Cloud") need 128px pills; six columns of
+  those plus gaps and gutters is 944px, so the tree layout starts at
+  **960px** and everything below stacks. Tablets get the stacked layout on
+  purpose — it is the same pills at the same size.
+- **Below 960px is option (b), stacked spine-and-chain, not a pannable
+  diagram.** A wrapping flex chain where every pill carries a left tick and
+  the gap equals the tick: the first pill in a row joins the spine, the
+  rest join the pill before them. No panning, no shrinking.
+- **Roots have dark text on the accent.** `--fg` on crimson is 3.5:1 (fails
+  AA at 12px); `--bg` is 5.4:1 on crimson and 6.9:1 on violet.
+- **Learning cluster = `.planned` on the leaves + dashed lines; the root is
+  outlined, not filled-and-dimmed.** A solid accent root at 0.5 opacity
+  would fail contrast. Flagged in the report as the one bend on the
+  utility. Leaf defaults are in `@layer components` so `.planned` wins
+  border-style and opacity (the `ExperienceClip.astro` pattern).
+- **Static, no interaction, no animation.** There is no per-skill detail to
+  reveal and inventing one is §7; a list reads faster than a widget. A
+  scroll-in draw was considered and dropped for the same reason the brief
+  gives: instant legibility. Reduced motion therefore changes nothing.
+- **Column split is build-time** (`rows = ceil(n/2)`, `data-head` on each
+  column's first item so it gets no connector above) — the
+  seeded-waveform pattern; zero client JS.
+- **Fan trick**: the SVG is a `2×1` box stretched with
+  `preserveAspectRatio="none"`; straight lines stay straight under
+  non-uniform scaling and `vector-effect="non-scaling-stroke"` keeps them
+  2px at any column width. No coordinates depend on the viewport.
+- h2 still says "Tech stack" under the "Toolkit" eyebrow; renaming it
+  "Skills" to match the nav is the owner's call.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — Tech stack row. **§5.6** — the Tech stack paragraph
+  rewritten in full, with the "separate video section, do not merge"
+  note. **§10** — new line 17. **README** — components list.
+  **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`cdp.mjs` + `verify18.mjs` + `violet18.mjs` in the session scratchpad
+(headless Chrome over CDP, static server over `dist/`, `boot-seen`
+pre-set; 1280×1150, 960×1150, 768×1400 fine pointer, 375×812 touch):
+
+- Build + `astro check`: 0 / 0 / 0. `grep -rn TechStack src` → 0 hits.
+  Headings: 1 h1, 4 h2, **7 h3** (the roots) — the outline gained the
+  category level. 0 links in the section.
+- **Every node legible at every width**: 34 leaves + 7 roots at all four
+  widths, `scrollWidth <= clientWidth` on each (nothing clipped), every
+  leaf one line (≤ 40px tall), leaves 14px, roots 12px. All 34 names
+  read in the screenshots at 1280 and 375.
+- **Hierarchy**: root `rgb(255,59,92)` fill / `rgb(17,18,20)` text; leaf
+  `rgb(26,27,30)` fill. Leaves 181px wide at 1280, 126–130 at 960.
+- **Lines**: connector pseudo-elements `background rgb(255,59,92)` 2px, fan
+  `stroke rgb(255,59,92)` 2px, spine `2px solid rgb(255,59,92)` below
+  960 — full opacity, and the screenshots read as bright red lines, not
+  hints. Violet: root `rgb(167,139,250)` with the same dark text, lines
+  and fan violet.
+- **Learning**: Docker / Kubernetes opacity 0.5, dashed border; their
+  connectors `dashed rgb(255,59,92)`, spine dashed, fan
+  `stroke-dasharray 4 4`; root transparent with accent text, dashed.
+- **Layout**: `scrollWidth == clientWidth` at 375 / 768 / 960 / 1280.
+  1280: three groups per band at x = 48 / 451 / 853, 379px each, bands at
+  y 2318 / 2667, learning at 451,2864 (the middle pair). 375: seven
+  stacked groups 327px wide, section 1472px.
+- **Anchor**: nav "Skills" → `#skills` top at 80px.
+- **Reduced motion**: `animation-name: none` on every element in the
+  section (there is none to remove).
+- **Client JS**: unchanged — 0 external, 7 inline blocks, 3280 B gz.
+- **Screenshots**: `skills-1280.png`, `skills-960.png`, `skills-768.png`,
+  `skills-375.png` + `-b` + `-c`, `skills-1280-violet.png`.
+
+### Still open
+
+- The video-editing constellation section (next increment): separate
+  section, separate anchor, Canva goes there.
+- `public/resume.pdf` still missing; the five About panels; the no-JS nav
+  transparency noted in increment 17.
+- Vercel alias: see below once the deploy is verified.
+
 ## 2026-09-22 — increment 17
 
 ### Last milestone completed
