@@ -92,6 +92,130 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-22 — increment 17
+
+### Last milestone completed
+
+**The footer's credits roll is real** (PRD §5.8), one code commit
+(`footer: roll the credits on scroll, settle on the links`) plus this docs
+commit. `Footer.astro` (200 lines, at the cap) now holds a 250vh scroll
+track → sticky 100dvh pin (`overflow: clip`) → the roll: a pin-height
+title card, the two credit rows, then `FooterContact.astro` (new): a
+pin-height contact card with "Get in touch" + the four links centred and
+the © line 2rem above its bottom edge. The roll translates
+`0 → calc(--pin-inner − 100%)` against a named view timeline on the track
+(`contain 0% → contain 100%`); `src/scripts/credits-roll.ts` (new) is the
+`CSS.supports` fallback (rAF, absolute scrollY, `--credits-progress`) and
+the keyboard reveal. Still `<footer id="contact">`; nav anchor lands at
+80px.
+
+### Decisions worth knowing before you touch this
+
+- **0% is a title card, not a blank screen.** Whatever is in the pin at
+  progress 0 is what scrolls into view before the pin engages, so a roll
+  that starts from empty would put 100vh of nothing after Projects. The
+  title card is that frame instead.
+- **The document ends at 100%.** The contact card is pin-height, so the
+  track's end is the page's end and the © line is inside the last frame.
+  There is no post-release flow content by design; if something is ever
+  added after the footer the "release" becomes a real scroll again.
+- **The rate is < 1 on purpose and tunable in one place.** Rate =
+  (roll − pin-inner) / (`--pin-length` − 100dvh) = 0.773 px/px at
+  1280×900 with `--pin-length: 250vh`. At 1:1 the pin is visually
+  identical to plain flow; the slower roll is what the pin buys. Shorten
+  the track to speed it up.
+- **Reduced motion disables the roll (static block), unlike Experience.**
+  Experience kept its pin because sticky is layout and a zone change is
+  discrete. Here the pin exists only to move content slower than the
+  scroll — a differential rate is parallax, WCAG 2.3.3's own example — so
+  the mechanic goes. The static block is the same three frames at 1:1 and
+  still ends on the contact card. Nav progress bar stays on under reduce
+  because it is 1:1 state; this isn't.
+- **Keyboard: `focusin` + `:focus-visible` → jump to the track end.** A
+  link focused inside a stuck pin never scrolls into view on its own (the
+  window scrolls, the pin absorbs it). The jump is instant because the
+  browser's own focus-scroll runs *after* `focusin` and then clamps to
+  the same document end. `:focus-visible` keeps mouse clicks on a
+  half-visible link from being yanked (measured with a real CDP click).
+- **`overflow: clip`, not `hidden`**, on the pin: hidden makes a scroll
+  container that focus() would scroll internally, out from under the
+  transform.
+- **Hooks are `data-credits-track/pin/roll`**, not `data-track/pin`:
+  Experience already uses `[data-pin]` and its ruler rows `[data-track]`,
+  and the first harness run measured those instead (38px "track").
+- **Links block centre = viewport centre; the links themselves sit 21px
+  lower** because "Get in touch" shares the centred block. Left as is;
+  say if the links row itself should be the centre.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — Contact row. **§5.8** — rewritten for the real mechanic.
+  **§10** — new line 16. **README** — components (FooterContact), lib
+  line, scripts (credits-roll.ts). **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`cdp.mjs` + `verify17.mjs` + `verify17b.mjs` in the session scratchpad
+(headless Chrome over CDP, static server over `dist/`, `boot-seen`
+pre-set; 1280×900 fine pointer and 375×812 touch-emulated; every scroll
+`behavior: 'instant'` + two rAFs before reading):
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints. Landmarks: one
+  `<h1>`, four `<h2>`, one `<footer>`; four anchors, `rel=noopener` ×3.
+- **Rate table, CSS branch, 1280×900**: track 2250, pin 900, roll 1880,
+  D 1350; `translateY` 0 → −1044 in ten equal steps of −104.4 →
+  **−0.773 px/px every interval**, same values scrolling back up
+  (reversible), pin top 0 throughout, ty 0 at track top − 300. **375×812**:
+  roll 1672, D 1218, −0.759 px/px. **Fallback** (`CSS.supports` stubbed,
+  `animation: none` injected, `data-fallback="on"`): the identical table.
+- **Landing / end**: at max scroll the links are at 490–516 (block centre
+  482 = 64 + 836/2), © bottom 868, pin bottom = track bottom = 900 =
+  innerHeight, `scrollY` = `scrollHeight − innerHeight`, `scrollWidth ==
+  clientWidth`, links on one row at both widths (375: 447–473).
+- **Anchor**: nav "Contact" click from the top → footer top at 80px.
+- **Keyboard**: Tab from Projects' last link → GitHub 497–511, in view,
+  `:focus-visible`, scrollY = end; LinkedIn / Gmail / Résumé same;
+  Shift+Tab out → Projects link in view after the smooth scroll settles
+  (a 2-rAF sample mid-scroll read −1304, harness artefact); real CDP
+  click on the Résumé link at 892px (6px visible): focused, not
+  `:focus-visible`, scrollY unchanged.
+- **Reduced motion**: pin static (1944px = 64 + 1880), track 1944,
+  animation `none`, no fallback flag, footer top moves 500 for 500, page
+  ends on the contact card with links at 490–516, Tab into GitHub revealed
+  by the browser at 497–511.
+- **No JS** (`Emulation.setScriptExecutionDisabled`, boxes via the DOM
+  domain): pin `static` 1944px, animation `none`, transform `none`; after
+  a synthesized scroll to the end the links are at 490–516 and the footer
+  bottom at 900.
+- **Screenshots**: `credits-0.png` (title card), `credits-50.png`
+  (credit rows mid-roll), `credits-100.png`, `credits-100-phone.png`,
+  `credits-50-phone.png`, `credits-focus.png` (ring on Résumé),
+  `credits-reduced.png`, `credits-nojs-true.png`, `credits-fallback-100.png`.
+- **Client JS**: 0 external scripts; 7 inline blocks, 3280 B gzipped
+  concatenated (16: 6 blocks, 3077 B) → **+203 B**.
+
+### Harness notes
+
+- Scope every footer selector to `#contact`: `[data-pin]`, `.links` and
+  `.credit`-ish names exist in Experience and the nav.
+- `Runtime.evaluate` is refused while scripts are disabled; read no-JS
+  layout with `DOM.getBoxModel` / `CSS.getComputedStyleForNode` and scroll
+  with `Input.synthesizeScrollGesture`. Injecting `noscript.textContent`
+  into a `<style>` does *not* emulate it (the text includes the
+  `<style>` tags and the first rule is dropped).
+- Synthetic `MouseEvent` + `focus()` still reads `:focus-visible` true;
+  only `Input.dispatchMouseEvent` exercises the mouse path.
+- Long heredocs still break this shell; the Write tool for scripts.
+
+### Still open
+
+- Owner to supply `public/resume.pdf` (link still 404s) and the five
+  About panels.
+- **Pre-existing, not this increment**: without JavaScript the nav never
+  gets `.is-scrolled`, so it stays transparent and content shows through
+  it (the credits' "Rishi" line in `credits-nojs-true.png`).
+- Vercel alias: see the line appended below once the deploy is verified.
+
 ## 2026-09-21 — increment 16
 
 ### Last milestone completed

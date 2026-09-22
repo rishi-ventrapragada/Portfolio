@@ -35,13 +35,14 @@ src/
                               ProjectLinks,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
                               ExperienceClip,
-                              Footer, BootPreloader, BootSquare, AccentToggle (dev only)
+                              Footer, FooterContact, BootPreloader, BootSquare,
+                              AccentToggle (dev only)
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
-  lib/is-url.ts               the href guard shared by ProjectLinks and Footer
+  lib/is-url.ts               the href guard shared by ProjectLinks and FooterContact
   pages/index.astro           the whole site: one page, anchored sections
-  scripts/                    boot-*.ts, hero-dissolve.ts, nav.ts,
+  scripts/                    boot-*.ts, credits-roll.ts, hero-dissolve.ts, nav.ts,
                               experience-timeline.ts, experience-scrub.ts,
                               experience-playhead.ts
   styles/global.css           all design tokens
