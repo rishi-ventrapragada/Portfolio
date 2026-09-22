@@ -1,0 +1,50 @@
+---
+// A film-perforation seam between two sections (PRD §5.12). The technique is
+// ProjectFrame.astro's sprocket strip — radial-gradient holes on a
+// `background-repeat: space` track, so whole 16px tiles are laid across the
+// width and the remainder is spread between them, never clipping a hole at
+// either edge.
+//
+// Boundary-aware, which is the whole reason this is a component rather than a
+// rule. The holes are *painted*, not punched: the gradient fills each disc
+// with the colour of the section behind it, so a hole only reads as a hole
+// while that colour matches what it sits over. The strip is the film stock —
+// a raised surface, distinct from both — and the divider is two stacked
+// halves, the upper one punched in the section above's colour and the lower
+// one in the section below's. At a dark/light seam (Hero→About,
+// Projects→Contact once §5.13 lands) each half stays correct instead of one
+// of them dropping a dark band onto a light section.
+//
+// `above` / `below` name the section surface on each side; `stock` is the
+// strip itself. The defaults are right for every dark-to-dark seam.
+interface Props {
+  above?: string;
+  below?: string;
+  stock?: string;
+}
+
+const { above = "var(--bg)", below = "var(--bg)", stock = "var(--bg-raised)" } = Astro.props;
+---
+
+<div class="divider" aria-hidden="true" style={`--stock: ${stock}`}>
+  <span class="half" style={`--hole: ${above}`}></span>
+  <span class="half" style={`--hole: ${below}`}></span>
+</div>
+
+<style>
+  .divider {
+    display: grid;
+    grid-template-rows: repeat(2, 12px);
+  }
+
+  /* Both halves share the film stock; each punches its own side's colour,
+     so the top row of holes reads through to the section above and the
+     bottom row to the section below. */
+  .half {
+    display: block;
+    background-color: var(--stock);
+    background-image: radial-gradient(circle, var(--hole) 0 3px, transparent 3.5px);
+    background-size: 16px 100%;
+    background-repeat: space no-repeat;
+  }
+</style>

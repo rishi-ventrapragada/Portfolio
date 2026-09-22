@@ -9,6 +9,7 @@
 // cross-fades to the next, so nothing ever leaves by the top edge.
 // scripts/footer-scrub.ts owns the zone/commit path and the keyboard reveal.
 // The credit wording is the owner's, split into rows.
+import Divider from "./Divider.astro";
 import FooterContact from "./FooterContact.astro";
 import FooterStage from "./FooterStage.astro";
 
@@ -17,6 +18,10 @@ const credits = [
   { id: "author", role: "Directed, developed & edited by", name: "Rishi" },
 ];
 ---
+
+{/* The Projects→Contact seam (PRD §5.12). Outside the <footer> so the
+    landmark still starts at the contact content. */}
+<Divider />
 
 <footer class="footer" id="contact" data-credits>
   {/* Without JavaScript nothing commits a stage, so the <noscript> style
@@ -74,7 +79,6 @@ const credits = [
      its content centred in the pin. */
   .footer {
     --pin-inner: calc(100dvh - var(--nav-height));
-    border-top: 1px solid var(--line);
   }
 
   /* --pin-length is the one number to tune: the scroll distance the track
