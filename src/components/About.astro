@@ -24,7 +24,11 @@ const panels = [
 ] as const;
 ---
 
-<section class="about" id="about" aria-labelledby="about-heading">
+{/* Light-scoped (PRD §5.16). The attribute sits on the section, not on an
+    inner wrapper: .page runs full-bleed inside it and its gutters are the
+    section's own background showing between the panels, so an ancestor that
+    actually paints is the only place this works. */}
+<section class="about" id="about" data-theme="light" aria-labelledby="about-heading">
   {/* No top rule: the hero subject fades into this section, and a hairline
       right under the fade would read as a cut. */}
   <div class="shell head">

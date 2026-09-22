@@ -10,14 +10,20 @@ import ProjectFrame from "./ProjectFrame.astro";
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<section class="projects shell" id="projects" aria-labelledby="projects-heading">
-  <p class="label eyebrow">Selected work</p>
-  <h2 id="projects-heading" class="heading">Projects</h2>
+{/* Light-scoped (PRD §5.16) on the section, which runs full width, with
+    .shell moved to an inner wrapper. The section used to carry .shell
+    itself, and a background there would have stopped at 1280px and left the
+    page's dark ground either side of it on a wide screen. */}
+<section class="projects" id="projects" data-theme="light" aria-labelledby="projects-heading">
+  <div class="shell">
+    <p class="label eyebrow">Selected work</p>
+    <h2 id="projects-heading" class="heading">Projects</h2>
 
-  {/* auto-fill, not auto-fit: frames keep their slot size and a later entry
-      drops into the next empty slot, like a contact sheet. */}
-  <div class="sheet">
-    {projects.map((entry, i) => <ProjectFrame entry={entry} index={i} />)}
+    {/* auto-fill, not auto-fit: frames keep their slot size and a later entry
+        drops into the next empty slot, like a contact sheet. */}
+    <div class="sheet">
+      {projects.map((entry, i) => <ProjectFrame entry={entry} index={i} />)}
+    </div>
   </div>
 </section>
 

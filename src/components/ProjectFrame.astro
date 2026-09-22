@@ -85,7 +85,7 @@ const expandable = !!(summary || stack || links);
     content: "";
     display: block;
     height: 14px;
-    background-image: radial-gradient(circle, var(--bg) 0 3px, transparent 3.5px);
+    background-image: radial-gradient(circle, var(--sprocket-hole) 0 3px, transparent 3.5px);
     background-size: 16px 100%;
     background-repeat: space no-repeat;
   }
@@ -143,7 +143,7 @@ const expandable = !!(summary || stack || links);
     .frame[data-expandable]:focus-within {
       z-index: 2;
       transform: scale(1.02);
-      box-shadow: 0 24px 48px color-mix(in srgb, var(--monitor-bg) 60%, transparent);
+      box-shadow: 0 24px 48px var(--shadow);
     }
   }
 

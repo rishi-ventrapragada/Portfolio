@@ -1,6 +1,9 @@
 ---
 import { Font } from "astro:assets";
 import "../styles/global.css";
+// After global.css on purpose: the section-scoped light tokens have to win
+// over :root[data-accent=...] on order, since they cannot on specificity.
+import "../styles/theme-light.css";
 import Footer from "../components/Footer.astro";
 import AccentToggle from "../components/AccentToggle.astro";
 import BootPreloader from "../components/BootPreloader.astro";

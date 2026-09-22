@@ -17,16 +17,22 @@ import ExperienceTimeline from "../components/ExperienceTimeline.astro";
 >
   {/* Perforated seams at every top-level boundary (PRD §5.12). The sixth,
       Projects→Contact, is at the top of Footer.astro: the footer is rendered
-      by the layout, outside this slot. */}
+      by the layout, outside this slot.
+
+      About and Projects are light (§5.16), so the three seams that touch
+      them are told which side is which: each half punches its own section's
+      surface, and the stock stays the lighter of the two so the strip reads
+      as film over both. --light-* are the scoped values, named in
+      styles/theme-light.css. */}
   <Hero />
-  <Divider />
+  <Divider below="var(--light-bg)" stock="var(--light-stock)" />
   <About />
-  <Divider />
+  <Divider above="var(--light-bg)" stock="var(--light-stock)" />
   <SkillTree />
   <Divider />
   <SkillConstellation />
   <Divider />
   <ExperienceTimeline />
-  <Divider />
+  <Divider below="var(--light-bg)" stock="var(--light-stock)" />
   <ProjectsSection />
 </BaseLayout>

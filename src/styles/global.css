@@ -38,6 +38,13 @@
      the darkened light-theme accent, where white reads 6.02). */
   --on-accent: #111214;
 
+  /* The surface a film perforation reads through to, and the colour a card's
+     drop shadow is mixed from. Both are their own tokens because a
+     light-scoped section needs different values (src/styles/theme-light.css)
+     and the alternatives — --bg and --monitor-bg — mean other things. */
+  --sprocket-hole: var(--bg);
+  --shadow: color-mix(in srgb, var(--monitor-bg) 60%, transparent);
+
   /* Small colour palette. First chosen for the boot preloader's greeting
      cycle (retired in increment 8, PRD §5.10) and kept by the owner's
      decision; since increment 13.1 the Experience timeline's clips use

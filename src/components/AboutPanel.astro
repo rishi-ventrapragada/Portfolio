@@ -16,7 +16,12 @@ const { n, tone, establishing = false } = Astro.props;
 ---
 
 <figure class:list={["panel", { establishing }]}>
-  <div class="art" data-tone={tone} role="img" aria-label={`Panel ${n} placeholder art`}>
+  <div
+    class="art"
+    style={`--tone: var(--word-${tone})`}
+    role="img"
+    aria-label={`Panel ${n} placeholder art`}
+  >
     <span class="meta tag">[PANEL {n} &mdash; placeholder art]</span>
   </div>
   <figcaption class="label caption">[TODO: panel {n} dialogue]</figcaption>
@@ -49,31 +54,35 @@ const { n, tone, establishing = false } = Astro.props;
     text-align: center;
   }
 
-  /* Each fill is a palette word mixed down into the raised surface: still
-     clearly a colour (so the grade cycle reads), not a flat swatch. */
-  .art[data-tone="amber"] {
-    background-color: color-mix(in srgb, var(--word-amber) 60%, var(--bg-raised));
+  /* One rule for all five fills; the panel passes its palette word as
+     --tone. The mix partner is --panel-ink, not --bg-raised directly,
+     because the operand's job here is "darken the word to a swatch". On a
+     light surface --bg-raised is white, so the same expression would wash
+     all five fills out to pastel; the light scope keeps a dark partner and a
+     lower word share so the swatches stay swatches and the grade cycle still
+     has something to act on. */
+  .art {
+    --panel-ink: var(--bg-raised);
+    --panel-mix: 52%;
+    --tag-ink: #ffffff;
+    background-color: color-mix(in srgb, var(--tone) var(--panel-mix), var(--panel-ink));
   }
 
-  .art[data-tone="sky"] {
-    background-color: color-mix(in srgb, var(--word-sky) 60%, var(--bg-raised));
+  /* Light scope: a dark mix partner and a higher word share, so the swatches
+     stay swatches. The tag's ink flips with them — measured across all five
+     fills, near-black is 5.28:1 at worst here where white is only 2.86. */
+  :global([data-theme="light"]) .art {
+    --panel-ink: #2a2b30;
+    --panel-mix: 72%;
+    --tag-ink: #111214;
   }
 
-  .art[data-tone="mint"] {
-    background-color: color-mix(in srgb, var(--word-mint) 60%, var(--bg-raised));
-  }
-
-  .art[data-tone="periwinkle"] {
-    background-color: color-mix(in srgb, var(--word-periwinkle) 60%, var(--bg-raised));
-  }
-
-  .art[data-tone="coral"] {
-    background-color: color-mix(in srgb, var(--word-coral) 60%, var(--bg-raised));
-  }
-
-  /* Dark tag on the bright fill; the scoped rule outranks .meta's muted grey. */
+  /* Its own token, not --bg or --on-accent: the fills are neither the page
+     nor the accent, and the ink that wins on them is the opposite of
+     --on-accent's in both themes. 52% keeps the darkest dark-theme fill at
+     4.6:1 against white; at the old 60% it was 3.97, under AA. */
   .tag {
-    color: var(--bg);
+    color: var(--tag-ink);
   }
 
   .caption {

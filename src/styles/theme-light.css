@@ -1,0 +1,78 @@
+/* Section-scoped light theme (PRD §4.3, §5.16).
+ *
+ * Its own file, imported after global.css, for two reasons. The cap
+ * (CLAUDE.md §5) is one; the cascade is the other. The accent switch is
+ * `:root[data-accent="violet"]`, specificity (0,1,1), while a section scope
+ * is `[data-theme="light"]`, only (0,1,0) — so on equal footing the violet
+ * rule would keep its dark-theme accent inside a light section. Later in the
+ * cascade with equal specificity, these win.
+ *
+ * Everything below is a redefinition of an existing token, so any component
+ * that reads tokens rather than literals follows automatically. Components
+ * that used a token as a stand-in for "a specific dark colour" do not, and
+ * were fixed at the source instead — see --on-accent in global.css and
+ * --sprocket-hole / --shadow below.
+ *
+ * Every ratio quoted here was computed, not assumed. */
+
+/* The light surfaces, readable from anywhere. A Divider sits *between* two
+   sections and so is inside neither scope, but still has to punch the light
+   side's colour — it cannot inherit what it is not inside, so the values are
+   also published at the root under their own names. Defined once here and
+   referenced by [data-theme="light"] below, so there is a single source. */
+:root {
+  --light-bg: #f4f3f0;
+  --light-raised: #ffffff;
+  /* The film stock at a dark/light seam: the raised light surface, so the
+     strip reads as one continuous piece of film over both sections. */
+  --light-stock: #e8e6e1;
+}
+
+[data-theme="light"] {
+  /* Warm paper rather than pure white: pure white against the dark sections
+     either side reads as a light leak. */
+  --bg: var(--light-bg);
+  --bg-raised: var(--light-raised);
+
+  --fg: #1a1b1e; /* 15.52:1 on --bg, 17.22:1 on --bg-raised */
+  --fg-muted: #5c5e66; /* 5.83:1 on --bg, 6.47:1 on --bg-raised */
+  --heading: #111214; /* 16.89:1 on --bg */
+  --line: #d8d6d1;
+
+  /* Both shipped accents fail AA as text on this background — crimson 3.14,
+     violet 2.45 — so the light scope carries darkened variants. These are
+     the same hues, not new colours. */
+  --accent: #c2183a; /* 5.43:1 on --bg, 6.02:1 on --bg-raised */
+  --accent-soft: rgba(194, 24, 58, 0.16);
+
+  /* The ink on a solid accent fill flips with the theme: near-black wins on
+     the bright dark-theme accents (5.38 on crimson) and loses on these
+     darker ones (3.11), where white wins (6.02). */
+  --on-accent: #ffffff;
+
+  /* The surface a sprocket hole reads through to. ProjectFrame used --bg
+     directly, which is right only while the section's background is the page
+     background; scoped light, the holes would have kept painting #111214. */
+  --sprocket-hole: var(--bg);
+
+  /* Drop shadows. Both Projects files borrowed --monitor-bg (the Experience
+     NLE surface, pure black) purely as a source of black; on a light card a
+     60% black shadow is far too heavy. */
+  --shadow: rgba(26, 27, 30, 0.14);
+}
+
+/* The violet accent needs its own darkened value inside a light section, for
+   the same reason crimson does. Matches :root[data-accent="violet"]'s
+   specificity by pairing the two, so it wins on order. */
+:root[data-accent="violet"] [data-theme="light"],
+:root[data-accent="violet"][data-theme="light"] {
+  --accent: #6d28d9; /* 6.40:1 on --bg, 7.10:1 on --bg-raised */
+  --accent-soft: rgba(109, 40, 217, 0.16);
+}
+
+/* A light section paints its own surface; without this only the tokens would
+   change and the section would keep the page's dark ground. */
+[data-theme="light"] {
+  background-color: var(--bg);
+  color: var(--fg);
+}
