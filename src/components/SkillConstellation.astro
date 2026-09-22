@@ -1,0 +1,200 @@
+---
+// Video-editing skills as one constellation (PRD §5.6, increment 20): nine
+// named stars joined by bright accent lines into a single connected shape.
+// This is the second, separate Skills section — the dev-side tree is
+// SkillTree.astro and the two are never merged. Content is the owner's,
+// verbatim, no sub-grouping. Positions are fixed here at build time; the
+// lines are one SVG stretched to the box (preserveAspectRatio="none" with
+// non-scaling strokes, as the tree's fans), the stars and names are HTML at
+// the same percentages, so the type never scales with the box. Static text
+// in a shape: every name is visible and is its star's accessible name, no
+// hover, no links, no animation, no client script.
+
+interface Star {
+  name: string;
+  /** Percent of the box, also the SVG viewBox unit. */
+  x: number;
+  y: number;
+  /** Dot diameter in px: a little size variety, never cramping the name. */
+  d: 8 | 10 | 14;
+}
+
+// Nine distinct y bands about 11% apart: in the portrait phone box no two
+// names can share a row, and a name sits on the side of its star that has
+// the room (left of the star past the midline), so nothing ever overlaps
+// or leaves the box at 375px.
+const stars: Star[] = [
+  { name: "Videography", x: 14, y: 9, d: 10 },
+  { name: "After Effects", x: 58, y: 17, d: 10 },
+  { name: "Premiere", x: 32, y: 28, d: 14 },
+  { name: "Motion Design", x: 82, y: 39, d: 10 },
+  { name: "DaVinci Resolve", x: 24, y: 50, d: 14 },
+  { name: "Canva", x: 90, y: 61, d: 8 },
+  { name: "Color Grading", x: 46, y: 72, d: 10 },
+  { name: "CapCut", x: 12, y: 83, d: 8 },
+  { name: "Audio Mixing", x: 68, y: 91, d: 10 },
+];
+
+// A spanning path through all nine (eight lines) plus two that close the
+// figure, so it reads as one shape without becoming a mesh.
+const edges: [string, string][] = [
+  ["Videography", "Premiere"],
+  ["Premiere", "After Effects"],
+  ["After Effects", "Motion Design"],
+  ["Premiere", "DaVinci Resolve"],
+  ["DaVinci Resolve", "Color Grading"],
+  ["DaVinci Resolve", "CapCut"],
+  ["Color Grading", "Audio Mixing"],
+  ["Motion Design", "Canva"],
+  ["Canva", "Audio Mixing"],
+  ["Color Grading", "Motion Design"],
+];
+
+const byName = new Map(stars.map((s) => [s.name, s]));
+const lines = edges.map(([a, b]) => [byName.get(a)!, byName.get(b)!]);
+
+// Decorative background sky: dim specks, never near a name, aria-hidden.
+const specks: [number, number, number][] = [
+  [5, 30, 2], [20, 14, 3], [38, 8, 2], [50, 40, 3], [66, 6, 2], [74, 20, 3],
+  [95, 12, 2], [60, 30, 2], [8, 62, 3], [30, 88, 2], [56, 56, 2], [78, 80, 3],
+  [96, 88, 2], [40, 96, 3],
+];
+---
+
+<section class="video shell" id="skills-video" aria-labelledby="skills-video-heading">
+  <p class="label eyebrow">Also</p>
+  <h2 id="skills-video-heading" class="heading">Video editing</h2>
+
+  <div class="sky">
+    <div class="specks" aria-hidden="true">
+      {specks.map(([x, y, s]) => <span class="speck" style={`left: ${x}%; top: ${y}%; --s: ${s}px`} />)}
+    </div>
+
+    <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      {lines.map(([a, b]) => <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} vector-effect="non-scaling-stroke" />)}
+    </svg>
+
+    <ul class="stars">
+      {
+        stars.map(({ name, x, y, d }) => (
+          <li class="star" style={`left: ${x}%; top: ${y}%; --d: ${d}px`} data-side={x > 50 ? "left" : "right"}>
+            <span class="name">{name}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .video {
+    padding-block: var(--rhythm);
+    border-top: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: var(--size-h2);
+  }
+
+  /* The box every percentage refers to. Portrait on a phone so the nine
+     bands have room; 16:10 from 768px, capped so the shape stays a
+     cluster rather than a sprawl on wide screens. */
+  .sky {
+    position: relative;
+    max-width: 960px;
+    margin-inline: auto;
+    aspect-ratio: 2 / 3;
+  }
+
+  @media (min-width: 768px) {
+    .sky {
+      aspect-ratio: 16 / 10;
+    }
+  }
+
+  .specks,
+  .lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .speck {
+    position: absolute;
+    width: var(--s);
+    height: var(--s);
+    margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+    border-radius: 50%;
+    background-color: var(--fg-muted);
+    opacity: 0.4;
+  }
+
+  /* Every line is 2px accent at full opacity, under both accents, like the
+     tree's connectors. */
+  .lines {
+    overflow: visible;
+    color: var(--accent);
+  }
+
+  .lines line {
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .stars {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A star is a point; its dot and name hang off it. */
+  .star {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .star::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--d) / -2);
+    left: calc(var(--d) / -2);
+    width: var(--d);
+    height: var(--d);
+    border-radius: 50%;
+    background-color: var(--fg);
+    box-shadow: 0 0 0 3px var(--accent-soft), 0 0 14px 2px var(--accent-soft);
+  }
+
+  /* The name: mono 14px, not uppercased (product names read wrong shouted),
+     one line, on a --bg halo so no crossing line touches the letters. */
+  .name {
+    position: absolute;
+    top: 0;
+    padding: 0.125rem 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--fg);
+    background-color: var(--bg);
+    border-radius: 2px;
+    transform: translateY(-50%);
+  }
+
+  .star[data-side="right"] .name {
+    left: calc(var(--d) / 2 + 0.5rem);
+  }
+
+  .star[data-side="left"] .name {
+    right: calc(var(--d) / 2 + 0.5rem);
+  }
+</style>
