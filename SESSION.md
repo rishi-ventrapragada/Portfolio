@@ -92,6 +92,81 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-22 — increment 19
+
+### Last milestone completed
+
+**Skills: heading renamed, branches scale with leaf count** (PRD §5.6),
+one code commit (`skills: scale branches with leaf count, rename to
+Skills`) plus this docs commit. h2 "Tech stack" → "Skills" (eyebrow
+"Toolkit" stays). `SkillGroup.astro` computes
+`branches = max(2, ceil(n / 3))` → Languages / Frameworks / AI fork three
+ways, the rest two; the fan SVG is `viewBox="0 0 N 1"` with one line per
+branch from `(N/2, 0)` to `(i + 0.5, 1)`; `SkillChain.astro` takes
+`branches` and lays out `repeat(var(--branches), 8rem)` columns. Mobile
+untouched.
+
+### Decisions worth knowing before you touch this
+
+- **The desktop tree is now centred wrapping rows, not the six-column
+  band grid.** Forced by arithmetic, not taste: a leaf column must stay
+  ≥ 128px (increment 18's measured floor for "Tailwind CSS" at 14px), so
+  three 3-branch groups need 3 × 416 + 48 = 1296px in one band and the
+  shell is 1184px (864 at 960). Every leaf is now exactly 8rem at every
+  desktop width; a group is `branches × 8rem + gaps` wide; rows fall out
+  of the content in document order (no `dense`). Rows: 1280 →
+  [Languages, Frameworks] / [AI, Tools, Platforms] / [Cloud, Learning];
+  960 → [Languages, Frameworks] / [AI, Tools] / [Platforms, Cloud,
+  Learning]. The learning cluster no longer has a placement rule; it
+  centres in its row like everything else.
+- **8rem is a hard floor.** Going below it clips "Tailwind CSS" /
+  "Google Cloud" at 14px. If a longer label ever arrives, widen `8rem` in
+  `SkillChain.astro` *and* `SkillGroup.astro` together.
+- The fan's viewBox is in branch units, so a 3-branch fan's outer lines
+  span 144px over 28px — shallow, but the middle line is vertical and the
+  spread reads as intended in the screenshots.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — Skills row. **§5.6** — heading "About and Skills"; the
+  Skills paragraph: h2 rename, the branch rule, the fan generalised, the
+  row layout and its arithmetic, measurements. **§10** — new line 18.
+  **SESSION.md** — this entry. README unchanged (same components).
+
+### Verified by measurement, not eyeballing
+
+`cdp.mjs` + `verify19.mjs` in the session scratchpad (headless Chrome over
+CDP, static server over `dist/`; 1280×1250, 960×1400, 768×1400, 375×812):
+
+- Build + `astro check`: 0 / 0 / 0. Built HTML: 3 × `viewBox="0 0 3 1"`,
+  4 × `"0 0 2 1"`. h2 text "Skills" = nav label "Skills". Headings 4 h2 /
+  7 h3, 0 links, 0 scripts (7 inline blocks, 3280 B gz, unchanged).
+- **Branches**: per group `--branches` / grid tracks / `data-head` count /
+  fan lines = 3,3,3,2,2,2,2 at 1280 and 960; fan `x1` 1.5 (three) or 1
+  (two), `x2` 0.5,1.5,2.5 / 0.5,1.5 — even by construction; fan boxes
+  416×28 and 272×28; learning fan `stroke-dasharray 4px, 4px`.
+- **Legibility again**: 34 leaves + 7 roots at all four widths, none
+  clipped, none wrapped, leaves 14px; **every leaf 128px wide** at 1280
+  and 960 (was 181 / 126–130). All names read in the screenshots.
+- **Rows**: 1280 → groups at y 2418 / 2666 / 2913 exactly as predicted
+  (Languages x 212, Frameworks 652; AI 136, Tools 576, Platforms 872;
+  Cloud 356, Learning 652); 960 → y 2385 / 2633 / 2880 with Platforms,
+  Cloud, Learning on the last row. `scrollWidth == clientWidth` at 375 /
+  768 / 960 / 1280. Section 902px tall at 1280 (953 before).
+- **Unchanged**: root `rgb(255,59,92)` / dark text, connectors
+  `rgb(255,59,92)` 2×16, Docker / Kubernetes 0.5 + dashed, anchor →
+  80px, `animation-name: none` throughout, mobile identical to 18.
+- **Screenshots**: `skills19-1280.png`, `skills19-960.png`,
+  `skills19-768.png`, `skills19-375.png` + `-b` (compare `skills-*.png`
+  from increment 18).
+
+### Still open
+
+- The video-editing constellation section (next increment): separate
+  section, separate anchor, Canva goes there.
+- `public/resume.pdf`, the About panels, the no-JS nav transparency.
+- Vercel alias: see below once the deploy is verified.
+
 ## 2026-09-22 — increment 18
 
 ### Last milestone completed
