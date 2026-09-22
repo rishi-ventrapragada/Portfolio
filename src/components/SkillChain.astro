@@ -1,8 +1,9 @@
 ---
 // The leaves of one skill-tree category (PRD §5.6): a single list whose
-// items read down one column then the next. From 960px it is two grid
-// columns and each leaf is joined to the one above by a solid accent
-// connector — the head of each column has none, the group's fan reaches it.
+// items read down one column then the next. From 960px it is one 8rem grid
+// column per branch (SkillGroup.astro decides how many) and each leaf is
+// joined to the one above by a solid accent connector — the head of each
+// column has none, the group's fan reaches it.
 // Below 960px it is a wrapping chain hung from a left spine, every leaf
 // ticked to the spine or to the leaf before it, so nothing ever shrinks.
 // The column split is computed here at build time; no client script.
@@ -12,17 +13,19 @@
 // and every node's visible text is its accessible name.
 interface Props {
   items: string[];
+  /** Columns from 960px; SkillGroup.astro computes it from the count. */
+  branches: number;
   /** Currently learning: the shared `.planned` treatment, dashed lines. */
   learning?: boolean;
 }
 
-const { items, learning = false } = Astro.props;
+const { items, branches, learning = false } = Astro.props;
 
-const rows = Math.ceil(items.length / 2);
+const rows = Math.ceil(items.length / branches);
 const nodes = items.map((item, i) => ({ item, head: i % rows === 0 }));
 ---
 
-<ul class="chain" style={`--rows: ${rows}`} data-planned={learning ? "" : undefined}>
+<ul class="chain" style={`--rows: ${rows}; --branches: ${branches}`} data-planned={learning ? "" : undefined}>
   {
     nodes.map(({ item, head }) => (
       <li class:list={["node", { planned: learning }]} data-head={head ? "" : undefined}>
@@ -80,13 +83,14 @@ const nodes = items.map((item, i) => ({ item, head: i % rows === 0 }));
     margin-top: -1px;
   }
 
-  /* --- From 960px: two columns, vertical connectors ------------------- */
+  /* --- From 960px: one 8rem column per branch, vertical connectors ---- */
   @media (min-width: 960px) {
     /* Filled top to bottom then across (grid-auto-flow: column); --rows
-       from the build so the second column starts at the right item. */
+       from the build so each next column starts at the right item. 8rem is
+       the measured floor for a 12-character label at 14px. */
     .chain {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(var(--branches), 8rem);
       grid-template-rows: repeat(var(--rows), auto);
       grid-auto-flow: column;
       gap: 16px 1rem;

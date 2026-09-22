@@ -31,7 +31,7 @@ const learning = { name: "Currently learning", items: ["Docker", "Kubernetes"] }
 
 <section class="skills shell" id="skills" aria-labelledby="skills-heading">
   <p class="label eyebrow">Toolkit</p>
-  <h2 id="skills-heading" class="heading">Tech stack</h2>
+  <h2 id="skills-heading" class="heading">Skills</h2>
 
   <ul class="tree">
     {categories.map((category) => <SkillGroup {...category} />)}
@@ -64,23 +64,19 @@ const learning = { name: "Currently learning", items: ["Docker", "Kubernetes"] }
     list-style: none;
   }
 
-  /* From 960px: six columns, two per group. Bands fall out of the flow —
-     Languages, Frameworks, AI; then Tools, Platforms, Cloud; then the
-     learning cluster placed in the middle pair. Six 128px pills plus gaps
-     and gutters need 944px, hence the breakpoint. */
+  /* From 960px: centred rows of fixed-width groups. Every leaf column is
+     8rem (the measured floor for a 12-character label at 14px) and a group
+     is as wide as its branches, so the rows fall out of the content —
+     [Languages, Frameworks] / [AI, Tools, Platforms] / [Cloud, Learning] at
+     1280 — in document order, never reflowed. Three 3-branch groups would
+     need 1296px in one band, more than the 1184px shell; hence rows. */
   @media (min-width: 960px) {
     .tree {
-      grid-template-columns: repeat(6, 1fr);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
       gap: 3rem 1.5rem;
-      align-items: start;
-    }
-
-    .tree > :global(.group) {
-      grid-column: span 2;
-    }
-
-    .tree > :global(.group[data-planned]) {
-      grid-column: 3 / span 2;
     }
   }
 </style>

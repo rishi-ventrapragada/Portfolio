@@ -1,10 +1,12 @@
 ---
-// One category of the skill tree (PRD §5.6): a root node, a fan of two
-// connector lines, and the leaves (SkillChain.astro). From 960px the group
-// is a small talent tree — root centred over the chain's two columns, the
-// fan reaching each column's head. Below 960px it is the root over the
-// chain's spine. The "Currently learning" group keeps the same anatomy with
-// an outlined root and dashed lines. No client script.
+// One category of the skill tree (PRD §5.6): a root node, a fan of one
+// connector line per branch, and the leaves (SkillChain.astro). Branches
+// scale with the leaf count — about three leaves each, never fewer than
+// two branches so every category forks — computed here at build time.
+// From 960px the group is a small talent tree — root centred over the
+// chain's columns, the fan reaching each column's head. Below 960px it is
+// the root over the chain's spine. The "Currently learning" group keeps
+// the same anatomy with an outlined root and dashed lines. No client script.
 import SkillChain from "./SkillChain.astro";
 
 interface Props {
@@ -15,20 +17,24 @@ interface Props {
 }
 
 const { name, items, learning = false } = Astro.props;
+
+// Languages 8 → 3, Frameworks 9 → 3, AI 7 → 3, the rest 2.
+const branches = Math.max(2, Math.ceil(items.length / 3));
+const fan = Array.from({ length: branches }, (_, i) => i + 0.5);
 ---
 
-<li class="group" data-planned={learning ? "" : undefined}>
+<li class="group" style={`--branches: ${branches}`} data-planned={learning ? "" : undefined}>
   <h3 class="label root">{name}</h3>
 
-  {/* Two lines from the root's bottom centre to each column's top centre.
-      preserveAspectRatio="none" stretches the 2×1 box to the row, which
-      keeps straight lines straight; non-scaling-stroke keeps them 2px. */}
-  <svg class="fan" viewBox="0 0 2 1" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-    <line x1="1" y1="0" x2="0.5" y2="1" vector-effect="non-scaling-stroke"></line>
-    <line x1="1" y1="0" x2="1.5" y2="1" vector-effect="non-scaling-stroke"></line>
+  {/* One line from the root's bottom centre to each column's top centre,
+      evenly spread by construction (one viewBox unit per column).
+      preserveAspectRatio="none" stretches the box to the row, which keeps
+      straight lines straight; non-scaling-stroke keeps them 2px. */}
+  <svg class="fan" viewBox={`0 0 ${branches} 1`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    {fan.map((x) => <line x1={branches / 2} y1="0" x2={x} y2="1" vector-effect="non-scaling-stroke" />)}
   </svg>
 
-  <SkillChain items={items} learning={learning} />
+  <SkillChain items={items} branches={branches} learning={learning} />
 </li>
 
 <style>
@@ -61,11 +67,14 @@ const { name, items, learning = false } = Astro.props;
   }
 
   /* --- From 960px: the talent tree ----------------------------------- */
+  /* As wide as its branches: 8rem per leaf column plus the 1rem gaps
+     (SkillChain.astro's tracks), so every group's leaves are one size. */
   @media (min-width: 960px) {
     .group {
       display: grid;
       grid-template-rows: auto 28px auto;
       align-content: start;
+      width: calc(var(--branches) * 8rem + (var(--branches) - 1) * 1rem);
     }
 
     .root {
