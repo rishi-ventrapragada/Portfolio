@@ -92,6 +92,109 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-22 — increment 20
+
+### Last milestone completed
+
+**Skills: the video-editing constellation** (PRD §5.6), one code commit
+(`skills: add video-editing constellation`) plus this docs commit. A new,
+**separate** second Skills section — `SkillConstellation.astro`, one file,
+no children, 200 lines — mounted in `index.astro` between `<SkillTree />`
+and `<ExperienceTimeline />`. Nine named stars (Videography, After
+Effects, Premiere, Motion Design, DaVinci Resolve, Canva, Color Grading,
+CapCut, Audio Mixing) joined by ten 2px `--accent` lines into one closed
+shape, over ~14 dim decorative specks. Static: no script, no animation,
+no hover, no links. `SkillTree.astro`, `Nav.astro` and `global.css` were
+not touched; no tokens added.
+
+### Decisions worth knowing before you touch this
+
+- **The eyebrow is "Also", not "Toolkit".** The tree directly above
+  already says "Toolkit"; repeating it reads as a duplicated header. The
+  h2 "Video editing" is the owner's own descriptor. Both are copy
+  choices made here — flag them if the owner wants different words.
+- **One coordinate set, two box shapes.** Every star is a build-time
+  `{x, y}` percent of the `.sky` box; only the box changes across
+  breakpoints (2:3 portrait below 768px, 16:10 and max 960px above), so
+  the labels stay a fixed 14px while the geometry rescales. Do not add a
+  second coordinate set for mobile — the portrait box is what makes
+  nine rows fit at 375px.
+- **A label sits on the side with the room:** `x > 50` → left of its
+  star, else right. That rule, plus the nine y bands ~11% apart, is the
+  whole no-overlap / no-clipping guarantee. Moving a star's `x` across
+  50 flips its label side; moving two stars into the same band at 375px
+  is what would break it.
+- **Top and bottom stars are at y 9 and 91, not 6 and 94.** At 6/94 the
+  dot's `--accent-soft` glow ring rendered half outside the box (caught
+  in the screenshot, not by the geometry assertions, which only measure
+  the label rects).
+- The SVG is the tree's proven technique: `viewBox="0 0 100 100"`,
+  `preserveAspectRatio="none"` so the shape stretches with the box, and
+  `vector-effect="non-scaling-stroke"` so the strokes stay 2px.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — new `#skills-video` site-map row; the Skills row's
+  "constellation is next" aside removed. **§5.6** — the tree paragraph's
+  forward reference closed; four new constellation paragraphs (content,
+  geometry, responsive rule, measurements, no-animation). **§10** — new
+  line 19; line 17's stale "next, separate section" tail removed.
+  **README** — `SkillConstellation` in the component list.
+  **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`cdp.mjs` + `verify20.mjs` in the session scratchpad (headless Chrome
+over CDP, static server over `dist/`; 1280, 960, 768, 375):
+
+- Build: 0 warnings. **Geometry at all four widths**: 9 names, all nine
+  verbatim, none clipped (`scrollWidth <= clientWidth`), none wrapped,
+  no pairwise label overlap, every label inside the `.sky` rect, no
+  horizontal overflow, labels a fixed 14px. Boxes 960×600 / 864×540 /
+  672×420 / 327×491.
+- **Real rendered pixels**: 1×1 `captureScreenshot` clips decoded from
+  PNG at all ten edge midpoints — **10/10** read accent red (pure
+  `rgb(255,59,92)` on six, antialiased 173–249 on the diagonals).
+- **Accents**: line stroke computes to `rgb(255, 59, 92)` under crimson
+  and `rgb(167, 139, 250)` under violet; the star glow picks up
+  `--accent-soft` in both.
+- **Structure / a11y**: `<section>` labelled by its h2 "Video editing",
+  still exactly one h1 on the page, 0 links in the section, `.lines` and
+  `.specks` both `aria-hidden="true"`.
+- **Nav unchanged**: hrefs still `#top #skills #experience #projects
+  #contact`, no `#skills-video` link; `#skills` lands the tree at 80px
+  and the constellation sits below it (top 981px at 1280).
+- **Budget**: 0 external scripts; inline 3276 B gz — unchanged from
+  increment 19's 3280 B, so the section added no client JS.
+- **Reduced motion**: `animation-name: none` on every star, name, speck
+  and line — nothing to branch on.
+- **Screenshots read by eye**: `i20-1280.png`, `i20-960.png`,
+  `i20-768.png`, `i20-375.png`.
+- **Harness note (cost me a false alarm):** `Page.captureScreenshot`
+  with a `clip` silently returns background for anything outside the
+  current viewport. The section is ~3000px down the page, so the first
+  pixel probe read 0/10 and the first screenshots showed the *tree*.
+  Both fixes: compute the clip in **page** coordinates
+  (`rect + window.scrollX/Y`) and pass `captureBeyondViewport: true`.
+  Use that for any section below the fold.
+
+### Live
+
+Alias pointed at `rishi-ventrapragada-ee9jwspdq` (Git deploy of the code
+push, Ready in 16s) and verified **on the vanity URL itself** with
+`live20.mjs`: served HTML carries `#skills-video`, the h2 and all nine
+names; at 1280 and 375 — 9 names, 10 edges, none clipped or wrapped, no
+overlap, all inside the box, no overflow, lines `rgb(255,59,92)` 2px,
+boxes 960×600 and 327×491. `live20-1280.png`, `live20-375.png` match the
+local shots. Re-point once more after this docs commit lands.
+
+### Still open
+
+- Copy: the "Also" eyebrow and the "Video editing" h2 are mine, not the
+  owner's words — confirm or replace.
+- `public/resume.pdf`, the About panels, the no-JS nav transparency.
+- `AGENTS.md` is untracked at the repo root and is not mine; left alone.
+
 ## 2026-09-22 — increment 19
 
 ### Last milestone completed
