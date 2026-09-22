@@ -1,0 +1,87 @@
+---
+// One named star of SkillConstellation.astro (PRD §5.6), split out for the
+// CLAUDE.md §5 line cap: a point with its dot and its name hanging off it.
+// The name's placement for each layout is solved at build time
+// (lib/constellation-labels.ts) and arrives as CSS inputs; the star's
+// movement is scripts/constellation-motion.ts's, via data-x / data-y.
+import { anchor, labelSides } from "../lib/constellation-labels";
+
+interface Props {
+  name: string;
+  x: number;
+  y: number;
+  d: number;
+  index: number;
+}
+
+const { name, x, y, d, index } = Astro.props;
+
+// Phone (-p) and from 768px (-w).
+const place = (["p", "w"] as const)
+  .map((k) => {
+    const { ax, ay, ox, oy } = anchor(labelSides[k === "p" ? "phone" : "wide"][index], d);
+    return `--ax-${k}: ${ax}; --ay-${k}: ${ay}; --ox-${k}: ${ox.toFixed(1)}px; --oy-${k}: ${oy.toFixed(1)}px`;
+  })
+  .join("; ");
+---
+
+<li class="star" style={`left: ${x}%; top: ${y}%; --d: ${d}px; ${place}`} data-x={x} data-y={y}>
+  <span class="name">{name}</span>
+</li>
+
+<style>
+  /* A star is a point; its dot and name hang off it. */
+  .star {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .star::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--d) / -2);
+    left: calc(var(--d) / -2);
+    width: var(--d);
+    height: var(--d);
+    border-radius: 50%;
+    background-color: var(--fg);
+    box-shadow: 0 0 0 3px var(--accent-soft), 0 0 14px 2px var(--accent-soft);
+  }
+
+  /* The name: mono 14px, not uppercased (product names read wrong shouted),
+     one line, on a soft --bg halo rather than a box (increment 23). Its
+     placement comes from lib/constellation-labels.ts as four numbers per
+     layout: which point of the label (--ax/--ay, a share of its own size)
+     sits at the offset (--ox/--oy) from the star. */
+  .name {
+    --ax: var(--ax-p);
+    --ay: var(--ay-p);
+    --ox: var(--ox-p);
+    --oy: var(--oy-p);
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.125rem 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--fg);
+    text-shadow:
+      0 0 3px var(--bg),
+      0 0 8px var(--bg),
+      0 0 14px var(--bg);
+    transform: translate(calc(var(--ax) * -100% + var(--ox)), calc(var(--ay) * -100% + var(--oy)));
+  }
+
+  @media (min-width: 768px) {
+    .name {
+      --ax: var(--ax-w);
+      --ay: var(--ay-w);
+      --ox: var(--ox-w);
+      --oy: var(--oy-w);
+    }
+  }
+</style>

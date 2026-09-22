@@ -1,21 +1,20 @@
 ---
 // Video-editing skills as one constellation (PRD §5.6, increment 20): nine
-// named stars joined by bright accent lines into a single connected shape.
-// This is the second, separate Skills section — the dev-side tree is
-// SkillTree.astro and the two are never merged. Content is the owner's,
-// verbatim, no sub-grouping. Positions are fixed here at build time; the
-// lines are one SVG stretched to the box (preserveAspectRatio="none" with
-// non-scaling strokes, as the tree's fans), the stars and names are HTML at
-// the same percentages, so the type never scales with the box. Static text
-// in a shape: every name is visible and is its star's accessible name, no
-// hover and no links.
+// named stars joined by accent lines into one shape — the second Skills
+// section, never merged with SkillTree.astro. Content is the owner's,
+// verbatim. The lines are one SVG stretched to the box (non-scaling strokes);
+// the stars and names are HTML at the same percentages, so type never scales.
+// Every name is visible and is its star's accessible name; no hover, no links.
 //
-// The whole figure drifts as one (increment 22): the transform is on the
-// single box that holds the lines, the stars and the specks, so the
-// coordinates never move relative to each other and the shape cannot come
-// apart. Pure CSS, no client script. Geometry lives in lib/constellation-data.ts
-// for the CLAUDE.md §5 line cap.
-import { lines, specks, stars } from "../lib/constellation-data";
+// The figure turns and drifts as one rigid shape (increment 23, replacing
+// the CSS drift of the whole box): scripts/constellation-motion.ts turns the
+// stars about their centroid, carries each line's ends with them and keeps
+// the names upright, which a CSS rotate could not. Each name's side is solved
+// at build time so no name touches a line at any angle reached
+// (lib/constellation-labels.ts).
+import { lineEnds, lines, specks, stars } from "../lib/constellation-data";
+import { TURN_DEG } from "../lib/constellation-labels";
+import ConstellationStar from "./ConstellationStar.astro";
 import Starfield from "./Starfield.astro";
 ---
 
@@ -28,26 +27,45 @@ import Starfield from "./Starfield.astro";
   {/* data-constellation, not just .sky: Starfield.astro uses a .sky of its
       own and one is mounted in this section, so the class alone is
       ambiguous to anything selecting into the page. */}
-  <div class="sky" data-constellation>
+  {/* Without JS the line cuts below are never drawn, so the names get back
+      an opaque ground to sit on instead. */}
+  <noscript><style>[data-constellation] .name { background-color: var(--bg); text-shadow: none; }</style></noscript>
+
+  <div class="sky" data-constellation data-turn-phone={TURN_DEG.phone} data-turn-wide={TURN_DEG.wide}>
     <div class="specks" aria-hidden="true">
       {specks.map(([x, y, s]) => <span class="speck" style={`left: ${x}%; top: ${y}%; --s: ${s}px`} />)}
     </div>
 
     <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      {lines.map(([a, b]) => <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} vector-effect="non-scaling-stroke" />)}
+      {/* Line routing: one black cut per name, positioned by the script, so
+          no line is ever drawn under the letters (lib/constellation-labels.ts). */}
+      <mask id="constellation-cuts" maskUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140">
+        <rect x="-20" y="-20" width="140" height="140" fill="white" />
+        {stars.map(() => <rect class="cut" width="0" height="0" fill="black" />)}
+      </mask>
+      <g mask="url(#constellation-cuts)">
+        {
+          lines.map(([a, b], i) => (
+            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} data-a={lineEnds[i][0]} data-b={lineEnds[i][1]} vector-effect="non-scaling-stroke" />
+          ))
+        }
+      </g>
     </svg>
 
     <ul class="stars">
       {
-        stars.map(({ name, x, y, d }) => (
-          <li class="star" style={`left: ${x}%; top: ${y}%; --d: ${d}px`} data-side={x > 50 ? "left" : "right"}>
-            <span class="name">{name}</span>
-          </li>
-        ))
+        stars.map((star, i) => <ConstellationStar {...star} index={i} />)
       }
     </ul>
   </div>
 </section>
+
+<script>
+  import { initConstellation } from "../scripts/constellation-motion";
+
+  const box = document.querySelector<HTMLElement>("[data-constellation]");
+  if (box) initConstellation(box);
+</script>
 
 <style>
   /* Positioned so the Starfield bounds itself here; content sits above it. */
@@ -74,45 +92,14 @@ import Starfield from "./Starfield.astro";
   }
 
   /* The box every percentage refers to. Portrait on a phone so the nine
-     bands have room; 16:10 from 768px, capped so the shape stays a
-     cluster rather than a sprawl on wide screens. */
-  /* One transform on the whole box, never on the individual stars: the lines
-     are drawn at the same percentages as the dots, so moving the container
-     moves both together and the figure stays rigid. A small radius and a
-     slow period — it should read as the sky breathing, not as something
-     sliding. The excursion is ±10px, well inside the box's own padding, so
-     nothing is pushed toward an edge. */
+     bands have room; 16:10 from 768px, capped so the shape stays a cluster
+     rather than a sprawl on wide screens. Its contents are moved by
+     scripts/constellation-motion.ts; the box itself never moves. */
   [data-constellation] {
     position: relative;
     max-width: 960px;
     margin-inline: auto;
     aspect-ratio: 2 / 3;
-    animation: constellation-drift 24s ease-in-out infinite;
-    will-change: transform;
-  }
-
-  @keyframes constellation-drift {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0);
-    }
-    25% {
-      transform: translate3d(8px, -6px, 0);
-    }
-    50% {
-      transform: translate3d(10px, 5px, 0);
-    }
-    75% {
-      transform: translate3d(-7px, 7px, 0);
-    }
-  }
-
-  /* Stops dead at the untransformed rest frame. */
-  @media (prefers-reduced-motion: reduce) {
-    [data-constellation] {
-      animation: none;
-      will-change: auto;
-    }
   }
 
   @media (min-width: 768px) {
@@ -157,47 +144,4 @@ import Starfield from "./Starfield.astro";
     list-style: none;
   }
 
-  /* A star is a point; its dot and name hang off it. */
-  .star {
-    position: absolute;
-    width: 0;
-    height: 0;
-  }
-
-  .star::before {
-    content: "";
-    position: absolute;
-    top: calc(var(--d) / -2);
-    left: calc(var(--d) / -2);
-    width: var(--d);
-    height: var(--d);
-    border-radius: 50%;
-    background-color: var(--fg);
-    box-shadow: 0 0 0 3px var(--accent-soft), 0 0 14px 2px var(--accent-soft);
-  }
-
-  /* The name: mono 14px, not uppercased (product names read wrong shouted),
-     one line, on a --bg halo so no crossing line touches the letters. */
-  .name {
-    position: absolute;
-    top: 0;
-    padding: 0.125rem 0.375rem;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    letter-spacing: 0.04em;
-    line-height: 1.3;
-    white-space: nowrap;
-    color: var(--fg);
-    background-color: var(--bg);
-    border-radius: 2px;
-    transform: translateY(-50%);
-  }
-
-  .star[data-side="right"] .name {
-    left: calc(var(--d) / 2 + 0.5rem);
-  }
-
-  .star[data-side="left"] .name {
-    right: calc(var(--d) / 2 + 0.5rem);
-  }
 </style>

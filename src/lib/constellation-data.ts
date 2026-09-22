@@ -50,8 +50,10 @@ const edges: [string, string][] = [
 
 const byName = new Map(stars.map((s) => [s.name, s]));
 
-/** Edge endpoints resolved to coordinates, for the SVG. */
+/** Edge endpoints resolved to coordinates, for the SVG, plus star indices
+ * so the motion script can move each end with its star. */
 export const lines = edges.map(([a, b]) => [byName.get(a)!, byName.get(b)!] as const);
+export const lineEnds = edges.map(([a, b]) => [stars.indexOf(byName.get(a)!), stars.indexOf(byName.get(b)!)] as const);
 
 /** Decorative background sky: dim specks, never near a name, aria-hidden. */
 export const specks: [number, number, number][] = [

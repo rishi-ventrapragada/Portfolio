@@ -13,7 +13,9 @@
 // combination and legibility is not negotiable.
 //
 // "Currently learning" keeps the same anatomy with an outlined root, dashed
-// lines and `.planned` leaves. No client script in either layout.
+// lines and `.planned` leaves. From increment 23 the scatter moves: the
+// positions here are each leaf's home, and scripts/skill-drift.ts drifts,
+// turns and drags them from there (data-x / data-y carry the home to it).
 import { extent, scatter } from "../lib/skill-scatter";
 import SkillChain from "./SkillChain.astro";
 
@@ -34,7 +36,7 @@ const canvasW = box.w + 16;
 const canvasH = box.h + 16;
 ---
 
-<li class="group" style={`--w: ${canvasW}px; --h: ${canvasH}px`} data-planned={learning ? "" : undefined}>
+<li class="group" style={`--w: ${canvasW}px; --h: ${canvasH}px`} data-planned={learning ? "" : undefined} data-skill-group>
   <h3 class="label root">{name}</h3>
 
   {/* One line per leaf, root centre to leaf centre. The viewBox is the
@@ -55,6 +57,8 @@ const canvasH = box.h + 16;
         <li
           class:list={["leaf", { planned: learning }]}
           style={`--x: ${leaf.x}px; --y: ${leaf.y}px`}
+          data-x={leaf.x.toFixed(2)}
+          data-y={leaf.y.toFixed(2)}
         >
           {leaf.item}
         </li>
@@ -154,6 +158,19 @@ const canvasH = box.h + 16;
       transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
     }
 
+    /* Draggable where a fine pointer can hold it (scripts/skill-drag.ts). */
+    @media (pointer: fine) {
+      .leaf {
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+      }
+
+      .group[data-dragging] .leaf {
+        cursor: grabbing;
+      }
+    }
+
     /* The chain is the mobile layout; hide it once the scatter is on. */
     .group :global(.chain) {
       display: none;
@@ -161,9 +178,11 @@ const canvasH = box.h + 16;
   }
 
   /* --- Currently learning: outlined root, dashed lines ----------------- */
+  /* The ground is --bg, not transparent: the rays start at the root's
+     centre, and an empty chip let the dashed lines run through its text. */
   .group[data-planned] .root {
     color: var(--accent);
-    background-color: transparent;
+    background-color: var(--bg);
     border-style: dashed;
   }
 

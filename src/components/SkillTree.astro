@@ -5,7 +5,9 @@
 // video-editing skills are a separate constellation section (next
 // increment), not part of this tree. A showcase, not a "shipped with"
 // list, so nothing here links anywhere. Category order and items are the
-// owner's, verbatim. One SkillGroup.astro per category; no client script.
+// owner's, verbatim. One SkillGroup.astro per category. From 960px the
+// scatter drifts and its leaves can be dragged (scripts/skill-drift.ts,
+// increment 23 — the first continuous client animation on the site).
 import SkillGroup from "./SkillGroup.astro";
 import Starfield from "./Starfield.astro";
 
@@ -36,11 +38,18 @@ const learning = { name: "Currently learning", items: ["Docker", "Kubernetes"] }
   <p class="label eyebrow">Toolkit</p>
   <h2 id="skills-heading" class="heading">Skills</h2>
 
-  <ul class="tree">
+  <ul class="tree" data-skill-tree>
     {categories.map((category) => <SkillGroup {...category} />)}
     <SkillGroup {...learning} learning />
   </ul>
 </section>
+
+<script>
+  import { initSkillDrift } from "../scripts/skill-drift";
+
+  const tree = document.querySelector<HTMLElement>("[data-skill-tree]");
+  if (tree) initSkillDrift(tree);
+</script>
 
 <style>
   /* Positioned so the Starfield can bound itself to this section, and the

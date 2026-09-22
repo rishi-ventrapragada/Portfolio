@@ -58,15 +58,29 @@ function overlap(a: Leaf, b: Leaf): number {
 }
 
 /**
- * Seed the leaves on a jittered ring, then push overlapping pairs apart until
- * none collide. Converges in well under ten passes for every category in the
- * set (measured); the iteration cap is a guard, not the expected path.
+ * Runtime motion limits (scripts/skill-drift.ts), exported so the canvas can
+ * be sized for them here: the group may rotate up to ROTATE_MAX either way
+ * about its root, and each leaf drifts up to DRIFT px on each axis. DRIFT is
+ * under GAP / 2 on purpose — two leaves drifting straight at each other still
+ * cannot close a GAP-wide space, so the rest state cannot collide.
+ */
+export const ROTATE_MAX = (10 * Math.PI) / 180;
+export const DRIFT = 5;
+
+/**
+ * Ordered slots, then relaxation (increment 23, replacing the jittered ring,
+ * which read as random). Angles are evenly spaced around the ellipse; the
+ * widest labels take the most horizontal slots, where the ellipse has the
+ * room, and the shortest go top and bottom; from six leaves the slots
+ * alternate between an outer and an inner ring so a big group reads as a
+ * designed rosette rather than a hoop. Only a trace of seeded jitter is left,
+ * enough to keep it hand-drawn. Relaxation then clears any remaining overlap.
  */
 export function scatter(name: string, items: string[]): Leaf[] {
   const rnd = mulberry32(73 + name.length * 7 + items.length);
   const n = items.length;
-  const rx = 150 + n * 22;
-  const ry = 84 + n * 13;
+  const rx = 96 + n * 13;
+  const ry = 68 + n * 12;
 
   // The root's own obstacle box, as a Leaf so it can reuse overlap(). The
   // chip is `.label` — uppercase at 0.12em tracking — so it runs wider than
@@ -80,14 +94,24 @@ export function scatter(name: string, items: string[]): Leaf[] {
     y: 0,
   };
 
-  // A quarter-turn offset keeps a two-item group off the horizontal, where
-  // both leaves would otherwise sit level with the root and read as a row
-  // rather than a scatter.
-  const phase = n <= 3 ? Math.PI / 3 : 0;
+  // Up to three leaves: a diagonal start, so two never sit level with the
+  // root and read as a row. Odd from five: the first slot at the top, so the
+  // figure is mirror-symmetric about the vertical. Even: a leaf on each axis.
+  const phase = n <= 3 ? Math.PI / 3 : n % 2 ? -Math.PI / 2 : 0;
+  const slots = Array.from({ length: n }, (_, k) => {
+    const angle = phase + (k / n) * Math.PI * 2 + (rnd() - 0.5) * 0.12;
+    const ring = n >= 6 && k % 2 ? 0.78 : 1;
+    return { angle, r: ring * (0.97 + rnd() * 0.06) };
+  });
+
+  // Widest label to the most horizontal slot. Both sorts are stable, so ties
+  // keep the owner's item order.
+  const bySlot = slots.map((_, k) => k).sort((a, b) => Math.abs(Math.cos(slots[b].angle)) - Math.abs(Math.cos(slots[a].angle)));
+  const byWidth = items.map((_, i) => i).sort((a, b) => boxWidth(items[b]) - boxWidth(items[a]));
+  const slotOf = new Map(byWidth.map((item, rank) => [item, slots[bySlot[rank]]]));
 
   const leaves: Leaf[] = items.map((item, i) => {
-    const angle = phase + (i / n) * Math.PI * 2 + (rnd() - 0.5) * 0.55;
-    const r = 0.62 + rnd() * 0.38;
+    const { angle, r } = slotOf.get(i)!;
     return { item, w: boxWidth(item), h: BOX_H, x: Math.cos(angle) * rx * r, y: Math.sin(angle) * ry * r };
   });
 
@@ -145,12 +169,22 @@ export function scatter(name: string, items: string[]): Leaf[] {
 
 /**
  * Canvas size for a group. The root is centred, so the canvas has to be
- * symmetric about the origin — twice the furthest excursion on each axis,
- * not the raw min-to-max extent, or a lopsided scatter would clip on the
- * long side.
+ * symmetric about the origin — twice the furthest excursion on each axis, not
+ * the raw min-to-max extent, or a lopsided scatter would clip on the long
+ * side. Sampled across the whole runtime rotation range plus the drift, so a
+ * group turned to its limit still never leaves its own box.
  */
 export function extent(leaves: Leaf[]): { w: number; h: number } {
-  const halfW = Math.max(...leaves.map((l) => Math.abs(l.x) + l.w / 2));
-  const halfH = Math.max(...leaves.map((l) => Math.abs(l.y) + l.h / 2));
+  let halfW = 0;
+  let halfH = 0;
+  for (let step = -6; step <= 6; step++) {
+    const a = (step / 6) * ROTATE_MAX;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    for (const l of leaves) {
+      halfW = Math.max(halfW, Math.abs(l.x * cos - l.y * sin) + l.w / 2 + DRIFT);
+      halfH = Math.max(halfH, Math.abs(l.x * sin + l.y * cos) + l.h / 2 + DRIFT);
+    }
+  }
   return { w: Math.ceil(halfW * 2), h: Math.ceil(halfH * 2) };
 }
