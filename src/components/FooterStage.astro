@@ -1,0 +1,60 @@
+---
+// One stage of the footer's staged reveal (PRD §5.8). All four stages are
+// rendered up front, stacked in the same grid cell (ExperienceFrame.astro's
+// technique) inside Footer.astro's .stack; only the one carrying
+// data-active is visible. Entering: fades in and settles from a slight
+// translateY. Leaving: fades in place only, never translates, so nothing
+// appears to exit via the top edge — the specific fix increment 21 makes.
+//
+// Hidden with opacity, not ExperienceFrame's `visibility: hidden`: the
+// contact links have to stay in the focus order from every zone, or the
+// keyboard jump in footer-scrub.ts has no focus event to fire on.
+// pointer-events keeps a hidden stage from swallowing clicks meant for the
+// visible one.
+interface Props {
+  id: string;
+  active?: boolean;
+}
+
+const { id, active = false } = Astro.props;
+---
+
+<div class="stage" data-credits-stage={id} data-active={active ? "" : undefined}>
+  <slot />
+</div>
+
+<style>
+  /* One full-height row, its content centred inside it — not
+     `place-content: center`, which would collapse the row to the content
+     and leave the contact card's absolutely-positioned © line anchored to
+     a box a few dozen pixels tall instead of the whole stage. */
+  .stage {
+    grid-area: 1 / 1;
+    display: grid;
+    grid-template-rows: 1fr;
+    align-items: center;
+    justify-items: center;
+    min-height: var(--pin-inner);
+    padding-inline: var(--gutter);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.75rem);
+    transition:
+      opacity 320ms ease,
+      transform 320ms ease;
+  }
+
+  .stage[data-active] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  /* Instant swap, no slide or fade (CLAUDE.md §4). */
+  @media (prefers-reduced-motion: reduce) {
+    .stage {
+      transition: none;
+    }
+  }
+</style>

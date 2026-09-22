@@ -1,10 +1,10 @@
 ---
-// PRD §5.8 — the contact card: the last frame of the credits roll
-// (Footer.astro owns the track, the pin and the roll). One pin-height card
-// with "Get in touch" and the links dead centre, so when the roll settles
-// the links sit in the middle of the viewport; the © line is pinned to the
-// card's bottom edge, out of the centring. Split out of Footer.astro for the
-// CLAUDE.md §5 line cap.
+// PRD §5.8 — the contact card: the last stage of the footer sequence
+// (Footer.astro owns the track and the pin, FooterStage.astro the stage box).
+// "Get in touch" and the links sit dead centre, so when the stage settles
+// the links are in the middle of the viewport; the © line is pinned to the
+// stage's bottom edge, out of the centring. Split out of Footer.astro for
+// the CLAUDE.md §5 line cap.
 //
 // Contact values go through the shared isUrl guard (src/lib/is-url.ts):
 // only an http(s) URL or a mailto: address becomes an <a>, anything else
@@ -51,14 +51,18 @@ const contacts = [
 </div>
 
 <style>
-  /* --pin-inner is the pinned viewport less the nav (set in Footer.astro);
-     the card is exactly that tall so its centre is the viewport's centre. */
+  /* FooterStage.astro is the pin-height box now (increment 21). The card
+     fills that whole box — stretched in both axes, overriding the stage's
+     centring — so the © line's absolute positioning anchors to the stage's
+     real bottom edge; the body stays centred within it. */
   .contact {
     position: relative;
     display: grid;
     place-content: center;
-    min-height: var(--pin-inner, 100dvh);
-    padding-inline: var(--gutter);
+    justify-self: stretch;
+    align-self: stretch;
+    width: 100%;
+    height: 100%;
     text-align: center;
   }
 

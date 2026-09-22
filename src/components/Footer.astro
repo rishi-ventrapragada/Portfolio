@@ -1,89 +1,93 @@
 ---
-// PRD §5.8 — contact as a rolling-credits sequence (increment 17). Still
-// the <footer> landmark and still #contact for the nav. A scroll track
-// (Wordmark.astro / ExperienceTimeline.astro technique) holds a sticky pin
-// for its whole distance; inside it the roll translates upward in step with
-// scroll progress — a title card (the 0% frame), the credit rows, then the
-// contact card (FooterContact.astro, the 100% frame) which settles centred
-// in the viewport as the track, and the document, end. CSS scroll-driven
-// animation first; scripts/credits-roll.ts is the fallback and the keyboard
-// reveal. The credit wording is the owner's, split into rows.
+// PRD §5.8 — contact as a staged credits sequence (increment 21; increment
+// 17's continuous crawl is gone). Still the <footer> landmark and still
+// #contact for the nav. A scroll track (Wordmark.astro /
+// ExperienceTimeline.astro technique) holds a sticky pin for its whole
+// distance; inside it four stages are stacked in one grid cell
+// (FooterStage.astro) and scroll progress through the pin commits one at a
+// time — each settles into the same centred position and holds, then
+// cross-fades to the next, so nothing ever leaves by the top edge.
+// scripts/footer-scrub.ts owns the zone/commit path and the keyboard reveal.
+// The credit wording is the owner's, split into rows.
 import FooterContact from "./FooterContact.astro";
+import FooterStage from "./FooterStage.astro";
 
 const credits = [
-  { role: "Built with", name: "Astro · Tailwind · Vercel" },
-  { role: "Directed, developed & edited by", name: "Rishi" },
+  { id: "built", role: "Built with", name: "Astro · Tailwind · Vercel" },
+  { id: "author", role: "Directed, developed & edited by", name: "Rishi" },
 ];
 ---
 
 <footer class="footer" id="contact" data-credits>
-  {/* Without JavaScript nothing reveals a focused link inside the pin, so
-      the <noscript> style (the ExperienceTimeline.astro pattern) un-pins the
-      section into a static block: the same three frames in plain flow. */}
+  {/* Without JavaScript nothing commits a stage, so the <noscript> style
+      (the ExperienceTimeline.astro pattern) un-pins the section into a
+      static block and un-stacks the stages into plain flow: the same four
+      in document order, ending on the contact card. */}
   <noscript>
     <style>
       [data-credits-track] { height: auto !important; }
       [data-credits-pin] { position: static !important; height: auto !important; overflow: visible !important; }
-      [data-credits-roll] { animation: none !important; transform: none !important; }
+      [data-credits-stack] { display: block !important; }
+      [data-credits-stage] { opacity: 1 !important; pointer-events: auto !important; transform: none !important; }
     </style>
   </noscript>
 
   <div class="track" data-credits-track>
     <div class="pin" data-credits-pin>
-      <div class="roll" data-credits-roll>
-        <div class="card">
+      {/* Every stage is in the HTML, stacked in one grid cell, so a swap is
+          a cross-fade in a box that never moves. The first is active from
+          the server, so the footer reads as a title card without JS. */}
+      <div class="stack" data-credits-stack>
+        <FooterStage id="title" active>
           <p class="title">Rishi Ventrapragada</p>
-        </div>
+        </FooterStage>
 
-        <dl class="credits">
-          {
-            credits.map((credit) => (
+        {
+          credits.map((credit) => (
+            <FooterStage id={credit.id}>
               <div class="credit">
-                <dt class="label role">{credit.role}</dt>
-                <dd class="name">{credit.name}</dd>
+                <p class="label role">{credit.role}</p>
+                <p class="name">{credit.name}</p>
               </div>
-            ))
-          }
-        </dl>
+            </FooterStage>
+          ))
+        }
 
-        <FooterContact />
+        <FooterStage id="contact">
+          <FooterContact />
+        </FooterStage>
       </div>
     </div>
   </div>
 </footer>
 
 <script>
-  import { initCreditsRoll } from "../scripts/credits-roll";
+  import { initFooterStages } from "../scripts/footer-scrub";
 
   const root = document.querySelector<HTMLElement>("[data-credits]");
-  if (root) initCreditsRoll(root);
+  if (root) initFooterStages(root);
 </script>
 
 <style>
   /* --pin-inner: the pinned viewport less the fixed nav, which is opaque
-     past the hero. Both cards are exactly this tall, so the roll's first
-     and last frames each fill the pin with their content centred. */
+     past the hero. Every stage is exactly this tall, so each settles with
+     its content centred in the pin. */
   .footer {
     --pin-inner: calc(100dvh - var(--nav-height));
     border-top: 1px solid var(--line);
   }
 
   /* --pin-length is the one number to tune: the scroll distance the track
-     occupies. The pin travels (--pin-length − 100dvh) while the roll travels
-     (its own height − the pin), so the roll's rate in px per scrolled px is
-     the ratio of the two. The named view timeline is what the roll animates
-     against: `contain` on a subject taller than the scrollport runs from
-     its top reaching the viewport top (pin engages) to its bottom reaching
-     the viewport bottom (pin releases) — exactly the pinned distance. */
+     occupies. The pin travels (--pin-length − 100dvh); each of the four
+     stage zones is a quarter of that. */
   .track {
     --pin-length: 250vh;
     height: var(--pin-length);
-    view-timeline: --credits block;
   }
 
-  /* overflow: clip, not hidden: it clips the roll without making the pin a
+  /* overflow: clip, not hidden: it clips the stack without making the pin a
      scroll container, so focusing a link can never scroll the pin's own
-     box out from under the transform. */
+     box out from under it. */
   .pin {
     position: sticky;
     top: 0;
@@ -92,15 +96,10 @@ const credits = [
     overflow: clip;
   }
 
-  .roll {
-    text-align: center;
-  }
-
-  .card {
+  /* The stages (FooterStage.astro) all take grid-area 1 / 1 here. */
+  .stack {
     display: grid;
-    place-content: center;
-    min-height: var(--pin-inner);
-    padding-inline: var(--gutter);
+    height: 100%;
   }
 
   .title {
@@ -114,22 +113,16 @@ const credits = [
     color: var(--heading);
   }
 
-  /* The rows: end-credit spacing — one name per line, a role above it,
-     wide gaps and a slow line-height. */
-  .credits {
+  /* One credit per stage now, so the row is a centred pair rather than the
+     old list: the role above the name, end-credit spacing kept. */
+  .credit {
     display: grid;
-    gap: 2.5rem;
-    margin: 0;
-    padding-inline: var(--gutter);
+    gap: 0.5rem;
     line-height: 2;
   }
 
-  .credit {
-    display: grid;
-    gap: 0.25rem;
-  }
-
   .role {
+    margin: 0;
     color: var(--accent);
   }
 
@@ -141,60 +134,12 @@ const credits = [
     color: var(--fg);
   }
 
-  /* --- The roll ----------------------------------------------------------- */
-  /* From resting in place to its last frame flush with the pin's bottom:
-     100% is the roll's own height, --pin-inner the box it rolls through. */
-  @keyframes credits-roll {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(calc(var(--pin-inner) - 100%));
-    }
-  }
-
-  @supports (animation-timeline: scroll()) {
-    /* Longhands, never the `animation` shorthand: if the timeline folds
-       into it the minifier emits an invalid shorthand and every browser
-       drops the roll (CLAUDE.md §4). :where() keeps the rules apart. */
-    :where([data-credits-roll]).roll {
-      animation-name: credits-roll;
-      animation-duration: 1ms; /* Overridden by the timeline. */
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-    }
-
-    .roll {
-      animation-timeline: --credits;
-      animation-range: contain 0% contain 100%;
-    }
-  }
-
-  /* Script fallback drives the same transform from --credits-progress. */
-  .roll[data-fallback="on"] {
-    transform: translateY(calc(var(--credits-progress, 0) * (var(--pin-inner) - 100%)));
-  }
-
-  /* --- Reduced motion: no roll, static block ------------------------------ */
-  /* The pin exists only to move content at a rate other than the scroll
-     rate, and that differential is parallax (WCAG 2.3.3's own example), so
-     the whole mechanic goes: the same three frames as plain flow, which at
-     1:1 is the same sequence, ending on the contact card. */
-  @media (prefers-reduced-motion: reduce) {
-    .track {
-      height: auto;
-    }
-
-    .pin {
-      position: static;
-      height: auto;
-      overflow: visible;
-    }
-
-    .roll,
-    .roll[data-fallback="on"] {
-      animation: none;
-      transform: none;
-    }
-  }
+  /* --- Reduced motion ----------------------------------------------------- */
+  /* The pin stays, unlike increment 17's roll. That roll moved content at a
+     rate other than the scroll rate, and a differential rate is parallax
+     (WCAG 2.3.3's own example), so it had to go. A stage commit is instead a
+     discrete state change at a zone boundary — sticky is layout, not
+     animation — so the mechanic adds no motion beyond the visitor's own
+     scroll (the §5.11 rationale). Only the entrance goes: FooterStage.astro
+     drops its transition, making each swap instant. */
 </style>
