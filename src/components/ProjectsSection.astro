@@ -32,6 +32,20 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
     padding-block: var(--rhythm);
   }
 
+  /* Room for the hover panel (increment 23). ProjectDetail opens below its
+     frame, out of grid flow, so nothing in layout accounts for it: measured
+     at 1280, KalaCart's open panel is 179px tall and ran 90px past this
+     section's bottom edge into Contact. The reserve is added under the last
+     row only where the panel exists at all (fine pointers with hover — on
+     touch it is display: none), and is sized for the panel plus the frame's
+     1.02 lift with room to spare. Re-measure if the summary grows. */
+  @media (hover: hover) and (pointer: fine) {
+    .projects {
+      --detail-reserve: 12rem;
+      padding-block-end: calc(var(--rhythm) + var(--detail-reserve));
+    }
+  }
+
   .eyebrow {
     margin: 0 0 1rem;
     color: var(--accent);

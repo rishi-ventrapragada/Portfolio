@@ -11,7 +11,7 @@
  * that reads tokens rather than literals follows automatically. Components
  * that used a token as a stand-in for "a specific dark colour" do not, and
  * were fixed at the source instead — see --on-accent in global.css and
- * --sprocket-hole / --shadow below.
+ * --shadow below (and the note on --sprocket-hole, which is kept dark).
  *
  * Every ratio quoted here was computed, not assumed. */
 
@@ -50,10 +50,12 @@
      darker ones (3.11), where white wins (6.02). */
   --on-accent: #ffffff;
 
-  /* The surface a sprocket hole reads through to. ProjectFrame used --bg
-     directly, which is right only while the section's background is the page
-     background; scoped light, the holes would have kept painting #111214. */
-  --sprocket-hole: var(--bg);
+  /* --sprocket-hole is deliberately NOT redefined here (increment 23). The
+     film perforations stay black in every theme — film stock is dark
+     whatever it is lying on. A custom property inherits its value already
+     resolved: :root's `var(--bg)` becomes #111214 there, and that is what
+     every element inside this scope receives. Redefining it here as
+     `var(--bg)` (increment 22) re-resolved it to the paper colour. */
 
   /* Drop shadows. Both Projects files borrowed --monitor-bg (the Experience
      NLE surface, pure black) purely as a source of black; on a light card a
