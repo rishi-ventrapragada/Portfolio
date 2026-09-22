@@ -202,11 +202,25 @@ in the session scratchpad (headless Chrome over CDP, `astro preview` over
   (built), `stage-p625.png` (author), `stage-p875.png` (contact),
   `nojs-top.png`, plus `m-*.png` at 375.
 
+### Live
+
+Alias pointed at `rishi-ventrapragada-7fpzsweun` (Git deploy of the code
++ docs push, Ready in ~16s) and verified **on the vanity URL itself**
+with `live.mjs` / `live-kb.mjs` / `live-final.mjs`: served HTML carries
+all four `data-credits-stage` values with `title` pre-`data-active`, and
+**zero** hits for `credits-roll` / `data-credits-roll` (the old mechanic
+is gone from the deployed bundle). Live CDP at 1280×900 reads the same
+numbers as local — track 2250, pinned distance 1350, forward
+`title → built → author → contact` and the reverse walk returning
+correctly, every stage settling at top 64 / bottom 900; all four contact
+links jump scrollY 6828 → 8178 and land at 498–512 in view with
+`:focus-visible` true; mouse-modality focus leaves scrollY at 6828;
+reduced motion `transition: none` with the pin still `sticky`.
+`liveshots/stage-p*.png` match the local shots. Re-point once more after
+this docs line lands.
+
 ### Still open
 
-- **Not yet pushed or deployed** at the time of writing; the Vercel alias
-  still points at increment 20's deployment. Re-point and verify on the
-  vanity URL per the standing constraint.
 - The owner said they will watch the entrance animation live to confirm
   it reads as *settling into place* rather than a fade with a jump. The
   320ms / 0.75rem values are the tuning knobs if it does not.
