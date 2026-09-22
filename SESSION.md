@@ -228,10 +228,27 @@ Build + `astro check` 0/0/0 before every commit.
   HTML is the authoritative check for markup that only appears once per
   session.
 
+### Live
+
+Alias pointed at `rishi-ventrapragada-2hacrbusf` and verified **on the
+vanity URL itself**. Served markup: 6 dividers, 649 `.star` (640
+starfield + 9 constellation), 12 layers, 12 meteors, 2 `data-theme=
+"light"`, 1 `.topo`, 34 scatter leaves. Live CDP re-runs match local
+exactly — A: nav geometry identical hidden vs shown, `scaleX(1.0000)` at
+the document end; F: 34/34 leaves, zero overlaps at 1280 and 960;
+E: 0.01px worst endpoint offset across the loop; C: every star
+`rgb(242,242,242)`; D: 7.81:1 worst over the contours; G: light scope
+resolves `#c2183a` and sprocket holes `#f4f3f0`.
+
+**Harness gotcha worth keeping:** the first post-alias `curl` of the
+vanity URL returned the *previous* deployment's HTML — a stale CDN read,
+not a bad deploy. The deployment URL and a cache-busted vanity request
+both returned the correct 154 390-byte document. Always cache-bust when
+verifying an alias move, or you will chase a deployment problem that
+does not exist.
+
 ### Still open
 
-- **Not yet pushed at the time of writing** — see the Live section once
-  this lands, and re-point the alias per the standing constraint.
 - The owner will look at the AboutPanel placeholder fills across all
   three grade states; that mix partner and share are the one visual
   judgment call in the batch rather than a measured fact.
