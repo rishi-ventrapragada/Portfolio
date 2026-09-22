@@ -12,6 +12,7 @@
 import Divider from "./Divider.astro";
 import FooterContact from "./FooterContact.astro";
 import FooterStage from "./FooterStage.astro";
+import TopoBackdrop from "./TopoBackdrop.astro";
 
 const credits = [
   { id: "built", role: "Built with", name: "Astro · Tailwind · Vercel" },
@@ -39,6 +40,10 @@ const credits = [
 
   <div class="track" data-credits-track>
     <div class="pin" data-credits-pin>
+      {/* Inside the pin, so the contours stay behind the credits for the
+          whole scroll rather than travelling with the track. */}
+      <TopoBackdrop />
+
       {/* Every stage is in the HTML, stacked in one grid cell, so a swap is
           a cross-fade in a box that never moves. The first is active from
           the server, so the footer reads as a title card without JS. */}
@@ -100,8 +105,11 @@ const credits = [
     overflow: clip;
   }
 
-  /* The stages (FooterStage.astro) all take grid-area 1 / 1 here. */
+  /* The stages (FooterStage.astro) all take grid-area 1 / 1 here. Lifted
+     above the topographic backdrop, which sits at z-index 0 in the pin. */
   .stack {
+    position: relative;
+    z-index: 1;
     display: grid;
     height: 100%;
   }
