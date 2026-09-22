@@ -31,13 +31,14 @@ npm run preview  # serve the production build locally
 src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
   components/                 Nav, Hero, Wordmark, About, AboutPanel, SkillTree, SkillGroup,
-                              SkillChain, SkillConstellation, Pills,
+                              SkillChain, SkillConstellation, ConstellationStar, Pills,
                               ProjectsSection, ProjectFrame, ProjectDetail,
                               ProjectLinks,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
                               ExperienceClip,
-                              Footer, FooterStage, FooterContact,
-                              Divider, Starfield, TopoBackdrop,
+                              Footer, FooterStage, FooterCredits, FooterContact,
+                              ContactCard, ContactIcon,
+                              Divider, Starfield, StarfieldMeteors, TopoBackdrop,
                               BootPreloader, BootSquare,
                               AccentToggle (dev only)
   content/projects/*.json     one data file per project, beside its cover image
@@ -47,10 +48,13 @@ src/
   lib/skill-scatter.ts        build-time leaf placement + collision assert
   lib/starfield-data.ts       seeded star layers and meteors
   lib/constellation-data.ts   the video-editing constellation's geometry
+  lib/constellation-labels.ts build-time name placement (min line crossings, asserted bounds)
   pages/index.astro           the whole site: one page, anchored sections
   scripts/                    boot-*.ts, footer-scrub.ts, hero-dissolve.ts, nav.ts,
                               experience-timeline.ts, experience-scrub.ts,
-                              experience-playhead.ts
+                              experience-playhead.ts, about-reveal.ts,
+                              skill-drift.ts, skill-physics.ts, skill-drag.ts,
+                              constellation-motion.ts
   styles/global.css           all design tokens
   styles/theme-light.css      the section-scoped light theme
 ```

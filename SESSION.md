@@ -92,6 +92,144 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-23 — increment 23 (six-part batch)
+
+### Last milestone completed
+
+**Six parts, one commit each, no source file shared between them** (PRD.md
+is the one shared file; each commit edits only its own sections). Order
+was A → C → B → E → D → F, not the brief's A–F: C went before B because
+B's "bleeding past the top nav" turned out to be C's transparent bar.
+
+- `79ef464` **hero** — boot noise removed; boot sky proven identical to the
+  hero sky; meteors ported from Recurzn-Web's real geometry.
+- `d863026` **nav** — solid from the bar's own bottom edge; 300ms fades.
+- `cb02dd6` **about** — grid in the shell, height-capped; reveal on sight.
+- `37aba47` **projects** — black sprockets; 12rem reserve for the panel.
+- `09e2469` **skills** — tree drift/drag, ordered scatter, constellation
+  turn, box-free names, line routing. **New client JS, flagged.**
+- `a696b07` **contact** — accumulating credits, scrim, icon-card screen.
+
+Owner decisions taken this session: the nav **stays dark** everywhere
+(no per-section theme); the credits have **no title line**, three lines
+only. Next milestone: none planned; see open items.
+
+### Decisions worth knowing before you touch this
+
+- **The nav "snap" was a gap, not a missing transition.** The bar went
+  solid when the hero's bottom crossed y = 0, so for the last 64px it was
+  transparent with white links over light About. `.is-scrolled` now has
+  its own observer one bar-height lower (`rootMargin` can't `calc()`, so
+  the px margins are rebuilt on viewport-height change).
+  `[data-past-hero]` keeps the y = 0 trigger.
+- **B's overflow was not measurable.** 0px horizontal overflow at nine
+  widths before any change. The "bleed" was the full-bleed grid 12px off
+  the edge plus the transparent bar. Contained in the shell and capped at
+  `100dvh − nav − 2rem` from 768px.
+- **`--sprocket-hole` is dark by *not* redefining it.** Custom
+  properties inherit resolved values, so `:root`'s `var(--bg)` arrives
+  in the light scope as `#111214`. Redefining it there is what made the
+  holes paper-coloured.
+- **The constellation could not be made crossing-free by placement
+  alone.** The owner's nine stars sit near the box edges with 2–4 lines
+  each; in the 327px phone box no arrangement is inside the box *and*
+  clear of every line through the turn. So there are two layers: a
+  build-time branch-and-bound search that minimises crossings (bounds,
+  dots and label/label overlaps are hard rules, and the build throws),
+  plus a runtime SVG mask that cuts lines under every name. Wide: 0
+  crossings. Phone: 7, all cut. The phone turns ±3°, not ±6°: at ±6°
+  "Videography" and "After Effects" collide at the extremes.
+- **A greedy placer boxed itself in.** Videography took the only spot
+  After Effects had. That is why it is branch-and-bound.
+- **The first solver "pass" was fake.** While `labelSides` was an
+  unused import, Vite tree-shook the module and the assertion never
+  ran. It only threw once the component used it. Don't trust a
+  build-time assert until something imports its result.
+- **Scatter runtime motion is bounded by construction.** DRIFT 5px is
+  under half the 12px build gap, so the rest state can't collide.
+  `extent()` sizes canvases over the ±10° turn + drift. The drag needs
+  runtime separation: 8 passes with the root and canvas clamps *inside*
+  each pass (clamping after undid it: 7 overlaps). The held leaf yields
+  as a last resort when a neighbour is pinned at the edge (the other 0).
+- **Reduced motion keeps drag** on the tree (direct manipulation, 1:1
+  with the pointer). Everything autonomous stops, and a released leaf is
+  home in the same frame.
+- **Credits scrim:** a radial gradient left the ends of the wide lines
+  uncovered (2.51:1 unchanged). A blurred rounded `--bg` panel at 94%
+  fixed it (5.19:1 worst).
+- **Contact cards go three-across from 960px, not 720.** At 768 the
+  213px cards wrapped every address.
+- **Meteor reduced-motion dim moved to the track.** The keyframes own the
+  streak's opacity, so the old `opacity: 0.35` on the streak was being
+  overridden. Increment 22's "measured 0.34" was a mid-cycle sample.
+
+### Doc edits this session (CLAUDE.md §7)
+
+PRD §3 (two site-map rows), §4.2 (`--sprocket-hole` row and note), §5.1,
+§5.3, §5.6 (About reveal and containment, scatter slots and balance,
+tree motion, constellation placement, routing and turn), §5.8 (the whole
+mechanic), §5.10, §5.14, §5.15, §5.16, §10 line 22. README: new
+components, lib and scripts. SESSION.md: this entry. CLAUDE.md is
+untouched.
+
+### Verified by measurement
+
+Harnesses in the session scratchpad (`lib.mjs` + `part*.mjs`, CDP over
+the prior session's `cdp.mjs`). Every one was rerun against the
+cache-busted vanity URL after the alias move, and every figure below
+matched live to within timing noise.
+
+- **A:** boot sky vs hero sky, animations paused, foreground hidden:
+  **0 of 1 024 000 px differ**; clocks equal to the ms. Meteors 2px ×
+  1276–1356px on screen, peak opacity 1. Reduce: 18s, track 0.35.
+- **C:** transparent at hero-bottom 65px, solid at 63. Across both edges,
+  one rect `0,0,1280,64` in 101/101 frames. Mid-fade
+  `rgba(26,27,30,0.67)`.
+- **B:** 0 overflow and 0 panels/captions outside the grid at seven
+  sizes. Reveal 1→2→3 at 0/140/280ms, then 4→5, and it holds. Reduce and
+  no-JS: all at opacity 1.
+- **E:** holes `rgb(17,18,20)` (computed and pixel). Open panel 102px
+  clear of the section bottom at four widths, in 3/3 real hovers.
+- **D:** tree at rest 1.17px/s, 60 samples/30s with 0 overlaps (min gap
+  20.9px); drag 0 overlaps in 40 steps; reduce 0.000px. Constellation 0
+  accent px inside any name box at 1280/768/375; 2.5 / 2.0 / 1.6px/s.
+  Balance before → after in PRD §5.6. JS +2.8 KB gz; page total ~6.7 KB
+  of the 40 KB budget.
+- **F:** lines `100 → 110 → 111 → 111 → contact`, reversible. The
+  assembled block fits at 1280×720 / 1280×600 / 375×667 / 360×640 /
+  320×568, with 182 / 122 / 245 / 231 / 167px spare. **At 375 the lines
+  are 28px**, the widest 309 of 327px, one row each. Lines 2–3 wrap only
+  at 320. Contrast worst 5.19 (crimson) / 6.64 (violet). © markup and CSS
+  byte-identical.
+
+### Harness notes
+
+- A negative `animation-delay` plus a negative `currentTime` puts a
+  paused CSS animation in its before-phase (progress `undefined`). Seek
+  one full period later instead.
+- CDP `captureScreenshot` `clip` is in **document** coordinates, not
+  viewport.
+- The nav's progress bar sets `visibility: visible` on itself, so hiding
+  the nav with `visibility` leaves the accent bar painting. Use
+  `display: none` when sampling accent pixels near the top.
+- Inline `style.transform = 'none'` still animates if the element has a
+  transition. Kill the transition first when auditing layout boxes.
+
+### Still open
+
+- **375px credits**: the owner will judge it live. 28px is the largest
+  size where "DIRECTED & EDITED BY" stays on one row. A bigger size means
+  each line wraps (the block fits either way, with ~245px spare).
+- **Phone constellation**: names are correct and never on a line, but a
+  few sit a little way from their star ("After Effects", "Motion
+  Design"). Moving stars or edges is the owner's call.
+- The contact glyphs are hand-drawn allusions, not official marks
+  (GitHub is a cat's head). Swap in official brand SVGs only with their
+  licences recorded in ASSETS.md.
+- Carried over: `public/resume.pdf`, About art and dialogue, no-JS nav
+  transparency, `@astrojs/react` named in CLAUDE.md §2 but absent from
+  `package.json`, PRD §5.13 reserved, the AboutPanel fills judgment call.
+
 ## 2026-09-22 — increment 22 (seven-part batch)
 
 ### Last milestone completed
