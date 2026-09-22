@@ -214,7 +214,14 @@ pre-set; 1280×900 fine pointer and 375×812 touch-emulated; every scroll
 - **Pre-existing, not this increment**: without JavaScript the nav never
   gets `.is-scrolled`, so it stays transparent and content shows through
   it (the credits' "Rishi" line in `credits-nojs-true.png`).
-- Vercel alias: see the line appended below once the deploy is verified.
+- Vercel alias: pointed at `rishi-ventrapragada-pmnzwm3jl` (the code +
+  docs push, Git deploy, Ready in 21s) and verified on the vanity URL
+  itself: curl shows `data-credits-track/pin/roll`, `data-contact`, the
+  mailto and résumé hrefs; live CDP at 1280×900 reads the same table —
+  track 2250, roll 1880, `translateY` 0 → −1044 at −0.773 px/px over four
+  intervals, links 490–516 at `scrollY` = max, pin bottom 900; reduced
+  motion static (pin 1944, animation `none`), same landing.
+  `live-credits-0/50/100.png`. Re-pointed once more after this line landed.
 
 ## 2026-09-21 — increment 16
 
