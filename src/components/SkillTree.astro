@@ -1,0 +1,86 @@
+---
+// Tech stack as a skill tree (PRD §5.6, increment 18): six category roots,
+// each branching to its skills, RPG talent-tree style, plus a dashed
+// "Currently learning" cluster. This is the dev/build side only — the
+// video-editing skills are a separate constellation section (next
+// increment), not part of this tree. A showcase, not a "shipped with"
+// list, so nothing here links anywhere. Category order and items are the
+// owner's, verbatim. One SkillGroup.astro per category; no client script.
+import SkillGroup from "./SkillGroup.astro";
+
+const categories = [
+  {
+    name: "Languages",
+    items: ["C", "Python", "Java", "HTML", "CSS", "JavaScript", "TypeScript", "Dart"],
+  },
+  {
+    name: "Frameworks",
+    items: ["Flutter", "Astro", "React", "Next.js", "Node.js", "Django", "FastAPI", "Tailwind CSS", "Vite"],
+  },
+  {
+    name: "AI",
+    items: ["Claude", "Claude Code", "Gemini", "GPT-6 Astra", "Codex", "Ollama", "Open Router"],
+  },
+  { name: "Tools", items: ["Notion", "Figma"] },
+  { name: "Platforms", items: ["Supabase", "Firebase", "Vercel", "Render"] },
+  { name: "Cloud", items: ["Google Cloud", "AWS"] },
+];
+
+const learning = { name: "Currently learning", items: ["Docker", "Kubernetes"] };
+---
+
+<section class="skills shell" id="skills" aria-labelledby="skills-heading">
+  <p class="label eyebrow">Toolkit</p>
+  <h2 id="skills-heading" class="heading">Tech stack</h2>
+
+  <ul class="tree">
+    {categories.map((category) => <SkillGroup {...category} />)}
+    <SkillGroup {...learning} learning />
+  </ul>
+</section>
+
+<style>
+  .skills {
+    padding-block: var(--rhythm);
+    border-top: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: var(--size-h2);
+  }
+
+  /* Below 960px the groups stack. */
+  .tree {
+    display: grid;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* From 960px: six columns, two per group. Bands fall out of the flow —
+     Languages, Frameworks, AI; then Tools, Platforms, Cloud; then the
+     learning cluster placed in the middle pair. Six 128px pills plus gaps
+     and gutters need 944px, hence the breakpoint. */
+  @media (min-width: 960px) {
+    .tree {
+      grid-template-columns: repeat(6, 1fr);
+      gap: 3rem 1.5rem;
+      align-items: start;
+    }
+
+    .tree > :global(.group) {
+      grid-column: span 2;
+    }
+
+    .tree > :global(.group[data-planned]) {
+      grid-column: 3 / span 2;
+    }
+  }
+</style>
