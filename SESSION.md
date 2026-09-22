@@ -92,6 +92,128 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-22 — increment 21
+
+### Last milestone completed
+
+**Contact/credits: the continuous crawl replaced by staged reveals**
+(PRD §5.8), one code commit plus this docs commit. Increment 17's single
+tall `.roll` translating against a view timeline is gone — with one rigid
+strip moving through a fixed pin, earlier content was *physically forced*
+off the top edge as later content arrived. Now four discrete stages
+(`FooterStage.astro`, new) stack in one grid cell inside the same pin and
+are committed one at a time by scroll zone, each settling into the same
+fixed box and holding. `credits-roll.ts`, `@keyframes credits-roll`, the
+`--credits` view timeline and the `--credits-progress` fallback all
+deleted; `src/scripts/footer-scrub.ts` (new) replaces them.
+`Footer.astro` 200 → 145 lines.
+
+Stages: `title` (RISHI VENTRAPRAGADA) → `built` (Astro · Tailwind ·
+Vercel) → `author` (Directed, developed & edited by Rishi) → `contact`
+(`FooterContact.astro`, unchanged content).
+
+### Decisions worth knowing before you touch this
+
+- **The zone engine is `experience-scrub.ts`'s `initScrub`, imported
+  unmodified.** It already takes (track, ids, commit) and is generic;
+  there was no reason to write a second one. Absolute `scrollY` each
+  frame, four equal zones, commit only on zone change — so reversal is
+  free and stateless, exactly like Experience.
+- **Stages hide with `opacity`, NOT `visibility: hidden`** — and this is
+  the one place the footer deliberately diverges from
+  `ExperienceFrame.astro`. `visibility: hidden` drops the contact links
+  out of the focus order for three of the four zones; measured during
+  this increment, `.focus()` did not stick and `document.activeElement`
+  fell back to `<body>`, so the `focusin` keyboard jump had no event to
+  fire on. Experience does not hit this because its clip *buttons* live
+  outside the frames and are always visible; here the links are the only
+  focusable content and they live inside a stage. `pointer-events: none`
+  keeps a hidden stage from swallowing clicks.
+- **Reduced motion now KEEPS the pin — the inverse of increment 17.**
+  That is not a reversal of judgment, it follows from the mechanic
+  changing. A roll moving content at a rate other than the scroll rate is
+  parallax (WCAG 2.3.3's own example), so it had to go. A zone commit is
+  a discrete state change and `position: sticky` is layout, so it adds no
+  motion beyond the visitor's own scroll — precisely the rationale §5.11
+  already uses for Experience. Only the 320ms entrance transition drops.
+- **`grid-template-rows: 1fr` + `align-items: center`, never
+  `place-content: center`.** `place-content` collapses the grid row to
+  the content height; the contact card's absolutely-positioned © line
+  then anchors to a ~69px box and lands between "Get in touch" and the
+  links instead of on the pin's bottom edge. Caught in a screenshot, then
+  measured (contact box 448–516 instead of 64–900). `.contact` carries
+  `width/height: 100%` + `justify-self/align-self: stretch` to fill the
+  stage it is centred in.
+- **The attribute is `data-credits-stage`, not `data-stage`.**
+  `BootPreloader.astro:27` already owns a bare `data-stage` for its
+  status line, and the first cut collided with it — both the script query
+  and the noscript `[data-stage]` override would have hit the preloader.
+- **Entrance vs exit is the whole fix.** Entering: `translateY(0.75rem)`
+  → 0 plus a fade, 320ms. Leaving: opacity only, no exit transform — so
+  an outgoing stage fades where it stands and never appears to leave by
+  the top.
+- **The no-JS `[data-credits-stack] { display: block }` override is new.**
+  With one roll there was nothing to un-stack; four overlapping grid
+  cells would otherwise collapse onto each other in static flow.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.8** — rewritten in full, opening with an explicit "this
+  replaces increment 17's continuous crawl" and why; new sections for the
+  stage table, the zone/commit mechanic, the entrance, the
+  opacity-not-visibility rule, keyboard, no-JS and the inverted
+  reduced-motion rule. **§10** — new line 20 (increment 21).
+  **README** — `FooterStage` added to the component list,
+  `credits-roll.ts` → `footer-scrub.ts` in scripts.
+  **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`cdp.mjs` + `verify.mjs` / `keyboard5.mjs` / `final.mjs` / `mobile.mjs`
+in the session scratchpad (headless Chrome over CDP, `astro preview` over
+`dist/`, `boot-seen` pre-set):
+
+- Build + `astro check`: 0 errors / 0 warnings / 0 hints.
+- **Zones at 1280×900**: track 2250, pin 900, pinned distance 1350.
+  Forward `title → built → author → contact`; reverse returns
+  `contact → author → built → title` at the same boundaries. **Every
+  stage settles at top 64 / bottom 900** — the identical box, which is
+  the whole point of the increment. Inactive stages sit at top 76,
+  opacity 0, `translateY(12px)`; none ever crosses the pin's top edge.
+- **375×812**: all four stages at top 64 / bottom 812, no horizontal
+  overflow, contact links on one row (single row, top 454).
+- **Keyboard**: from the footer's top (scrollY 6828, `title` active),
+  focusing GitHub / LinkedIn / Gmail / Résumé each moves scrollY to 8178
+  (document max), commits `contact`, and lands the link at 498–512, in
+  view, `:focus-visible` true. Mouse-modality focus leaves scrollY at
+  6828 (`:focus-visible` false) — increment 17's behaviour preserved.
+- **Reduced motion**: stage `transition: none` (instant swaps), pin still
+  `position: sticky`, all four zones commit and reverse identically.
+- **No JS**: pin `static` 3408px, stack `display: block`, stages at
+  64–900 / 900–1736 / 1736–2572 / 2572–3408, all `transform: none`,
+  opacity 1 — four frames in plain document order ending on contact.
+- **Contact card geometry after the layout fix**: stage 64–900 (836),
+  `.contact` 64–900 (fills it), body centred 448–516, © at 850–868 —
+  matching increment 17's measured 868 exactly.
+- **Budget**: 1278 B gzipped of referenced external JS + 2356 B inline
+  ≈ 3.6 KB of the 40 KB cap. The Footer chunk shrank (617 B raw / 444 B
+  gz) now that the progress fallback is gone.
+- **Screenshots read by eye**: `stage-p125.png` (title), `stage-p375.png`
+  (built), `stage-p625.png` (author), `stage-p875.png` (contact),
+  `nojs-top.png`, plus `m-*.png` at 375.
+
+### Still open
+
+- **Not yet pushed or deployed** at the time of writing; the Vercel alias
+  still points at increment 20's deployment. Re-point and verify on the
+  vanity URL per the standing constraint.
+- The owner said they will watch the entrance animation live to confirm
+  it reads as *settling into place* rather than a fade with a jump. The
+  320ms / 0.75rem values are the tuning knobs if it does not.
+- `public/resume.pdf`, the About panels, the no-JS nav transparency.
+- `@astrojs/react` is named in CLAUDE.md §2 as installed but is **not**
+  in `package.json` — unrelated to this increment, but worth reconciling.
+
 ## 2026-09-22 — increment 20
 
 ### Last milestone completed
