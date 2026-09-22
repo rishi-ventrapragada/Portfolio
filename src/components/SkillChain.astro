@@ -1,38 +1,26 @@
 ---
-// The leaves of one skill-tree category (PRD §5.6): a single list whose
-// items read down one column then the next. From 960px it is one 8rem grid
-// column per branch (SkillGroup.astro decides how many) and each leaf is
-// joined to the one above by a solid accent connector — the head of each
-// column has none, the group's fan reaches it.
-// Below 960px it is a wrapping chain hung from a left spine, every leaf
-// ticked to the spine or to the leaf before it, so nothing ever shrinks.
-// The column split is computed here at build time; no client script.
+// The leaves of one skill-tree category below 960px (PRD §5.6): a wrapping
+// chain hung from a left spine, every leaf ticked to the spine or to the leaf
+// before it, so nothing ever shrinks. Increment 19's layout, unchanged.
+//
+// Desktop is a different layout entirely — the free-scatter mind map in
+// SkillGroup.astro (increment 22) — which hides this list from 960px. The
+// column grid this file used to carry went with the fan it belonged to.
 //
 // Leaves are static text: there is no per-skill detail to reveal
 // (inventing one is CLAUDE.md §7), so a list reads faster than a widget
 // and every node's visible text is its accessible name.
 interface Props {
   items: string[];
-  /** Columns from 960px; SkillGroup.astro computes it from the count. */
-  branches: number;
   /** Currently learning: the shared `.planned` treatment, dashed lines. */
   learning?: boolean;
 }
 
-const { items, branches, learning = false } = Astro.props;
-
-const rows = Math.ceil(items.length / branches);
-const nodes = items.map((item, i) => ({ item, head: i % rows === 0 }));
+const { items, learning = false } = Astro.props;
 ---
 
-<ul class="chain" style={`--rows: ${rows}; --branches: ${branches}`} data-planned={learning ? "" : undefined}>
-  {
-    nodes.map(({ item, head }) => (
-      <li class:list={["node", { planned: learning }]} data-head={head ? "" : undefined}>
-        {item}
-      </li>
-    ))
-  }
+<ul class="chain" data-planned={learning ? "" : undefined}>
+  {items.map((item) => <li class:list={["node", { planned: learning }]}>{item}</li>)}
 </ul>
 
 <style>
@@ -55,14 +43,6 @@ const nodes = items.map((item, i) => ({ item, head: i % rows === 0 }));
     }
   }
 
-  /* Every connector is a 2px accent bar at full opacity. */
-  .node::before {
-    content: "";
-    position: absolute;
-    background-color: var(--accent);
-  }
-
-  /* --- Below 960px: a spine with a wrapping chain ---------------------- */
   /* The horizontal gap equals the tick, so a leaf's tick meets the leaf
      before it, or the spine when it starts a row. */
   .chain {
@@ -75,47 +55,16 @@ const nodes = items.map((item, i) => ({ item, head: i % rows === 0 }));
     border-left: 2px solid var(--accent);
   }
 
+  /* Every connector is a 2px accent bar at full opacity. */
   .node::before {
+    content: "";
+    position: absolute;
     top: 50%;
     right: 100%;
     width: 14px;
     height: 2px;
     margin-top: -1px;
-  }
-
-  /* --- From 960px: one 8rem column per branch, vertical connectors ---- */
-  @media (min-width: 960px) {
-    /* Filled top to bottom then across (grid-auto-flow: column); --rows
-       from the build so each next column starts at the right item. 8rem is
-       the measured floor for a 12-character label at 14px. */
-    .chain {
-      display: grid;
-      grid-template-columns: repeat(var(--branches), 8rem);
-      grid-template-rows: repeat(var(--rows), auto);
-      grid-auto-flow: column;
-      gap: 16px 1rem;
-      margin: 0;
-      padding: 0;
-      border-left: 0;
-    }
-
-    .node {
-      text-align: center;
-    }
-
-    .node::before {
-      top: auto;
-      right: auto;
-      bottom: 100%;
-      left: 50%;
-      width: 2px;
-      height: 16px;
-      margin: 0 0 0 -1px;
-    }
-
-    .node[data-head]::before {
-      content: none;
-    }
+    background-color: var(--accent);
   }
 
   /* --- Currently learning: dashed spine and connectors ---------------- */
@@ -127,14 +76,5 @@ const nodes = items.map((item, i) => ({ item, head: i % rows === 0 }));
     height: 0;
     background: none;
     border-top: 2px dashed var(--accent);
-  }
-
-  @media (min-width: 960px) {
-    .chain[data-planned] .node::before {
-      width: 0;
-      height: 16px;
-      border-top: 0;
-      border-left: 2px dashed var(--accent);
-    }
   }
 </style>

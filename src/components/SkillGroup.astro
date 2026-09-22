@@ -1,40 +1,68 @@
 ---
-// One category of the skill tree (PRD §5.6): a root node, a fan of one
-// connector line per branch, and the leaves (SkillChain.astro). Branches
-// scale with the leaf count — about three leaves each, never fewer than
-// two branches so every category forks — computed here at build time.
-// From 960px the group is a small talent tree — root centred over the
-// chain's columns, the fan reaching each column's head. Below 960px it is
-// the root over the chain's spine. The "Currently learning" group keeps
-// the same anatomy with an outlined root and dashed lines. No client script.
+// One category of the skill tree (PRD §5.6). Two layouts, both in the markup,
+// each shown at its own width:
+//
+// From 960px — a free-scatter mind map (increment 22, replacing the column
+// fan). Every leaf sits at its own build-time position around the root and is
+// joined to it by its own straight line. Lines crossing each other is the
+// intended hand-drawn look; labels never overlap, which skill-scatter.ts
+// guarantees by relaxation and asserts at build time.
+//
+// Below 960px — increment 19's stacked spine-and-chain (SkillChain.astro),
+// deliberately unchanged: free scatter and narrow screens are a bad
+// combination and legibility is not negotiable.
+//
+// "Currently learning" keeps the same anatomy with an outlined root, dashed
+// lines and `.planned` leaves. No client script in either layout.
+import { extent, scatter } from "../lib/skill-scatter";
 import SkillChain from "./SkillChain.astro";
 
 interface Props {
   name: string;
   items: string[];
-  /** Currently learning: outlined root, dashed fan, `.planned` leaves. */
+  /** Currently learning: outlined root, dashed lines, `.planned` leaves. */
   learning?: boolean;
 }
 
 const { name, items, learning = false } = Astro.props;
 
-// Languages 8 → 3, Frameworks 9 → 3, AI 7 → 3, the rest 2.
-const branches = Math.max(2, Math.ceil(items.length / 3));
-const fan = Array.from({ length: branches }, (_, i) => i + 0.5);
+const leaves = scatter(name, items);
+// extent() is already symmetric about the root, which sits at the canvas
+// centre; a few px of slack keeps borders and the 2px rays off the edge.
+const box = extent(leaves);
+const canvasW = box.w + 16;
+const canvasH = box.h + 16;
 ---
 
-<li class="group" style={`--branches: ${branches}`} data-planned={learning ? "" : undefined}>
+<li class="group" style={`--w: ${canvasW}px; --h: ${canvasH}px`} data-planned={learning ? "" : undefined}>
   <h3 class="label root">{name}</h3>
 
-  {/* One line from the root's bottom centre to each column's top centre,
-      evenly spread by construction (one viewBox unit per column).
-      preserveAspectRatio="none" stretches the box to the row, which keeps
-      straight lines straight; non-scaling-stroke keeps them 2px. */}
-  <svg class="fan" viewBox={`0 0 ${branches} 1`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-    {fan.map((x) => <line x1={branches / 2} y1="0" x2={x} y2="1" vector-effect="non-scaling-stroke" />)}
+  {/* One line per leaf, root centre to leaf centre. The viewBox is the
+      canvas in px so the coordinates are the same numbers as the leaves'
+      offsets; non-scaling-stroke keeps every line 2px. Desktop only. */}
+  <svg
+    class="rays"
+    viewBox={`${-canvasW / 2} ${-canvasH / 2} ${canvasW} ${canvasH}`}
+    aria-hidden="true"
+    focusable="false"
+  >
+    {leaves.map((leaf) => <line x1="0" y1="0" x2={leaf.x} y2={leaf.y} vector-effect="non-scaling-stroke" />)}
   </svg>
 
-  <SkillChain items={items} branches={branches} learning={learning} />
+  <ul class="scatter">
+    {
+      leaves.map((leaf) => (
+        <li
+          class:list={["leaf", { planned: learning }]}
+          style={`--x: ${leaf.x}px; --y: ${leaf.y}px`}
+        >
+          {leaf.item}
+        </li>
+      ))
+    }
+  </ul>
+
+  <SkillChain items={items} learning={learning} />
 </li>
 
 <style>
@@ -43,62 +71,103 @@ const fan = Array.from({ length: branches }, (_, i) => i + 0.5);
   }
 
   /* Root: solid accent, dark text (light text fails contrast on both
-     accents), uppercase mono. A touch taller than a leaf, never wider than
-     its chain. Below 960px it sits over the chain's spine. */
+     accents), uppercase mono. Below 960px it sits over the chain's spine. */
   .root {
     display: inline-block;
     margin: 0 0 0 1rem;
     padding: 0.625rem 1rem;
     text-align: center;
-    color: var(--bg);
+    color: var(--on-accent);
     background-color: var(--accent);
     border: 1px solid var(--accent);
     border-radius: 4px;
   }
 
-  .fan {
+  /* The scatter is desktop-only; below 960px SkillChain owns the layout. */
+  .rays,
+  .scatter {
     display: none;
-    color: var(--accent);
   }
 
-  .fan line {
-    stroke: currentColor;
-    stroke-width: 2;
-  }
-
-  /* --- From 960px: the talent tree ----------------------------------- */
-  /* As wide as its branches: 8rem per leaf column plus the 1rem gaps
-     (SkillChain.astro's tracks), so every group's leaves are one size. */
+  /* --- From 960px: the free-scatter mind map -------------------------- */
   @media (min-width: 960px) {
     .group {
-      display: grid;
-      grid-template-rows: auto 28px auto;
-      align-content: start;
-      width: calc(var(--branches) * 8rem + (var(--branches) - 1) * 1rem);
+      position: relative;
+      width: var(--w);
+      height: var(--h);
     }
 
+    /* Root centred on the canvas; every leaf offset is measured from here.
+       nowrap is load-bearing: skill-scatter.ts sizes the root's obstacle box
+       from a one-line estimate, so a wrapping chip would be taller than the
+       area the leaves were pushed out of. */
     .root {
-      display: block;
-      justify-self: center;
-      width: 70%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 2;
       margin: 0;
+      white-space: nowrap;
+      transform: translate(-50%, -50%);
     }
 
-    .fan {
+    .rays {
       display: block;
+      position: absolute;
+      inset: 0;
       width: 100%;
-      height: 28px;
+      height: 100%;
+      color: var(--accent);
+      overflow: visible;
+    }
+
+    .rays line {
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .scatter {
+      display: block;
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    /* A leaf is a label centred on its own point, over the lines. */
+    .leaf {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 1;
+      padding: 0.5rem 0.625rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      white-space: nowrap;
+      color: var(--fg);
+      background-color: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
+    }
+
+    /* The chain is the mobile layout; hide it once the scatter is on. */
+    .group :global(.chain) {
+      display: none;
     }
   }
 
-  /* --- Currently learning: outlined root, dashed fan ------------------ */
+  /* --- Currently learning: outlined root, dashed lines ----------------- */
   .group[data-planned] .root {
     color: var(--accent);
     background-color: transparent;
     border-style: dashed;
   }
 
-  .group[data-planned] .fan line {
+  .group[data-planned] .rays line {
     stroke-dasharray: 4 4;
   }
 </style>

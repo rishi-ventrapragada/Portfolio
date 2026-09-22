@@ -63,19 +63,18 @@ const learning = { name: "Currently learning", items: ["Docker", "Kubernetes"] }
     list-style: none;
   }
 
-  /* From 960px: centred rows of fixed-width groups. Every leaf column is
-     8rem (the measured floor for a 12-character label at 14px) and a group
-     is as wide as its branches, so the rows fall out of the content —
-     [Languages, Frameworks] / [AI, Tools, Platforms] / [Cloud, Learning] at
-     1280 — in document order, never reflowed. Three 3-branch groups would
-     need 1296px in one band, more than the 1184px shell; hence rows. */
+  /* From 960px: centred rows of scatter canvases. Each group sizes itself to
+     its own leaf extent (SkillGroup.astro publishes --w / --h from
+     skill-scatter.ts), so the rows fall out of the content in document
+     order. Wrapping, not one band: the two largest canvases alone are
+     ~1144px of the 1184px shell. */
   @media (min-width: 960px) {
     .tree {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: flex-start;
-      gap: 3rem 1.5rem;
+      gap: 2rem 1.5rem;
     }
   }
 </style>
