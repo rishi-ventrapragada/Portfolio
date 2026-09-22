@@ -1,6 +1,7 @@
 ---
-// About (PRD §5.6): a comic page. The eyebrow and heading sit in the shell;
-// the panel grid runs viewport edge to edge like the Experience monitor.
+// About (PRD §5.6): a comic page. The eyebrow, heading and panel grid share
+// the shell, so the panels line up with the heading and stop at its gutter
+// (increment 23 — edge to edge, the grid read as spilling off the page).
 // Increment 16 ships the structure and the mechanic only: every panel's art
 // and dialogue is a visibly marked placeholder (CLAUDE.md §7) until the
 // owner supplies them. One panel = AboutPanel.astro.
@@ -10,6 +11,9 @@
 // It runs on the clock, not on scroll (owner's decision), and needs no
 // script. Reduced motion removes the animation, which leaves the filter at
 // its rest value — frozen on full colour.
+//
+// Reveal (increment 23): each panel fades up the first time it scrolls into
+// view and then stays (scripts/about-reveal.ts). Normal scroll, no pinning.
 import AboutPanel from "./AboutPanel.astro";
 
 // The five fills come from the small palette in global.css (all five words
@@ -36,10 +40,19 @@ const panels = [
     <h2 id="about-heading" class="heading">About</h2>
   </div>
 
-  <div class="page" data-about-page>
-    {panels.map((panel) => <AboutPanel {...panel} />)}
+  <div class="shell">
+    <div class="page" data-about-page>
+      {panels.map((panel) => <AboutPanel {...panel} />)}
+    </div>
   </div>
 </section>
+
+<script>
+  import { initAboutReveal } from "../scripts/about-reveal";
+
+  const page = document.querySelector<HTMLElement>("[data-about-page]");
+  if (page) initAboutReveal(page);
+</script>
 
 <style>
   .about {
@@ -56,25 +69,27 @@ const panels = [
     font-size: var(--size-h2);
   }
 
-  /* Phone: one column, the establishing panel first. The gutter (the gap
-     and the outer padding) is the page background showing between the
-     panels' hairline borders — no separate ink colour. */
+  /* Phone: one column, the establishing panel first. The gap is the page
+     background showing between the panels' hairline borders. Inside the
+     shell, so its edges are the heading's gutter, never the viewport's. */
   .page {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.75rem;
-    padding-inline: 0.75rem;
     animation: grade 15s linear infinite;
   }
 
   /* From 768px: four columns by two rows, the establishing panel spanning
-     the left half. aspect-ratio on the grid makes each cell roughly square
-     without a fixed height, so the page scales with the viewport. */
+     the left half. aspect-ratio makes each cell roughly square without a
+     fixed height; max-height caps it at the viewport below the fixed bar, so
+     on a short wide screen the whole page still fits in view at once rather
+     than running up under the nav (the rows just get shorter). */
   @media (min-width: 768px) {
     .page {
       grid-template-columns: repeat(4, minmax(0, 1fr));
       grid-template-rows: repeat(2, minmax(0, 1fr));
       aspect-ratio: 2 / 1;
+      max-height: calc(100dvh - var(--nav-height) - 2rem);
     }
 
     .page > :global(.establishing) {

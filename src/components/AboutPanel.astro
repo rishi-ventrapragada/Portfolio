@@ -38,6 +38,24 @@ const { n, tone, establishing = false } = Astro.props;
     border: 1px solid var(--line);
   }
 
+  /* Reveal (scripts/about-reveal.ts). The hidden start state applies only
+     once the script has armed the grid with [data-reveal], so without JS —
+     or under reduced motion, where the script never arms — every panel is
+     simply visible. Transform and opacity only; --reveal-delay staggers
+     panels that enter together so they land one after another. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global([data-reveal]) > .panel {
+      transition:
+        opacity 600ms ease var(--reveal-delay, 0ms),
+        transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+    }
+
+    :global([data-reveal]) > .panel:not([data-revealed]) {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+  }
+
   /* Desktop: the grid's rows decide the height (About.astro). */
   @media (min-width: 768px) {
     .panel {
