@@ -1,0 +1,90 @@
+---
+// One contact button-card on the footer's contact screen (PRD §5.8,
+// increment 23): a rectangular link with a hand-authored glyph, the label,
+// and the address itself underneath, so the card says where it goes before
+// it is clicked. Only ever rendered for a real URL (FooterContact.astro keeps
+// the isUrl guard).
+import ContactIcon from "./ContactIcon.astro";
+
+interface Props {
+  label: string;
+  href: string;
+  icon: "github" | "linkedin" | "mail";
+}
+
+const { label, href, icon } = Astro.props;
+// The address as a reader would say it: no scheme, no "www.", no trailing
+// slash, the bare address for mail.
+const address = href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+---
+
+<a class="card" href={href} rel="noopener">
+  <ContactIcon name={icon} />
+  <span class="text">
+    <span class="label-text">{label}</span>
+    <span class="meta address">{address}</span>
+  </span>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 5rem;
+    padding: 1rem 1.25rem;
+    color: var(--fg);
+    background-color: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    text-align: left;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .card:hover,
+  .card:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .text {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .label-text {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--heading);
+  }
+
+  /* Long addresses (the LinkedIn path) wrap at any character rather than
+     widen the card past a phone's width. */
+  .address {
+    overflow-wrap: anywhere;
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 479.98px) {
+    .card {
+      min-height: 3.75rem;
+      padding: 0.625rem 1rem;
+    }
+
+    .label-text {
+      font-size: 1.0625rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
+    }
+  }
+</style>

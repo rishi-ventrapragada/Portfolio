@@ -1,10 +1,10 @@
 ---
-// PRD §5.8 — the contact card: the last stage of the footer sequence
+// PRD §5.8 — the contact screen: the last stage of the footer sequence
 // (Footer.astro owns the track and the pin, FooterStage.astro the stage box).
-// "Get in touch" and the links sit dead centre, so when the stage settles
-// the links are in the middle of the viewport; the © line is pinned to the
-// stage's bottom edge, out of the centring. Split out of Footer.astro for
-// the CLAUDE.md §5 line cap.
+// Since increment 23 the links are rectangular button-cards with a
+// hand-authored glyph each (ContactCard.astro), under a display-size "Get in
+// touch", all dead centre; the © line is pinned to the stage's bottom edge,
+// out of the centring, and is unchanged.
 //
 // Contact values go through the shared isUrl guard (src/lib/is-url.ts):
 // only an http(s) URL or a mailto: address becomes an <a>, anything else
@@ -12,27 +12,26 @@
 // The résumé link stays outside the guard as built: a root-relative path
 // to public/resume.pdf, which is still pending from the owner.
 import { isUrl } from "../lib/is-url";
+import ContactCard from "./ContactCard.astro";
 
 const year = new Date().getFullYear();
 
 const contacts = [
-  { label: "GitHub", value: "https://github.com/rishi-ventrapragada" },
-  { label: "LinkedIn", value: "https://www.linkedin.com/in/rishi-ventrapragada" },
-  { label: "Gmail", value: "mailto:rishiventrapragada23@gmail.com" },
-];
+  { label: "GitHub", value: "https://github.com/rishi-ventrapragada", icon: "github" },
+  { label: "LinkedIn", value: "https://www.linkedin.com/in/rishi-ventrapragada", icon: "linkedin" },
+  { label: "Gmail", value: "mailto:rishiventrapragada23@gmail.com", icon: "mail" },
+] as const;
 ---
 
 <div class="contact" data-contact>
   <div class="body">
-    <p class="label get-in-touch">Get in touch</p>
-    <ul class="links">
+    <h2 class="get-in-touch">Get in touch</h2>
+    <ul class="cards">
       {
-        contacts.map(({ label, value }) =>
+        contacts.map(({ label, value, icon }) =>
           isUrl(value) ? (
             <li>
-              <a class="meta link" href={value} rel="noopener">
-                {label}
-              </a>
+              <ContactCard label={label} href={value} icon={icon} />
             </li>
           ) : (
             <li class="meta pending">
@@ -41,10 +40,8 @@ const contacts = [
           ),
         )
       }
-      <li>
-        <a class="meta link" href="/resume.pdf">Résumé [TODO]</a>
-      </li>
     </ul>
+    <a class="meta resume" href="/resume.pdf">Résumé [TODO]</a>
   </div>
 
   <p class="meta copyright">&copy; {year} Rishi</p>
@@ -58,7 +55,9 @@ const contacts = [
   .contact {
     position: relative;
     display: grid;
-    place-content: center;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    justify-items: center;
     justify-self: stretch;
     align-self: stretch;
     width: 100%;
@@ -68,29 +67,58 @@ const contacts = [
 
   .body {
     display: grid;
-    gap: 1.5rem;
+    justify-items: center;
+    gap: 2rem;
+    width: min(100%, 64rem);
   }
 
+  /* h2: the footer is its own landmark with no heading of its own; the
+     credits above are decorative text, so this is the section's title. */
   .get-in-touch {
     margin: 0;
-    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--heading);
+    text-shadow: 0 0 0.5rem var(--bg);
   }
 
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.5rem;
+  /* Three across from 960px, one column below: each card keeps a width
+     where its address fits on one or two lines. */
+  .cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    width: 100%;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .link {
-    color: var(--fg);
+  @media (min-width: 960px) {
+    .cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
-  .link:hover {
+  /* Phone: tighter spacing so the whole screen clears the © line pinned to
+     the stage's bottom edge even on a 320×568 viewport. */
+  @media (max-width: 479.98px) {
+    .body {
+      gap: 1.25rem;
+    }
+
+    .cards {
+      gap: 0.625rem;
+    }
+  }
+
+  .resume {
+    color: var(--fg-muted);
+  }
+
+  .resume:hover {
     color: var(--accent);
   }
 

@@ -1,23 +1,24 @@
 ---
-// PRD §5.8 — contact as a staged credits sequence (increment 21; increment
-// 17's continuous crawl is gone). Still the <footer> landmark and still
-// #contact for the nav. A scroll track (Wordmark.astro /
-// ExperienceTimeline.astro technique) holds a sticky pin for its whole
-// distance; inside it four stages are stacked in one grid cell
-// (FooterStage.astro) and scroll progress through the pin commits one at a
-// time — each settles into the same centred position and holds, then
-// cross-fades to the next, so nothing ever leaves by the top edge.
-// scripts/footer-scrub.ts owns the zone/commit path and the keyboard reveal.
-// The credit wording is the owner's, split into rows.
+// PRD §5.8 — contact as a credits sequence. Still the <footer> landmark and
+// still #contact for the nav. A scroll track holds a sticky pin for its
+// whole distance; inside it two stages share one grid cell
+// (FooterStage.astro): the credits, then the contact screen.
+//
+// Increment 23: the credit lines ACCUMULATE. Each scroll zone adds one line
+// and keeps the ones before it, so the block assembles in place
+// (FooterCredits.astro); one more zone holds it complete, and the last
+// cross-fades to the contact screen. scripts/footer-scrub.ts owns the zones
+// and the keyboard reveal.
 import Divider from "./Divider.astro";
 import FooterContact from "./FooterContact.astro";
+import FooterCredits from "./FooterCredits.astro";
 import FooterStage from "./FooterStage.astro";
 import TopoBackdrop from "./TopoBackdrop.astro";
 
-const credits = [
-  { id: "built", role: "Built with", name: "Astro · Tailwind · Vercel" },
-  { id: "author", role: "Directed, developed & edited by", name: "Rishi" },
-];
+// The credit, one line per entry, in the order they build up. Plain text —
+// regroup or reword freely; the zones follow the number of lines. The last
+// line is styled as the name.
+const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapragada"];
 ---
 
 {/* The Projects→Contact seam (PRD §5.12). Outside the <footer> so the
@@ -25,16 +26,17 @@ const credits = [
 <Divider />
 
 <footer class="footer" id="contact" data-credits>
-  {/* Without JavaScript nothing commits a stage, so the <noscript> style
+  {/* Without JavaScript nothing commits a zone, so the <noscript> style
       (the ExperienceTimeline.astro pattern) un-pins the section into a
-      static block and un-stacks the stages into plain flow: the same four
-      in document order, ending on the contact card. */}
+      static block, un-stacks the stages into plain flow and shows every
+      credit line: the assembled credits, then the contact screen. */}
   <noscript>
     <style>
       [data-credits-track] { height: auto !important; }
       [data-credits-pin] { position: static !important; height: auto !important; overflow: visible !important; }
       [data-credits-stack] { display: block !important; }
       [data-credits-stage] { opacity: 1 !important; pointer-events: auto !important; transform: none !important; }
+      [data-credit-line] { opacity: 1 !important; transform: none !important; }
     </style>
   </noscript>
 
@@ -44,24 +46,13 @@ const credits = [
           whole scroll rather than travelling with the track. */}
       <TopoBackdrop />
 
-      {/* Every stage is in the HTML, stacked in one grid cell, so a swap is
-          a cross-fade in a box that never moves. The first is active from
-          the server, so the footer reads as a title card without JS. */}
-      <div class="stack" data-credits-stack>
-        <FooterStage id="title" active>
-          <p class="title">Rishi Ventrapragada</p>
+      {/* Both stages are in the HTML, stacked in one grid cell, so the swap
+          is a cross-fade in a box that never moves. The credits are active
+          from the server with their first line shown. */}
+      <div class="stack" data-credits-stack data-lines={creditLines.length}>
+        <FooterStage id="credits" active>
+          <FooterCredits lines={creditLines} />
         </FooterStage>
-
-        {
-          credits.map((credit) => (
-            <FooterStage id={credit.id}>
-              <div class="credit">
-                <p class="label role">{credit.role}</p>
-                <p class="name">{credit.name}</p>
-              </div>
-            </FooterStage>
-          ))
-        }
 
         <FooterStage id="contact">
           <FooterContact />
@@ -87,10 +78,11 @@ const credits = [
   }
 
   /* --pin-length is the one number to tune: the scroll distance the track
-     occupies. The pin travels (--pin-length − 100dvh); each of the four
-     stage zones is a quarter of that. */
+     occupies. The pin travels (--pin-length − 100dvh), split evenly into one
+     zone per credit line, a hold on the assembled block, and the contact
+     screen — five zones for three lines, 40vh each. */
   .track {
-    --pin-length: 250vh;
+    --pin-length: 300vh;
     height: var(--pin-length);
   }
 
@@ -112,38 +104,6 @@ const credits = [
     z-index: 1;
     display: grid;
     height: 100%;
-  }
-
-  .title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--size-h2);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    line-height: 1.1;
-    text-transform: uppercase;
-    color: var(--heading);
-  }
-
-  /* One credit per stage now, so the row is a centred pair rather than the
-     old list: the role above the name, end-credit spacing kept. */
-  .credit {
-    display: grid;
-    gap: 0.5rem;
-    line-height: 2;
-  }
-
-  .role {
-    margin: 0;
-    color: var(--accent);
-  }
-
-  .name {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-    font-weight: 500;
-    color: var(--fg);
   }
 
   /* --- Reduced motion ----------------------------------------------------- */

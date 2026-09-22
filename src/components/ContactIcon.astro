@@ -1,0 +1,54 @@
+---
+// Inline glyphs for the contact cards (PRD §5.8, increment 23). Hand-authored
+// here on a 24px grid — simplified allusions, not the brands' official
+// marks, and nothing is fetched. currentColor, so the card decides the
+// colour; aria-hidden, because the card's text label is the accessible name.
+interface Props {
+  name: "github" | "linkedin" | "mail";
+}
+
+const { name } = Astro.props;
+---
+
+<svg class="icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+  {
+    name === "github" && (
+      // A cat's head: two pointed ears on a broad face, eyes knocked out.
+      <path
+        fill="currentColor"
+        fill-rule="evenodd"
+        d="M5.2 3.2 9.4 6.6a9.6 9.6 0 0 1 5.2 0l4.2-3.4.6 5.6A7.4 7.4 0 0 1 20 11.6c0 4.6-3.6 8.2-8 8.2s-8-3.6-8-8.2c0-1 .1-2 .6-2.8zM9.2 11.4a1.3 1.6 0 1 0 0 3.2 1.3 1.6 0 0 0 0-3.2zm5.6 0a1.3 1.6 0 1 0 0 3.2 1.3 1.6 0 0 0 0-3.2z"
+      />
+    )
+  }
+  {
+    name === "linkedin" && (
+      // "in" inside a rounded square.
+      <g fill="currentColor">
+        <path
+          fill-rule="evenodd"
+          d="M5 2.5h14A2.5 2.5 0 0 1 21.5 5v14a2.5 2.5 0 0 1-2.5 2.5H5A2.5 2.5 0 0 1 2.5 19V5A2.5 2.5 0 0 1 5 2.5zm0 1.8a.7.7 0 0 0-.7.7v14c0 .4.3.7.7.7h14c.4 0 .7-.3.7-.7V5a.7.7 0 0 0-.7-.7z"
+        />
+        <circle cx="8" cy="7.9" r="1.4" />
+        <rect x="6.8" y="10.2" width="2.4" height="7.3" rx="0.4" />
+        <path d="M11.2 10.2h2.3v1.1c.5-.8 1.5-1.3 2.6-1.3 2 0 3.2 1.3 3.2 3.6v3.9h-2.4v-3.6c0-1.1-.5-1.7-1.4-1.7-1 0-1.9.7-1.9 1.9v3.4h-2.4z" />
+      </g>
+    )
+  }
+  {
+    name === "mail" && (
+      // An envelope, its flap folded into the letter M.
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+        <rect x="2.8" y="5" width="18.4" height="14" rx="2.2" />
+        <path d="M3.4 6.2 12 12.9l8.6-6.7" />
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .icon {
+    flex: none;
+    display: block;
+  }
+</style>

@@ -1,0 +1,87 @@
+---
+// The credits block of the footer sequence (PRD §5.8, increment 23). Lines
+// accumulate: each appears as its scroll zone is reached and then stays, so
+// the block builds up into one assembled piece of text rather than one line
+// replacing another. Every line is laid out from the start (hidden with
+// opacity), so the block is already its final size and centred — a line
+// arriving never pushes the others around. scripts/footer-scrub.ts sets
+// data-shown. The last line is the name, in --heading; the rest are accent.
+interface Props {
+  lines: readonly string[];
+}
+
+const { lines } = Astro.props;
+---
+
+<div class="credits">
+  {
+    lines.map((line, i) => (
+      <p class:list={["line", { name: i === lines.length - 1 }]} data-credit-line={i} data-shown={i === 0 ? "" : undefined}>
+        {line}
+      </p>
+    ))
+  }
+</div>
+
+<style>
+  /* A soft --bg scrim behind the block, so the contour lines of the
+     topographic backdrop never pass at full strength behind the letters —
+     crimson measured 2.51:1 over a contour without it (PRD §5.15). A
+     rounded panel blurred at the edges: it covers the whole text area at
+     full strength and reads as the contours thinning out around the text,
+     not as a box. (A radial gradient was tried first and left the ends of
+     the wide lines uncovered.) */
+  .credits {
+    position: relative;
+    display: grid;
+    gap: 0.35em;
+    max-width: 100%;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 7vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .credits::before {
+    content: "";
+    position: absolute;
+    inset: -2.5rem -3rem;
+    z-index: -1;
+    border-radius: 3rem;
+    background-color: color-mix(in srgb, var(--bg) 94%, transparent);
+    filter: blur(1.25rem);
+    pointer-events: none;
+  }
+
+  .line {
+    margin: 0;
+    color: var(--accent);
+    text-shadow: 0 0 1.25rem var(--bg);
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition:
+      opacity 480ms ease,
+      transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .line.name {
+    margin-top: 0.3em;
+    color: var(--heading);
+  }
+
+  .line[data-shown] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Lines still accumulate one by one; they just land without moving. */
+  @media (prefers-reduced-motion: reduce) {
+    .line {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
