@@ -18,7 +18,7 @@
   --heading: #f2f2f2;
   /* Boot preloader square backdrop (PRD §5.10): the not-yet-revealed area of
      the loading square. Darker than --bg so the box reads as a distinct object
-     against the overlay's noise texture. */
+     against the overlay's starfield. */
   --boot-square-bg: #0b0c0e;
   /* Experience monitor and timeline (PRD §5.11). The monitor is the one
      surface allowed to be pure black: an NLE preview monitor reads as a

@@ -75,15 +75,17 @@ export const layers: Layer[] = SPEC.map((s) => ({
 }));
 
 /**
- * Three streaks on pairwise-coprime periods, so their starts only coincide
- * once every lcm(23, 31, 37) = 26 381s — a meteor never arrives on a
- * predictable beat. Each is visible for a small fraction of its own period
- * (~18% overall), which is what keeps them an event rather than a texture.
+ * Three streaks, geometry taken from Recurzn-Web's own sky (lib/starfield.ts
+ * there, increment 23): each streak is a track 130–150vw long at a static
+ * angle, starting off the left edge, so it crosses the whole section rather
+ * than flicking a few px. Periods 9 / 11 / 13s are pairwise coprime, so the
+ * starts coincide only every lcm = 1287s and never settle into a beat. Each
+ * is visible for ~18% of its own period and parked off-screen for the rest.
  */
 export const meteors = [
-  { top: 12, left: 8, duration: 23, delay: -4, length: 140, angle: 28 },
-  { top: 34, left: 54, duration: 31, delay: -17, length: 180, angle: 24 },
-  { top: 6, left: 78, duration: 37, delay: -29, length: 120, angle: 32 },
+  { top: 5, left: -10, length: 130, angle: 12, duration: 9, delay: -2.5 },
+  { top: 32, left: -18, length: 150, angle: 27, duration: 13, delay: -10 },
+  { top: 62, left: -14, length: 140, angle: 19, duration: 11, delay: -6 },
 ] as const;
 
 /** Reported in the PRD: four instances of this many nodes each. */

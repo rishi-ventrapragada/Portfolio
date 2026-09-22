@@ -1,7 +1,8 @@
 ---
 // A drifting star sky behind a section (PRD §5.14), ported from the Recurzn /
 // Life OS effect. Three parallax layers drift left at different speeds; the
-// two nearer ones twinkle; three meteors cross on coprime periods. Positions
+// two nearer ones twinkle; three meteors cross on coprime periods, at
+// Recurzn's own scale (StarfieldMeteors.astro, split for the line cap). Positions
 // are generated at build time (lib/starfield-data.ts) — no client script.
 //
 // Monochrome on purpose: every star, twinkle and streak is --heading, the
@@ -9,7 +10,8 @@
 //
 // Bounded to its own section: contain: strict plus overflow: clip means it
 // can never paint into a neighbour, so the dividers stay the visible seam.
-import { layers, meteors } from "../lib/starfield-data";
+import { layers } from "../lib/starfield-data";
+import StarfieldMeteors from "./StarfieldMeteors.astro";
 ---
 
 <div class="sky" aria-hidden="true">
@@ -32,16 +34,7 @@ import { layers, meteors } from "../lib/starfield-data";
     ))
   }
 
-  <div class="meteors">
-    {
-      meteors.map((m) => (
-        <span
-          class="meteor"
-          style={`top: ${m.top}%; left: ${m.left}%; --dur: ${m.duration}s; --delay: ${m.delay}s; --len: ${m.length}px; --angle: ${m.angle}deg`}
-        />
-      ))
-    }
-  </div>
+  <StarfieldMeteors />
 </div>
 
 <style>
@@ -136,41 +129,6 @@ import { layers, meteors } from "../lib/starfield-data";
     }
   }
 
-  .meteors {
-    position: absolute;
-    inset: 0;
-  }
-
-  /* A streak is a short gradient rotated along its own travel. It is off
-     screen for most of its period; the visible window is the 0–18% band. */
-  .meteor {
-    position: absolute;
-    width: var(--len);
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--heading));
-    opacity: 0;
-    transform: rotate(var(--angle)) translateX(-50%);
-    animation: meteor var(--dur) linear var(--delay) infinite;
-  }
-
-  @keyframes meteor {
-    0% {
-      opacity: 0;
-      transform: rotate(var(--angle)) translate3d(-60%, -60%, 0) scaleX(0.4);
-    }
-    4% {
-      opacity: 0.9;
-    }
-    18% {
-      opacity: 0;
-      transform: rotate(var(--angle)) translate3d(320%, 320%, 0) scaleX(1);
-    }
-    100% {
-      opacity: 0;
-      transform: rotate(var(--angle)) translate3d(320%, 320%, 0) scaleX(1);
-    }
-  }
-
   /* --- Reduced motion --------------------------------------------------
      The drift freezes at frame 0 and the twinkle settles to its base
      opacity, leaving a complete, still sky rather than an empty box.
@@ -180,7 +138,8 @@ import { layers, meteors } from "../lib/starfield-data";
      motion set as an OS-level battery default rather than as a vestibular
      need, and deleting the streaks outright would silently take the
      feature away from them. Halved and dimmed is the compromise the
-     original shipped, and it is preserved here. */
+     original shipped, and it is preserved here; StarfieldMeteors.astro
+     owns that branch. */
   @media (prefers-reduced-motion: reduce) {
     .track {
       animation: none;
@@ -189,11 +148,6 @@ import { layers, meteors } from "../lib/starfield-data";
     .star[data-twinkle] {
       animation: none;
       opacity: 0.8;
-    }
-
-    .meteor {
-      animation-duration: calc(var(--dur) * 2);
-      opacity: 0.35;
     }
   }
 </style>
