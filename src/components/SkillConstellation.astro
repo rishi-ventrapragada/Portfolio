@@ -8,58 +8,15 @@
 // non-scaling strokes, as the tree's fans), the stars and names are HTML at
 // the same percentages, so the type never scales with the box. Static text
 // in a shape: every name is visible and is its star's accessible name, no
-// hover, no links, no animation, no client script.
+// hover and no links.
+//
+// The whole figure drifts as one (increment 22): the transform is on the
+// single box that holds the lines, the stars and the specks, so the
+// coordinates never move relative to each other and the shape cannot come
+// apart. Pure CSS, no client script. Geometry lives in lib/constellation-data.ts
+// for the CLAUDE.md §5 line cap.
+import { lines, specks, stars } from "../lib/constellation-data";
 import Starfield from "./Starfield.astro";
-
-interface Star {
-  name: string;
-  /** Percent of the box, also the SVG viewBox unit. */
-  x: number;
-  y: number;
-  /** Dot diameter in px: a little size variety, never cramping the name. */
-  d: 8 | 10 | 14;
-}
-
-// Nine distinct y bands about 11% apart: in the portrait phone box no two
-// names can share a row, and a name sits on the side of its star that has
-// the room (left of the star past the midline), so nothing ever overlaps
-// or leaves the box at 375px.
-const stars: Star[] = [
-  { name: "Videography", x: 14, y: 9, d: 10 },
-  { name: "After Effects", x: 58, y: 17, d: 10 },
-  { name: "Premiere", x: 32, y: 28, d: 14 },
-  { name: "Motion Design", x: 82, y: 39, d: 10 },
-  { name: "DaVinci Resolve", x: 24, y: 50, d: 14 },
-  { name: "Canva", x: 90, y: 61, d: 8 },
-  { name: "Color Grading", x: 46, y: 72, d: 10 },
-  { name: "CapCut", x: 12, y: 83, d: 8 },
-  { name: "Audio Mixing", x: 68, y: 91, d: 10 },
-];
-
-// A spanning path through all nine (eight lines) plus two that close the
-// figure, so it reads as one shape without becoming a mesh.
-const edges: [string, string][] = [
-  ["Videography", "Premiere"],
-  ["Premiere", "After Effects"],
-  ["After Effects", "Motion Design"],
-  ["Premiere", "DaVinci Resolve"],
-  ["DaVinci Resolve", "Color Grading"],
-  ["DaVinci Resolve", "CapCut"],
-  ["Color Grading", "Audio Mixing"],
-  ["Motion Design", "Canva"],
-  ["Canva", "Audio Mixing"],
-  ["Color Grading", "Motion Design"],
-];
-
-const byName = new Map(stars.map((s) => [s.name, s]));
-const lines = edges.map(([a, b]) => [byName.get(a)!, byName.get(b)!]);
-
-// Decorative background sky: dim specks, never near a name, aria-hidden.
-const specks: [number, number, number][] = [
-  [5, 30, 2], [20, 14, 3], [38, 8, 2], [50, 40, 3], [66, 6, 2], [74, 20, 3],
-  [95, 12, 2], [60, 30, 2], [8, 62, 3], [30, 88, 2], [56, 56, 2], [78, 80, 3],
-  [96, 88, 2], [40, 96, 3],
-];
 ---
 
 <section class="video shell" id="skills-video" aria-labelledby="skills-video-heading">
@@ -68,7 +25,10 @@ const specks: [number, number, number][] = [
   <p class="label eyebrow">Also</p>
   <h2 id="skills-video-heading" class="heading">Video editing</h2>
 
-  <div class="sky">
+  {/* data-constellation, not just .sky: Starfield.astro uses a .sky of its
+      own and one is mounted in this section, so the class alone is
+      ambiguous to anything selecting into the page. */}
+  <div class="sky" data-constellation>
     <div class="specks" aria-hidden="true">
       {specks.map(([x, y, s]) => <span class="speck" style={`left: ${x}%; top: ${y}%; --s: ${s}px`} />)}
     </div>
@@ -98,7 +58,7 @@ const specks: [number, number, number][] = [
 
   .eyebrow,
   .heading,
-  .sky {
+  [data-constellation] {
     position: relative;
     z-index: 1;
   }
@@ -116,15 +76,47 @@ const specks: [number, number, number][] = [
   /* The box every percentage refers to. Portrait on a phone so the nine
      bands have room; 16:10 from 768px, capped so the shape stays a
      cluster rather than a sprawl on wide screens. */
-  .sky {
+  /* One transform on the whole box, never on the individual stars: the lines
+     are drawn at the same percentages as the dots, so moving the container
+     moves both together and the figure stays rigid. A small radius and a
+     slow period — it should read as the sky breathing, not as something
+     sliding. The excursion is ±10px, well inside the box's own padding, so
+     nothing is pushed toward an edge. */
+  [data-constellation] {
     position: relative;
     max-width: 960px;
     margin-inline: auto;
     aspect-ratio: 2 / 3;
+    animation: constellation-drift 24s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  @keyframes constellation-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    25% {
+      transform: translate3d(8px, -6px, 0);
+    }
+    50% {
+      transform: translate3d(10px, 5px, 0);
+    }
+    75% {
+      transform: translate3d(-7px, 7px, 0);
+    }
+  }
+
+  /* Stops dead at the untransformed rest frame. */
+  @media (prefers-reduced-motion: reduce) {
+    [data-constellation] {
+      animation: none;
+      will-change: auto;
+    }
   }
 
   @media (min-width: 768px) {
-    .sky {
+    [data-constellation] {
       aspect-ratio: 16 / 10;
     }
   }
