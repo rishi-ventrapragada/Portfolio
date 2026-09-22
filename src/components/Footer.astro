@@ -1,95 +1,106 @@
 ---
-// PRD §5.8 — contact as a credits roll. The footer is still the <footer>
-// landmark and still #contact for the nav. First a tall, centred block of
-// text set like film end credits that scrolls with the page (no pin, no
-// script); below it the real contact links; then the résumé and the
-// copyright line. The credit wording is the owner's, split into rows.
-//
-// Contact values go through the shared isUrl guard (src/lib/is-url.ts):
-// only an http(s) URL or a mailto: address becomes an <a>, anything else
-// (a "[TODO]" placeholder, CLAUDE.md §7) renders as visible mono text.
-// The résumé link stays outside the guard as built: a root-relative path
-// to public/resume.pdf, which is still pending from the owner.
-import { isUrl } from "../lib/is-url";
-
-const year = new Date().getFullYear();
+// PRD §5.8 — contact as a rolling-credits sequence (increment 17). Still
+// the <footer> landmark and still #contact for the nav. A scroll track
+// (Wordmark.astro / ExperienceTimeline.astro technique) holds a sticky pin
+// for its whole distance; inside it the roll translates upward in step with
+// scroll progress — a title card (the 0% frame), the credit rows, then the
+// contact card (FooterContact.astro, the 100% frame) which settles centred
+// in the viewport as the track, and the document, end. CSS scroll-driven
+// animation first; scripts/credits-roll.ts is the fallback and the keyboard
+// reveal. The credit wording is the owner's, split into rows.
+import FooterContact from "./FooterContact.astro";
 
 const credits = [
   { role: "Built with", name: "Astro · Tailwind · Vercel" },
   { role: "Directed, developed & edited by", name: "Rishi" },
 ];
-
-const contacts = [
-  { label: "GitHub", value: "https://github.com/rishi-ventrapragada" },
-  { label: "LinkedIn", value: "https://www.linkedin.com/in/rishi-ventrapragada" },
-  { label: "Gmail", value: "mailto:rishiventrapragada23@gmail.com" },
-];
 ---
 
-<footer class="footer" id="contact">
-  <div class="shell inner">
-    <div class="credits">
-      <p class="title">Rishi Ventrapragada</p>
-      <dl class="roll">
-        {
-          credits.map((credit) => (
-            <div class="credit">
-              <dt class="label role">{credit.role}</dt>
-              <dd class="name">{credit.name}</dd>
-            </div>
-          ))
-        }
-      </dl>
-    </div>
+<footer class="footer" id="contact" data-credits>
+  {/* Without JavaScript nothing reveals a focused link inside the pin, so
+      the <noscript> style (the ExperienceTimeline.astro pattern) un-pins the
+      section into a static block: the same three frames in plain flow. */}
+  <noscript>
+    <style>
+      [data-credits-track] { height: auto !important; }
+      [data-credits-pin] { position: static !important; height: auto !important; overflow: visible !important; }
+      [data-credits-roll] { animation: none !important; transform: none !important; }
+    </style>
+  </noscript>
 
-    <div class="contact">
-      <p class="label get-in-touch">Get in touch</p>
-      <ul class="links">
-        {
-          contacts.map(({ label, value }) =>
-            isUrl(value) ? (
-              <li>
-                <a class="meta link" href={value} rel="noopener">
-                  {label}
-                </a>
-              </li>
-            ) : (
-              <li class="meta pending">
-                {label} &mdash; {value}
-              </li>
-            ),
-          )
-        }
-        <li>
-          <a class="meta link" href="/resume.pdf">Résumé [TODO]</a>
-        </li>
-      </ul>
-    </div>
+  <div class="track" data-credits-track>
+    <div class="pin" data-credits-pin>
+      <div class="roll" data-credits-roll>
+        <div class="card">
+          <p class="title">Rishi Ventrapragada</p>
+        </div>
 
-    <p class="meta copyright">&copy; {year} Rishi</p>
+        <dl class="credits">
+          {
+            credits.map((credit) => (
+              <div class="credit">
+                <dt class="label role">{credit.role}</dt>
+                <dd class="name">{credit.name}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <FooterContact />
+      </div>
+    </div>
   </div>
 </footer>
 
+<script>
+  import { initCreditsRoll } from "../scripts/credits-roll";
+
+  const root = document.querySelector<HTMLElement>("[data-credits]");
+  if (root) initCreditsRoll(root);
+</script>
+
 <style>
+  /* --pin-inner: the pinned viewport less the fixed nav, which is opaque
+     past the hero. Both cards are exactly this tall, so the roll's first
+     and last frames each fill the pin with their content centred. */
   .footer {
+    --pin-inner: calc(100dvh - var(--nav-height));
     border-top: 1px solid var(--line);
-    padding-block: var(--rhythm) 2rem;
   }
 
-  .inner {
-    display: grid;
-    gap: 3rem;
+  /* --pin-length is the one number to tune: the scroll distance the track
+     occupies. The pin travels (--pin-length − 100dvh) while the roll travels
+     (its own height − the pin), so the roll's rate in px per scrolled px is
+     the ratio of the two. The named view timeline is what the roll animates
+     against: `contain` on a subject taller than the scrollport runs from
+     its top reaching the viewport top (pin engages) to its bottom reaching
+     the viewport bottom (pin releases) — exactly the pinned distance. */
+  .track {
+    --pin-length: 250vh;
+    height: var(--pin-length);
+    view-timeline: --credits block;
+  }
+
+  /* overflow: clip, not hidden: it clips the roll without making the pin a
+     scroll container, so focusing a link can never scroll the pin's own
+     box out from under the transform. */
+  .pin {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    padding-top: var(--nav-height);
+    overflow: clip;
+  }
+
+  .roll {
     text-align: center;
   }
 
-  /* The roll: end-credit spacing — one name per line, a role above it,
-     wide gaps and a slow line-height so the block reads as a scroll of
-     credits even though it is plain flow content. */
-  .credits {
+  .card {
     display: grid;
-    gap: 3rem;
-    padding-block: var(--rhythm);
-    line-height: 2;
+    place-content: center;
+    min-height: var(--pin-inner);
+    padding-inline: var(--gutter);
   }
 
   .title {
@@ -103,10 +114,14 @@ const contacts = [
     color: var(--heading);
   }
 
-  .roll {
+  /* The rows: end-credit spacing — one name per line, a role above it,
+     wide gaps and a slow line-height. */
+  .credits {
     display: grid;
     gap: 2.5rem;
     margin: 0;
+    padding-inline: var(--gutter);
+    line-height: 2;
   }
 
   .credit {
@@ -126,35 +141,60 @@ const contacts = [
     color: var(--fg);
   }
 
-  .contact {
-    display: grid;
-    gap: 1.5rem;
+  /* --- The roll ----------------------------------------------------------- */
+  /* From resting in place to its last frame flush with the pin's bottom:
+     100% is the roll's own height, --pin-inner the box it rolls through. */
+  @keyframes credits-roll {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(var(--pin-inner) - 100%));
+    }
   }
 
-  .get-in-touch {
-    margin: 0;
-    color: var(--accent);
+  @supports (animation-timeline: scroll()) {
+    /* Longhands, never the `animation` shorthand: if the timeline folds
+       into it the minifier emits an invalid shorthand and every browser
+       drops the roll (CLAUDE.md §4). :where() keeps the rules apart. */
+    :where([data-credits-roll]).roll {
+      animation-name: credits-roll;
+      animation-duration: 1ms; /* Overridden by the timeline. */
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+    }
+
+    .roll {
+      animation-timeline: --credits;
+      animation-range: contain 0% contain 100%;
+    }
   }
 
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  /* Script fallback drives the same transform from --credits-progress. */
+  .roll[data-fallback="on"] {
+    transform: translateY(calc(var(--credits-progress, 0) * (var(--pin-inner) - 100%)));
   }
 
-  .link {
-    color: var(--fg);
-  }
+  /* --- Reduced motion: no roll, static block ------------------------------ */
+  /* The pin exists only to move content at a rate other than the scroll
+     rate, and that differential is parallax (WCAG 2.3.3's own example), so
+     the whole mechanic goes: the same three frames as plain flow, which at
+     1:1 is the same sequence, ending on the contact card. */
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      height: auto;
+    }
 
-  .link:hover {
-    color: var(--accent);
-  }
+    .pin {
+      position: static;
+      height: auto;
+      overflow: visible;
+    }
 
-  .copyright {
-    margin: 0;
+    .roll,
+    .roll[data-fallback="on"] {
+      animation: none;
+      transform: none;
+    }
   }
 </style>

@@ -1,0 +1,99 @@
+---
+// PRD §5.8 — the contact card: the last frame of the credits roll
+// (Footer.astro owns the track, the pin and the roll). One pin-height card
+// with "Get in touch" and the links dead centre, so when the roll settles
+// the links sit in the middle of the viewport; the © line is pinned to the
+// card's bottom edge, out of the centring. Split out of Footer.astro for the
+// CLAUDE.md §5 line cap.
+//
+// Contact values go through the shared isUrl guard (src/lib/is-url.ts):
+// only an http(s) URL or a mailto: address becomes an <a>, anything else
+// (a "[TODO]" placeholder, CLAUDE.md §7) renders as visible mono text.
+// The résumé link stays outside the guard as built: a root-relative path
+// to public/resume.pdf, which is still pending from the owner.
+import { isUrl } from "../lib/is-url";
+
+const year = new Date().getFullYear();
+
+const contacts = [
+  { label: "GitHub", value: "https://github.com/rishi-ventrapragada" },
+  { label: "LinkedIn", value: "https://www.linkedin.com/in/rishi-ventrapragada" },
+  { label: "Gmail", value: "mailto:rishiventrapragada23@gmail.com" },
+];
+---
+
+<div class="contact" data-contact>
+  <div class="body">
+    <p class="label get-in-touch">Get in touch</p>
+    <ul class="links">
+      {
+        contacts.map(({ label, value }) =>
+          isUrl(value) ? (
+            <li>
+              <a class="meta link" href={value} rel="noopener">
+                {label}
+              </a>
+            </li>
+          ) : (
+            <li class="meta pending">
+              {label} &mdash; {value}
+            </li>
+          ),
+        )
+      }
+      <li>
+        <a class="meta link" href="/resume.pdf">Résumé [TODO]</a>
+      </li>
+    </ul>
+  </div>
+
+  <p class="meta copyright">&copy; {year} Rishi</p>
+</div>
+
+<style>
+  /* --pin-inner is the pinned viewport less the nav (set in Footer.astro);
+     the card is exactly that tall so its centre is the viewport's centre. */
+  .contact {
+    position: relative;
+    display: grid;
+    place-content: center;
+    min-height: var(--pin-inner, 100dvh);
+    padding-inline: var(--gutter);
+    text-align: center;
+  }
+
+  .body {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .get-in-touch {
+    margin: 0;
+    color: var(--accent);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .link {
+    color: var(--fg);
+  }
+
+  .link:hover {
+    color: var(--accent);
+  }
+
+  .copyright {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 2rem;
+    margin: 0;
+  }
+</style>
