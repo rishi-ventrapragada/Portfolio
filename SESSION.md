@@ -92,6 +92,155 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-22 — increment 22 (seven-part batch)
+
+### Last milestone completed
+
+**Seven independent visual changes, one commit each, no file shared
+between parts** (A nav bar, B dividers, F skill scatter, C starfield,
+E constellation drift, D topo backdrop, G light theme), plus this docs
+commit. Order was A → B → F → C → E → D → G: F had to settle
+`SkillTree.astro` before C mounted a starfield into it, and G landed last
+so it could validate B's dividers against a real light section.
+
+Excluded by the brief and untouched: the eyebrow words ("Origin story",
+"Also") and the comic-panel layout.
+
+### Decisions worth knowing before you touch this
+
+- **The sprocket divider's holes are *painted*, not punched.** This is
+  the whole reason `Divider.astro` takes `above` / `below` / `stock`
+  rather than being one CSS rule. A hole only reads as a hole while its
+  fill matches the section behind it, so the divider is two 12px halves
+  sharing one film stock, each punching its own side's colour. My first
+  cut defaulted both halves *and* the stock to `--bg` and shipped an
+  invisible solid band — the strip has to be a different surface from
+  the holes, which is what ProjectFrame was doing with `--bg-raised` all
+  along.
+- **Five section `border-top` hairlines were deleted** when the dividers
+  landed. The perforation is the seam now; keeping both read as a
+  doubled rule.
+- **The skill scatter asserts, it does not hope.** `skill-scatter.ts`
+  throws at build time if any two labels — or any label and its root
+  chip — still overlap after relaxation. Two bugs it caught that a
+  screenshot alone would not have: two-item groups placing both leaves
+  dead horizontal *through* the root (fixed with a quarter-turn phase
+  offset for n ≤ 3), and the root needing to be a collision **box**, not
+  a radius, because "Currently learning" is ~190px wide. The root is
+  `white-space: nowrap` for the same reason — the obstacle box is sized
+  from a one-line estimate.
+- **`--on-accent` is not `--bg`, and `--tag-ink` is not `--on-accent`.**
+  The ink that stays legible on a fill flips with the theme, and it
+  flips *differently* for the accent chip than for the comic panels:
+  near-black wins on dark-theme crimson (5.38) and on the light panel
+  fills (5.28), white wins on the darkened light accent (6.02) and on
+  the dark panel fills (4.81). Two separate tokens, both measured.
+- **The panel fills needed a real decision, not a token swap.** Their
+  `color-mix` partner's job is to *darken* the palette word; on a light
+  surface `--bg-raised` is white, so the same expression would have
+  washed all five out to pastel. Light keeps a dark partner (`#2a2b30`)
+  at 72%. Dropping the dark share to 52% also fixed a **pre-existing**
+  AA failure (tag at 3.89 → 4.81) that nobody had measured before.
+- **The topo backdrop's `feColorMatrix` tints to `--fg-muted`.** Left
+  white, the contours measured 3.13:1 behind the contact links — under
+  AA. That was a real failure found by sampling rendered pixels, not a
+  harness artefact, and the fix was the cause (tint the filter output),
+  not the symptom (dim the layer).
+- **The constellation drifts via one transform on the container.** Not
+  per-star, which would desync the stars from their fixed-coordinate
+  lines. Verified rather than argued: 0.01px worst endpoint offset
+  across seven samples of the loop.
+- **Starfield meteors are halved and dimmed under reduced motion, not
+  removed** — reduced-motion is an OS battery default for many mobile
+  visitors, and deleting them would silently take the feature away.
+  Preserved from the original's reasoning.
+- **`[data-hero]`, not `#hero`**: every `[id]` inherits a 5rem
+  `scroll-margin-top` from `global.css`, and nothing links there. The
+  nav's old 1×1 sentinel at a hardcoded `top: 100dvh` is gone; both
+  `.is-scrolled` and `[data-past-hero]` now observe the real box.
+- **`[data-constellation]`** exists because `Starfield.astro` has a
+  `.sky` of its own and one is mounted in that section. Astro scopes the
+  styles but not the class name, so `querySelector('.sky')` was hitting
+  the wrong element — it cost me a debugging cycle.
+- **`theme-light.css` is a separate file for the cascade, not just the
+  cap.** `[data-theme="light"]` is (0,1,0) and `:root[data-accent=…]` is
+  (0,1,1), so the light tokens can only win on source order.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — site map rewritten (light sections, dividers, starfield
+  hosts). **§4.2** — new "tokens that are not surfaces" block.
+  **§5.1** — progress-bar hiding and the real-box observer. **§5.3** —
+  light scope and the `.shell` move. **§5.6** — the scatter replaces the
+  column-fan paragraphs, mobile marked a deliberate scope boundary, the
+  constellation's "no animation" paragraph replaced by the drift.
+  **§5.8** — backdrop and divider pointers. **New §5.12** dividers,
+  **§5.14** starfield, **§5.15** contact backdrop, **§5.16** light
+  sections (§5.13 left reserved). **§10** — new line 21.
+  **README** — three new components, three lib modules, the new
+  stylesheet. **SESSION.md** — this entry.
+
+### Verified by measurement, not eyeballing
+
+`cdp.mjs` + per-part harnesses in the session scratchpad (headless
+Chrome over CDP, `astro preview` over `dist/`, `boot-seen` pre-set).
+Build + `astro check` 0/0/0 before every commit.
+
+- **A**: hidden at scrollY 0–900 with `scaleX(0)`, visible from 901,
+  `scaleX(1.0000)` exactly at the document end, hides again on the way
+  up; nav height and track geometry identical hidden vs shown.
+- **B**: 6 dividers at the 6 expected seams; all six sections compute
+  `border-top-width: 0`; at a simulated dark/light seam the upper half
+  punched `rgb(17,18,20)` and the lower `rgb(244,243,240)` — checked
+  from computed values *before* G existed, then visually after.
+- **F**: 34 leaves / 34 rays at 1280 and 960 — none clipped, none
+  wrapped, **zero label overlaps, zero leaf-on-root collisions**; mobile
+  re-confirmed unchanged at 768 and 375.
+- **C**: 4 instances × 170 nodes = **684 starfield nodes** on a
+  ~1100-node page; every star `rgb(242,242,242)`, zero accent pixels;
+  `contain: strict`, `will-change` on near/mid layers only; seamless
+  loop proven by geometry (layer 1280 / track 2560 / copy offset 1280 /
+  keyframe end 1280, all equal); reduced motion exactly as specified.
+- **E**: 0.01px worst endpoint offset across the loop, no label leaves
+  the box, no overflow, `animation: none` under reduce.
+- **D**: contact links **7.81:1** worst case over the contours (was 3.13
+  before the tint); fully static in both motion branches.
+- **G**: **27 text pairings computed, 0 failing**, both accents; panel
+  tags sampled from rendered pixels in all three grade states — 5.22 /
+  5.22 / 6.77; sprocket holes `rgb(244,243,240)` on white frames; light
+  scope resolves `#c2183a` / `#6d28d9` while the document keeps
+  `#ff3b5c` / `#a78bfa`; 375px both sections light, single column, no
+  overflow, grade cycle still stops under reduce.
+
+### Harness notes
+
+- **Astro scopes styles, not class names.** Two components can both own
+  a `.sky`; scope page-level selectors with a data attribute.
+- `getComputedStyle` returns `color(srgb 0.76 0.55 0.28)` for a
+  `color-mix`, not `rgb()`. A naive `rgb\\(` parser reads those as
+  fractional and reports false contrast failures — five of them, in my
+  case. Sample rendered pixels instead.
+- Lazy images are still blank when `captureBeyondViewport` fires.
+  Scroll the page, `await Promise.all([...document.images].map(i =>
+  i.decode()))`, then capture.
+- `Storage.clearDataForOrigin` did not clear `sessionStorage` for the
+  preview origin, so the boot overlay would not re-render; the built
+  HTML is the authoritative check for markup that only appears once per
+  session.
+
+### Still open
+
+- **Not yet pushed at the time of writing** — see the Live section once
+  this lands, and re-point the alias per the standing constraint.
+- The owner will look at the AboutPanel placeholder fills across all
+  three grade states; that mix partner and share are the one visual
+  judgment call in the batch rather than a measured fact.
+- `public/resume.pdf`, the About panel art and dialogue, the no-JS nav
+  transparency.
+- `@astrojs/react` is named in CLAUDE.md §2 as installed but is not in
+  `package.json` — still unreconciled, unrelated to this batch.
+- PRD §5.13 is deliberately left reserved.
+
 ## 2026-09-22 — increment 21
 
 ### Last milestone completed

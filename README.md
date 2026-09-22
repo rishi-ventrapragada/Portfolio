@@ -37,17 +37,22 @@ src/
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
                               ExperienceClip,
                               Footer, FooterStage, FooterContact,
+                              Divider, Starfield, TopoBackdrop,
                               BootPreloader, BootSquare,
                               AccentToggle (dev only)
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
   lib/is-url.ts               the href guard shared by ProjectLinks and FooterContact
+  lib/skill-scatter.ts        build-time leaf placement + collision assert
+  lib/starfield-data.ts       seeded star layers and meteors
+  lib/constellation-data.ts   the video-editing constellation's geometry
   pages/index.astro           the whole site: one page, anchored sections
   scripts/                    boot-*.ts, footer-scrub.ts, hero-dissolve.ts, nav.ts,
                               experience-timeline.ts, experience-scrub.ts,
                               experience-playhead.ts
   styles/global.css           all design tokens
+  styles/theme-light.css      the section-scoped light theme
 ```
 
 The accent toggle bottom-right is dev-only and disappears from production builds;
