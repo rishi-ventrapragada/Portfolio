@@ -40,9 +40,9 @@ const { lines } = Astro.props;
   }
 
   /* Two parts, and the order is load-bearing (the first shadow paints on
-     top). --halo is a solid --bg outline 3px deep — the letter shifted
-     around two rings, 8 copies at 1.5px and 12 at 3px, no blur — then a
-     blurred falloff. That keeps the contour lines off the ground right at
+     top). --halo (Footer.astro, shared with the © line) is a solid --bg
+     outline 3px deep — the letter shifted around two rings, 8 copies at
+     1.5px and 12 at 3px, no blur — then a blurred falloff. That keeps the contour lines off the ground right at
      each stroke: crimson measured 2.51:1 over a contour with nothing there,
      and still 3.27 with blurred shadows alone, which are only half opaque
      at the letter's edge (PRD §5.8). Under it, a wide faint off-white
@@ -50,13 +50,6 @@ const { lines } = Astro.props;
      accent lines: crimson falls below 4.5:1 once the ground under it lifts
      past about 8%. */
   .line {
-    --halo:
-      1.5px 0 0 var(--bg), 1.1px 1.1px 0 var(--bg), 0 1.5px 0 var(--bg), -1.1px 1.1px 0 var(--bg),
-      -1.5px 0 0 var(--bg), -1.1px -1.1px 0 var(--bg), 0 -1.5px 0 var(--bg), 1.1px -1.1px 0 var(--bg),
-      3px 0 0 var(--bg), 2.6px 1.5px 0 var(--bg), 1.5px 2.6px 0 var(--bg), 0 3px 0 var(--bg),
-      -1.5px 2.6px 0 var(--bg), -2.6px 1.5px 0 var(--bg), -3px 0 0 var(--bg), -2.6px -1.5px 0 var(--bg),
-      -1.5px -2.6px 0 var(--bg), 0 -3px 0 var(--bg), 1.5px -2.6px 0 var(--bg), 2.6px -1.5px 0 var(--bg),
-      0 0 6px var(--bg), 0 0 12px var(--bg);
     margin: 0;
     color: var(--accent);
     text-shadow:

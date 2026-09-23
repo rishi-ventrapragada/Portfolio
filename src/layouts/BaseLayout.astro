@@ -87,6 +87,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
   <body tabindex="-1">
     <BootPreloader />
     <a class="skip-link label" href="#main">Skip to content</a>
+    {/* Without JavaScript nothing ever makes the nav solid, and a
+        transparent bar leaves its white links on the light About and
+        Projects sections at 1.1:1. So without JS the bar is solid
+        everywhere (Nav.astro's own <style> is scoped, hence here). */}
+    <noscript><style>[data-nav] { background-color: var(--bg-raised) !important; }</style></noscript>
     <Nav />
     <main id="main">
       <slot />

@@ -106,6 +106,19 @@ const expandable = !!(summary || stack || links);
     outline-color: color-mix(in srgb, var(--accent) 70%, var(--light-bg));
   }
 
+  /* Planned (Recurzn): only the cover steps back. The shared utility's 0.5
+     opacity on the whole article took the title to 3.90:1 and the frame
+     number to 2.50:1 on the paper (increment 28); dimming the picture alone
+     keeps the "not shipped yet" read while every word stays at the frame's
+     full contrast. The dashed edge still comes from the utility. */
+  .frame.planned {
+    opacity: 1;
+  }
+
+  .frame.planned .cover {
+    opacity: 0.5;
+  }
+
   /* Sprocket strips: whole holes only. `space` lays complete 16px tiles
      across the width and spreads the remainder between them, so the last
      hole is never clipped at the frame's edge at any width. */

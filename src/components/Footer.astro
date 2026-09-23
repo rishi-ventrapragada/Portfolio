@@ -82,8 +82,21 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
   /* --pin-inner: the pinned viewport less the fixed nav, which is opaque
      past the hero. Every stage is exactly this tall, so each settles with
      its content centred in the pin. */
+  /* --halo: text sitting straight on the topographic contours carries a
+     solid 3px --bg outline (20 zero-blur offset copies on two rings, then
+     two blurs), so no contour line ever runs right up to a glyph. Shared by
+     the credit lines (FooterCredits.astro, which explains the numbers) and
+     the © line (FooterContact.astro, increment 28 — it read 3.16:1 where a
+     contour crossed it). */
   .footer {
     --pin-inner: calc(100dvh - var(--nav-height));
+    --halo:
+      1.5px 0 0 var(--bg), 1.1px 1.1px 0 var(--bg), 0 1.5px 0 var(--bg), -1.1px 1.1px 0 var(--bg),
+      -1.5px 0 0 var(--bg), -1.1px -1.1px 0 var(--bg), 0 -1.5px 0 var(--bg), 1.1px -1.1px 0 var(--bg),
+      3px 0 0 var(--bg), 2.6px 1.5px 0 var(--bg), 1.5px 2.6px 0 var(--bg), 0 3px 0 var(--bg),
+      -1.5px 2.6px 0 var(--bg), -2.6px 1.5px 0 var(--bg), -3px 0 0 var(--bg), -2.6px -1.5px 0 var(--bg),
+      -1.5px -2.6px 0 var(--bg), 0 -3px 0 var(--bg), 1.5px -2.6px 0 var(--bg), 2.6px -1.5px 0 var(--bg),
+      0 0 6px var(--bg), 0 0 12px var(--bg);
   }
 
   /* --pin-length is the one number to tune: the scroll distance the track

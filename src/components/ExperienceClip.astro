@@ -77,6 +77,21 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
     }
   }
 
+  /* Planned (Recurzn): the fill steps back and the ink flips, instead of
+     the shared utility's 0.5 opacity on the whole clip — that took the dark
+     ink to 2.87:1 ("Recurzn") and 2.48:1 ("Now"), under AA (increment 28).
+     The fill is exactly what the fade used to composite to (the tone half
+     into --timeline-bg), so the block reads the same; --fg on it is
+     measured in SESSION.md. The dashed edge takes the tone so it shows —
+     in --timeline-bg it was invisible against the lane. Unlayered and
+     scoped, so it outranks the utility. */
+  .clip.planned {
+    opacity: 1;
+    color: var(--fg);
+    background-color: color-mix(in srgb, var(--tone) 50%, var(--timeline-bg));
+    border-color: var(--tone);
+  }
+
   .year {
     flex: none;
     font-size: 0.625rem;

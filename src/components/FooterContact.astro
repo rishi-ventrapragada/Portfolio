@@ -146,10 +146,20 @@ const contacts = [
     }
   }
 
+  /* Straight on the contours like the credits, so it wears the same halo
+     (Footer.astro), plus a finer inner ring at 0.8px and 2.25px: on 11px
+     glyphs the halo's two rings alone left single gap pixels (3.84:1 worst
+     at 320×568). With both: 5.66:1 worst near any glyph, five viewports;
+     3.16:1 with no halo at all (increment 28). */
   .copyright {
     position: absolute;
     inset-inline: 0;
     bottom: 2rem;
     margin: 0;
+    text-shadow:
+      var(--halo),
+      2.25px 0 0 var(--bg), 1.6px 1.6px 0 var(--bg), 0 2.25px 0 var(--bg), -1.6px 1.6px 0 var(--bg),
+      -2.25px 0 0 var(--bg), -1.6px -1.6px 0 var(--bg), 0 -2.25px 0 var(--bg), 1.6px -1.6px 0 var(--bg),
+      0.8px 0 0 var(--bg), -0.8px 0 0 var(--bg), 0 0.8px 0 var(--bg), 0 -0.8px 0 var(--bg);
   }
 </style>
