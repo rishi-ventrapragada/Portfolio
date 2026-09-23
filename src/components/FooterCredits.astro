@@ -25,7 +25,7 @@ const { lines } = Astro.props;
 
 <style>
   /* Increment 25: no panel behind the block — the words sit straight on
-     the topographic backdrop and carry their own glow (.line below). */
+     the backdrop and carry their own glow (.line below). */
   .credits {
     display: grid;
     gap: 0.35em;
@@ -42,8 +42,9 @@ const { lines } = Astro.props;
   /* Two parts, and the order is load-bearing (the first shadow paints on
      top). --halo (Footer.astro, shared with the © line) is a solid --bg
      outline 3px deep — the letter shifted around two rings, 8 copies at
-     1.5px and 12 at 3px, no blur — then a blurred falloff. That keeps the contour lines off the ground right at
-     each stroke: crimson measured 2.51:1 over a contour with nothing there,
+     1.5px and 12 at 3px, no blur — then a blurred falloff. That keeps the
+     backdrop off the ground right at each stroke: crimson measured 2.51:1
+     over a contour (increment 25's backdrop) with nothing there,
      and still 3.27 with blurred shadows alone, which are only half opaque
      at the letter's edge (PRD §5.8). Under it, a wide faint off-white
      bloom is the glow you see. A white glow cannot sit right behind the

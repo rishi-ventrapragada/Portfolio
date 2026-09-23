@@ -15,7 +15,7 @@ import FooterContact from "./FooterContact.astro";
 import FooterCredits from "./FooterCredits.astro";
 import FooterStage from "./FooterStage.astro";
 import LeaderStrip from "./LeaderStrip.astro";
-import TopoBackdrop from "./TopoBackdrop.astro";
+import ProjectorBeam from "./ProjectorBeam.astro";
 
 // The credit, one line per entry, in the order they build up. Plain text —
 // regroup or reword freely; the zones follow the number of lines. The last
@@ -52,9 +52,9 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
         starts instead (the <noscript> rule above). */}
     <span class="anchor" id="contact" data-contact-anchor></span>
     <div class="pin" data-credits-pin>
-      {/* Inside the pin, so the contours stay behind the credits for the
+      {/* Inside the pin, so the beam stays behind the credits for the
           whole scroll rather than travelling with the track. */}
-      <TopoBackdrop />
+      <ProjectorBeam />
 
       {/* Both stages are in the HTML, stacked in one grid cell, so the swap
           is a cross-fade in a box that never moves. The credits are active
@@ -83,12 +83,12 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
   /* --pin-inner: the pinned viewport less the fixed nav, which is opaque
      past the hero. Every stage is exactly this tall, so each settles with
      its content centred in the pin. */
-  /* --halo: text sitting straight on the topographic contours carries a
-     solid 3px --bg outline (20 zero-blur offset copies on two rings, then
-     two blurs), so no contour line ever runs right up to a glyph. Shared by
-     the credit lines (FooterCredits.astro, which explains the numbers) and
-     the © line (FooterContact.astro, increment 28 — it read 3.16:1 where a
-     contour crossed it). */
+  /* --halo: text sitting straight on the backdrop carries a solid 3px
+     --bg outline (20 zero-blur offset copies on two rings, then two blurs),
+     so nothing in the backdrop — the contours until increment 29, the
+     projector beam's light and dust since — ever runs right up to a glyph.
+     Shared by the credit lines (FooterCredits.astro, which explains the
+     numbers) and the © line (FooterContact.astro, increment 28). */
   .footer {
     --pin-inner: calc(100dvh - var(--nav-height));
     --halo:
@@ -135,7 +135,7 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
   }
 
   /* The stages (FooterStage.astro) all take grid-area 1 / 1 here. Lifted
-     above the topographic backdrop, which sits at z-index 0 in the pin. */
+     above the projector beam, which sits at z-index 0 in the pin. */
   .stack {
     position: relative;
     z-index: 1;
