@@ -1,4 +1,12 @@
-@import "tailwindcss";
+/* source(none): Tailwind's automatic detection scanned every file in the
+   repo as plain text — PRD.md, SESSION.md, code comments and the CSS values
+   inside scoped <style> blocks — and generated a utility for every word
+   that happened to name one ("grid", "absolute", "transition": 37 of them,
+   none used; limiting it to the .astro folders still left 34). No
+   component uses a Tailwind utility class today, so nothing is scanned
+   (increment 28). The first component that does must be registered here
+   with `@source "../components/Name.astro";` or its classes will not exist. */
+@import "tailwindcss" source(none);
 
 /* ---------------------------------------------------------------
    Design tokens — single source of truth (PRD 4.2).
@@ -61,8 +69,6 @@
   --font-mono: var(--font-mono-src), ui-monospace, SFMono-Regular, monospace;
 
   /* Type scale (PRD 4.3) */
-  --size-wordmark: clamp(6rem, 22vw, 20rem);
-  --size-h1: clamp(2.5rem, 6vw, 5rem);
   --size-h2: clamp(1.75rem, 3.5vw, 2.75rem);
   --size-label: 0.75rem;
   --size-meta: 0.6875rem;

@@ -1,18 +1,16 @@
 ---
-// Tag pills for a list of strings (PRD §5.3, §5.6). Shared by the tech-stack
-// cards and the project card's stack, so the pill exists in exactly one place.
+// Tag pills for a list of strings (PRD §5.3): the project detail panel's
+// stack. Its own component so the pill exists in exactly one place.
 interface Props {
   items: string[];
-  /** Secondary emphasis, e.g. "currently learning". */
-  muted?: boolean;
   /** Accessible name for the list, e.g. "Stack". */
   label?: string;
 }
 
-const { items, muted = false, label } = Astro.props;
+const { items, label } = Astro.props;
 ---
 
-<ul class="pills" aria-label={label} data-muted={muted ? "" : undefined}>
+<ul class="pills" aria-label={label}>
   {items.map((item) => <li class="pill">{item}</li>)}
 </ul>
 
@@ -39,9 +37,5 @@ const { items, muted = false, label } = Astro.props;
     border: 1px solid var(--line);
     border-radius: 2px;
     white-space: nowrap;
-  }
-
-  .pills[data-muted] .pill {
-    color: var(--fg-muted);
   }
 </style>

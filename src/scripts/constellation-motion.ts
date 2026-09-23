@@ -16,7 +16,10 @@
  * so the build-time solver itself never ships.
  *
  * Moves only while the box is on screen. Reduced motion: never moves; the
- * build-time positions are the rest frame.
+ * build-time positions are the rest frame. The preference is read live, like
+ * skill-drift.ts and magnetic.ts: switching it on mid-turn stops the loop
+ * and puts the figure back at rest, switching it off resumes (increment 28 —
+ * it used to be read once at load).
  */
 
 const TURN_PERIOD = 40; // s, one full sway of the rotation
@@ -26,7 +29,7 @@ const CUT_PAD = 2; // px of clear line around each name
 
 export function initConstellation(box: HTMLElement): void {
   const wide = matchMedia("(min-width: 768px)");
-  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const stars = [...box.querySelectorAll<HTMLElement>(".star")];
   const names = stars.map((s) => s.querySelector<HTMLElement>(".name")!);
   const home = stars.map((s) => [Number(s.dataset.x), Number(s.dataset.y)]);
@@ -79,9 +82,8 @@ export function initConstellation(box: HTMLElement): void {
     cut();
   }).observe(box);
 
-  if (still) return;
-
   let frame = 0;
+  let visible = false;
   let clock = 0; // ms of motion so far; paused while off screen
   let last = 0;
 
@@ -121,14 +123,41 @@ export function initConstellation(box: HTMLElement): void {
     frame = requestAnimationFrame(draw);
   };
 
-  new IntersectionObserver(([entry]) => {
-    if (entry.isIntersecting && !frame) {
+  // The rest frame: every star home, every line on its build-time ends.
+  const rest = () => {
+    home.forEach(([x, y], i) => {
+      offset[i][0] = 0;
+      offset[i][1] = 0;
+      pos[i][0] = x;
+      pos[i][1] = y;
+      stars[i].style.transform = "";
+    });
+    for (const { el, a: i, b: j } of lines) {
+      el.x1.baseVal.value = home[i][0];
+      el.y1.baseVal.value = home[i][1];
+      el.x2.baseVal.value = home[j][0];
+      el.y2.baseVal.value = home[j][1];
+    }
+    if (specks) specks.style.transform = "";
+    cut();
+  };
+
+  const sync = () => {
+    const run = visible && !reduced.matches;
+    if (run && !frame) {
       // Resume where the clock stopped, so re-entering never jumps.
       last = performance.now();
       frame = requestAnimationFrame(draw);
-    } else if (!entry.isIntersecting && frame) {
+    } else if (!run && frame) {
       cancelAnimationFrame(frame);
       frame = 0;
     }
+    if (reduced.matches) rest();
+  };
+
+  new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    sync();
   }).observe(box);
+  reduced.addEventListener("change", sync);
 }

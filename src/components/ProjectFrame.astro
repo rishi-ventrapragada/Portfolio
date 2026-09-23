@@ -28,11 +28,7 @@ const number = `Frame ${String(index + 1).padStart(3, "0")}`;
 const expandable = !!(summary || stack || links);
 ---
 
-<article
-  class:list={["frame", { planned }]}
-  data-status={status}
-  data-expandable={expandable ? "" : undefined}
->
+<article class:list={["frame", { planned }]} data-expandable={expandable ? "" : undefined}>
   <div class="cover">
     {/* The cover is a screenshot, so it sets its own ratio rather than
         being cropped. */}

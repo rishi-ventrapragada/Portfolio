@@ -156,7 +156,10 @@
     }
   }
 
-  /* --- Reduced motion: opacity only, no blur or movement ----------------- */
+  /* --- Reduced motion: opacity only, no blur or movement -----------------
+     Only the scroll-timeline branch needs this. The script fallback never
+     runs under reduce (hero-dissolve.ts starts only without it and stops on
+     the change), so there is no [data-fallback] rule here. */
   @media (prefers-reduced-motion: reduce) {
     @keyframes wordmark-dissolve {
       from {
@@ -165,11 +168,6 @@
       to {
         opacity: 0;
       }
-    }
-
-    .wordmark-wrap[data-fallback="on"] {
-      filter: none;
-      transform: none;
     }
   }
 </style>
