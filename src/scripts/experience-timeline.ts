@@ -5,6 +5,12 @@
 // and the track reverts to the committed clip on leave. The playhead follows
 // whatever the monitor shows. No aria-live: each clip's accessible name and
 // description already carry what the monitor shows.
+//
+// On a narrow screen the lane is wider than the viewport (four clips never
+// shrink below --lane-min), so a commit also pages the timeline sideways to
+// keep the committed clip — and the playhead on it — in view, the way an
+// editor's timeline follows its playhead (increment 28; at 375px KalaCart and
+// Recurzn used to commit off-screen). A hover preview never pages it.
 import { initPlayhead } from "./experience-playhead";
 import { initScrub } from "./experience-scrub";
 
@@ -14,6 +20,8 @@ export function initExperience(root: HTMLElement): void {
   const track = root.querySelector<HTMLElement>("[data-track]");
   if (!track || clips.length === 0) return;
   const movePlayhead = initPlayhead(root);
+  const scroller = root.querySelector<HTMLElement>("[data-timeline]");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 
   // The server marks the first clip pressed, so no-JS and JS agree on load.
   let committed =
@@ -30,6 +38,7 @@ export function initExperience(root: HTMLElement): void {
     committed = id;
     for (const clip of clips) clip.setAttribute("aria-pressed", String(clip.dataset.clip === id));
     show(id);
+    if (scroller) reveal(scroller, clips.find((clip) => clip.dataset.clip === id), reduced.matches);
   };
 
   for (const clip of clips) {
@@ -93,4 +102,20 @@ function initHoverPreview(track: HTMLElement, show: (id: string) => void, commit
     previewing = "";
     show(committed());
   });
+}
+
+// Scrolls the timeline the least distance that brings the clip fully into
+// view, clear of the sticky V1 / A1 track header that covers the lane's
+// left edge. Reads layout once, writes one scroll; a no-op where the lane
+// already fits (768px and up).
+function reveal(scroller: HTMLElement, clip: HTMLElement | undefined, instant: boolean): void {
+  if (!clip || scroller.scrollWidth <= scroller.clientWidth) return;
+  const box = scroller.getBoundingClientRect();
+  const r = clip.getBoundingClientRect();
+  const head = scroller.querySelector<HTMLElement>("[data-track]")?.previousElementSibling?.getBoundingClientRect().width ?? 0;
+  const pad = 4;
+  let left = scroller.scrollLeft;
+  if (r.left < box.left + head + pad) left += r.left - (box.left + head + pad);
+  else if (r.right > box.right - pad) left += r.right - (box.right - pad);
+  if (left !== scroller.scrollLeft) scroller.scrollTo({ left, behavior: instant ? "instant" : "smooth" });
 }
