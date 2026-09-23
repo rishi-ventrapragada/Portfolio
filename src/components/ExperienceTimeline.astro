@@ -13,6 +13,7 @@
 import { getEntry } from "astro:content";
 import ExperienceFrame from "./ExperienceFrame.astro";
 import ExperienceTrack from "./ExperienceTrack.astro";
+import Starfield from "./Starfield.astro";
 
 const kalacart = await getEntry("projects", "kalacart");
 if (!kalacart) throw new Error("projects/kalacart is missing");
@@ -64,7 +65,12 @@ const moments: Moment[] = [
     </style>
   </noscript>
 
+  {/* The fifth Starfield (increment 24), bounded to the heading block only:
+      the monitor and timeline are opaque and fill the pin, so a sky behind
+      the whole track would never show anywhere else. */}
   <div class="shell head">
+    <Starfield />
+
     <p class="label eyebrow">Journey</p>
     <h2 id="experience-heading" class="heading">Experience</h2>
   </div>
@@ -101,8 +107,23 @@ const moments: Moment[] = [
   .experience {
   }
 
+  /* Positioned so the Starfield bounds itself to this block; the content is
+     lifted above it. The block runs down to the monitor's top edge, so the
+     sky has no bare band under it: the heading's gap is padding rather than
+     a margin (which would collapse out of the box), and the track below is
+     pulled up under the last --nav-height, the pin's own transparent top
+     padding. The monitor lands exactly where it did before. */
   .head {
+    position: relative;
     padding-top: var(--rhythm);
+    padding-bottom: calc(2rem + var(--nav-height));
+    margin-bottom: calc(-1 * var(--nav-height));
+  }
+
+  .eyebrow,
+  .heading {
+    position: relative;
+    z-index: 1;
   }
 
   .eyebrow {
@@ -111,7 +132,7 @@ const moments: Moment[] = [
   }
 
   .heading {
-    margin: 0 0 2rem;
+    margin: 0;
     font-size: var(--size-h2);
   }
 
