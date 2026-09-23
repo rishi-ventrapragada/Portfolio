@@ -1,0 +1,103 @@
+---
+// The skills graph, from 960px (PRD §5.6, increment 31): an Obsidian-style
+// map — a centre, eight hubs, every skill a leaf of its hub — drawn as
+// glowing stars on the section's sky. Decorative: aria-hidden, because the
+// same content is the semantic list in SkillsList.astro, which is also the
+// mobile and no-JS layout and the keyboard's route through the graph.
+//
+// Links are one SVG; nodes and labels are HTML (SkillNode.astro), because
+// an opacity animation on an HTML element runs on the compositor while one
+// on an SVG child repaints the whole SVG every frame — so the twinkle costs
+// ~nothing. Positions come from the build (lib/skills-layout.ts): x and y
+// as percentages of the box, all type in px, and the box is never smaller
+// than the layout's reference, so a larger one only spreads nodes apart.
+// scripts/skills-graph.ts springs, pushes and drifts them.
+import { H, links, nodes, W } from "../lib/skills-layout";
+import { toneVar } from "../lib/skills-data";
+import SkillNode from "./SkillNode.astro";
+
+const pct = (x: number) => `${((x / W) * 100).toFixed(3)}%`;
+const pctY = (y: number) => `${((y / H) * 100).toFixed(3)}%`;
+---
+
+<div class="graph" data-skills-graph data-offscreen-pause aria-hidden="true" style={`--ref-h: ${H}px`}>
+  <svg class="links" width="100%" height="100%" focusable="false">
+    {
+      links.map(({ a, b, learning }) => (
+        <line
+          x1={pct(nodes[a].x)}
+          y1={pctY(nodes[a].y)}
+          x2={pct(nodes[b].x)}
+          y2={pctY(nodes[b].y)}
+          data-a={a}
+          data-b={b}
+          data-hub={nodes[b].hub}
+          data-learning={learning ? "" : undefined}
+          style={`--tone: ${toneVar(nodes[b].tone)}`}
+        />
+      ))
+    }
+  </svg>
+
+  {nodes.map((n) => <SkillNode node={n} left={pct(n.x)} top={pctY(n.y)} />)}
+</div>
+
+<style>
+  /* The box every node percentage refers to. Hidden below 960px, where the
+     stacked list is the layout (SkillsList.astro), and without JS.
+     Since review: it breaks out of the section's 1184px shell on wide
+     screens — the viewport less its gutters, up to 1680px, centred — and
+     grows taller with it, from the layout's 720px reference to 840px, so
+     at 1920 the graph spreads across the sky instead of sitting in a
+     column of it. Never smaller than the reference in either axis, which
+     is what keeps the build's overlap and clearance checks true. */
+  .graph {
+    --gw: min(100vw - 2 * var(--gutter), 1680px);
+    position: relative;
+    display: none;
+    width: var(--gw);
+    height: clamp(var(--ref-h), var(--gw) * 0.5, 840px);
+    margin-inline: calc((100% - var(--gw)) / 2);
+  }
+
+  @media (min-width: 960px) {
+    .graph {
+      display: block;
+    }
+  }
+
+  .links {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  /* Thin, soft: each link in its leaf's colour at low strength, the centre
+     spokes in off-white. Currently learning is dashed. */
+  .links line {
+    stroke: var(--tone);
+    stroke-width: 1;
+    stroke-opacity: 0.32;
+    transition: stroke-opacity 200ms ease;
+  }
+
+  .links line[data-learning] {
+    stroke-dasharray: 3 4;
+  }
+
+  /* Hover or focus on a cluster: its links brighten, every other one
+     recedes (scripts/skills-graph.ts sets data-hl and data-lit). */
+  .graph[data-hl] .links line {
+    stroke-opacity: 0.1;
+  }
+
+  .graph[data-hl] .links line[data-lit] {
+    stroke-opacity: 0.8;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .links line {
+      transition: none;
+    }
+  }
+</style>

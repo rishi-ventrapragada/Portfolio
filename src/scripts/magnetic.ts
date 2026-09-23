@@ -8,7 +8,7 @@
  *
  * Gated three ways. `(pointer: fine)` and `pointerType === "mouse"`, so
  * touch and pen never trigger it. And off under `prefers-reduced-motion:
- * reduce`: the card does not go where the pointer goes (the skill-tree drag
+ * reduce`: the card does not go where the pointer goes (the skills-graph drag
  * exception) — it moves a fraction as far, then keeps moving on its own as
  * it springs back. That is motion triggered by interaction (WCAG 2.3.3),
  * and it is decoration. Both queries are re-read live; flipping either one

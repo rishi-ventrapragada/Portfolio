@@ -7,8 +7,7 @@ import EdgeCode from "../components/EdgeCode.astro";
 import ClapperStrip from "../components/ClapperStrip.astro";
 import Hero from "../components/Hero.astro";
 import About from "../components/About.astro";
-import SkillTree from "../components/SkillTree.astro";
-import SkillConstellation from "../components/SkillConstellation.astro";
+import SkillsSection from "../components/SkillsSection.astro";
 import ProjectsSection from "../components/ProjectsSection.astro";
 import ExperienceTimeline from "../components/ExperienceTimeline.astro";
 ---
@@ -21,17 +20,16 @@ import ExperienceTimeline from "../components/ExperienceTimeline.astro";
       side is light (§5.16) so each half punches its own section's surface.
       About→Skills is a strip of film edge code (EdgeCode.astro, increment
       29) and Experience→Projects clapperboard sticks (ClapperStrip.astro,
-      increment 30). Skills→Video editing
-      and Video editing→Experience have none (owner's calls, increments 24
-      and 25). Projects→Contact, the countdown leader, is at the top of
+      increment 30). Skills→Experience has none (owner's call, increment
+      25; since increment 31 Skills is one section, the old Skills→Video
+      editing boundary is gone). Projects→Contact, the countdown leader, is at the top of
       Footer.astro: the footer is rendered by the layout, outside this
       slot. */}
   <Hero />
   <Divider below="var(--light-bg)" stock="var(--light-stock)" />
   <About />
   <EdgeCode />
-  <SkillTree />
-  <SkillConstellation />
+  <SkillsSection />
   <ExperienceTimeline />
   <ClapperStrip />
   <ProjectsSection />

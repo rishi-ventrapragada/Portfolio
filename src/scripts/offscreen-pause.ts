@@ -9,8 +9,8 @@
  *
  * Measured before this: 668–959ms of main-thread work per second parked on
  * Projects or Contact, where nothing on screen moves — the five skies' star
- * twinkles running out of sight. The JS loops (skill-drift.ts,
- * constellation-motion.ts) already stop off-screen on their own observers.
+ * twinkles running out of sight. A JS loop on a marked element listens for
+ * the "offscreenchange" event this dispatches (skills-graph.ts).
  *
  * Without JS or IntersectionObserver nothing is marked and everything runs,
  * which is how it behaved before.
@@ -19,7 +19,13 @@ export function initOffscreenPause(): void {
   if (!("IntersectionObserver" in window)) return;
   const observer = new IntersectionObserver(
     (entries) => {
-      for (const entry of entries) entry.target.toggleAttribute("data-offscreen", !entry.isIntersecting);
+      for (const entry of entries) {
+        const was = entry.target.hasAttribute("data-offscreen");
+        entry.target.toggleAttribute("data-offscreen", !entry.isIntersecting);
+        // A JS loop on a marked element (skills-graph.ts, increment 31)
+        // hears the change and stops or restarts itself.
+        if (was === entry.isIntersecting) entry.target.dispatchEvent(new Event("offscreenchange"));
+      }
     },
     { rootMargin: "100px 0px" },
   );

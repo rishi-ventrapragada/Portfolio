@@ -6,7 +6,7 @@
  * the rest of the site's generated art, so every build is identical.
  */
 
-/** Same PRNG family as starfield-data.ts and skill-scatter.ts. */
+/** Same PRNG family as starfield-data.ts and skills-layout.ts. */
 function mulberry32(a: number): () => number {
   return () => {
     a |= 0;

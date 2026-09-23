@@ -30,7 +30,8 @@
 /* Planned, not shipped: the element steps back and its edge goes dashed
    (PRD §5.3, §5.6, §5.11). Unlayered on purpose: a component keeps its own
    defaults in @layer components so this utility wins border-style and
-   opacity without !important. Used by the skill tree's learning leaves; the
+   opacity without !important. Used by the skills graph's Currently learning nodes and the
+   mobile list's learning chain; the
    Experience clip and the project frame take the dashed edge but override
    the fade, which took their text below AA (increment 28) — they dim only
    what carries no text. */

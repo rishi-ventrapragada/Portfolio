@@ -1,0 +1,95 @@
+---
+// A skills-graph node's name (PRD §5.6, increment 31): mono, in px sizes
+// the build checked (lib/skills-metrics.ts, passed down as custom
+// properties on the node), on the side of its dot the build chose. A soft
+// --bg halo keeps links and stars off the letters with no box behind them.
+// Split from SkillNode.astro for the CLAUDE.md §5 cap.
+import type { Side } from "../lib/skills-metrics";
+
+interface Props {
+  text: string;
+  side: Side;
+}
+
+const { text, side } = Astro.props;
+---
+
+<span class="name" data-side={side}>{text}</span>
+
+<style>
+  /* Labels: mono, a soft --bg halo so links and stars never run through
+     the letters, and no box. Leaves in --fg beside their dot. */
+  .name {
+    position: absolute;
+    top: calc(var(--line) / -2);
+    font-family: var(--font-mono);
+    font-size: var(--size);
+    letter-spacing: var(--track);
+    line-height: var(--line);
+    white-space: nowrap;
+    color: var(--fg);
+    transition: opacity 200ms ease;
+    text-shadow:
+      0 0 2px var(--bg),
+      0 0 3px var(--bg),
+      0 0 6px var(--bg),
+      0 0 10px var(--bg);
+  }
+
+  .name[data-side="start"] {
+    left: calc(var(--r) + var(--gap));
+  }
+
+  .name[data-side="end"] {
+    right: calc(var(--r) + var(--gap));
+  }
+
+  .name[data-side="below"],
+  .name[data-side="above"] {
+    left: 0;
+    transform: translateX(-50%);
+  }
+
+  .name[data-side="below"] {
+    top: calc(var(--r) + var(--gap));
+  }
+
+  .name[data-side="above"] {
+    top: auto;
+    bottom: calc(var(--r) + var(--gap));
+  }
+
+  /* Hubs and the centre: their colour, uppercase, a little heavier; the
+     build puts each label on whichever side its own links leave free. */
+  :global(.node:not([data-kind="leaf"])) .name {
+    font-weight: 500;
+    color: var(--tone);
+  }
+
+  /* A cluster under hover or focus dims everything else, but a label only
+     to 0.72: the least that keeps every colour at AA on --bg (periwinkle
+     and coral hub labels need 0.69; 4.6:1 at 0.72). Currently learning's
+     labels are already at .planned's 0.5, so only its stars dim. */
+  :global(.graph[data-hl] .node:not([data-lit]):not(.planned)) .name {
+    opacity: 0.72;
+  }
+
+  /* Draggable by its name too, where a fine pointer can hold it. */
+  @media (pointer: fine) {
+    .name {
+      pointer-events: auto;
+      cursor: grab;
+      user-select: none;
+    }
+
+    :global(.graph[data-dragging]) .name {
+      cursor: grabbing;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .name {
+      transition: none;
+    }
+  }
+</style>

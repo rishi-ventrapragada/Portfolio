@@ -34,8 +34,8 @@ src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
   components/                 Nav, Hero, Wordmark, HeroCaption, About,
                               AboutComic + AboutPanel (dormant — see SESSION.md),
-                              SkillTree, SkillGroup, SkillChain, SkillConstellation,
-                              ConstellationStar, Pills,
+                              SkillsSection, SkillsGraph, SkillNode, SkillLabel,
+                              SkillsList, SkillChain, Pills,
                               ProjectsSection, ProjectFrame, ProjectDetail,
                               ProjectLinks, PlannedCard, HazardTape,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
@@ -53,16 +53,17 @@ src/
   lib/film-strips.ts          the edge-code and countdown-leader seams' SVG tiles
   lib/is-url.ts               the href guard + new-tab linkAttrs, shared by
                               ProjectLinks, FooterContact and ContactCard
-  lib/skill-scatter.ts        build-time leaf placement + collision assert
+  lib/skills-data.ts          the skills graph's content (hubs, skills, colours, ring)
+  lib/skills-layout.ts        build-time force layout + overlap / crossing / clearance asserts
+  lib/skills-geometry.ts      box overlap, segment-to-box distance, segment crossing
+  lib/skills-metrics.ts       label and node sizes shared by the layout and the renderer
   lib/starfield-data.ts       seeded star layers (as box-shadow lists) and meteors
-  lib/constellation-data.ts   the video-editing constellation's geometry
-  lib/constellation-labels.ts build-time name placement (min line crossings, asserted bounds)
   pages/index.astro           the whole site: one page, anchored sections
   scripts/                    boot-*.ts, footer-scrub.ts, hero-dissolve.ts, nav.ts,
                               experience-timeline.ts, experience-scrub.ts,
                               experience-playhead.ts, about-reveal.ts,
-                              skill-drift.ts, skill-physics.ts, skill-drag.ts,
-                              constellation-motion.ts, engage.ts, magnetic.ts,
+                              skills-graph.ts, skills-sim.ts, skills-keys.ts,
+                              engage.ts, magnetic.ts,
                               offscreen-pause.ts
   styles/global.css           all design tokens and base element styles
   styles/utilities.css        the shared .label / .meta / .shell / .planned utilities

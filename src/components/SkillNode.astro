@@ -1,0 +1,147 @@
+---
+// One node of the skills graph (PRD §5.6, increment 31): a glowing star —
+// a soft radial glow that twinkles, a bright core — and its name. A zero-
+// size box at the node's point; everything is placed around it, so the
+// script moves a node with one transform. Sizes are the build's
+// (lib/skills-metrics.ts), passed in as custom properties, so the label
+// drawn here is the box the layout checked.
+import type { GraphNode } from "../lib/skills-layout";
+import { nodeStyle } from "../lib/skills-metrics";
+import SkillLabel from "./SkillLabel.astro";
+
+interface Props {
+  node: GraphNode;
+  /** x and y as percentages of the graph box ("41.2%"); data-x / data-y
+   * carry the numbers for the script's rest points. */
+  left: string;
+  top: string;
+}
+
+const { node: n, left, top } = Astro.props;
+---
+
+<div
+  class:list={["node", { planned: n.learning }]}
+  data-node={n.id}
+  data-kind={n.kind}
+  data-hub={n.hub}
+  data-x={left.slice(0, -1)}
+  data-y={top.slice(0, -1)}
+  style={nodeStyle(n, left, top)}
+>
+  <span class="star"><span class="glow"></span><span class="core"></span></span>
+  <span class="ring"></span>
+  <SkillLabel text={n.kind === "leaf" ? n.name : n.name.toUpperCase()} side={n.side} />
+</div>
+
+<style>
+  .node {
+    --glow: 14px;
+    --core: 2.5px;
+    position: absolute;
+    z-index: 1;
+    width: 0;
+    height: 0;
+  }
+
+  /* Hubs are larger and brighter than leaves; the centre larger still. */
+  .node[data-kind="hub"] {
+    --glow: 28px;
+    --core: 4.5px;
+  }
+
+  .node[data-kind="centre"] {
+    --glow: 40px;
+    --core: 6px;
+  }
+
+  .star {
+    transition: opacity 200ms ease;
+  }
+
+  .glow,
+  .core,
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .glow {
+    inset: calc(-1 * var(--glow));
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--tone) 60%, transparent) 0,
+      color-mix(in srgb, var(--tone) 18%, transparent) 32%,
+      transparent 70%
+    );
+    animation: twinkle var(--dur) ease-in-out var(--delay) infinite;
+  }
+
+  .node[data-kind="leaf"] .glow {
+    opacity: 0.75;
+  }
+
+  @keyframes twinkle {
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  .core {
+    inset: calc(-1 * var(--core));
+    background-color: var(--tone);
+    box-shadow: 0 0 calc(var(--core) * 1.5) var(--tone);
+  }
+
+  /* Currently learning: a hollow dashed core, and .planned's dimming. */
+  .planned .core {
+    inset: calc(-1 * var(--core) - 1.5px);
+    background: none;
+    border: 1.5px dashed var(--tone);
+    box-shadow: none;
+  }
+
+  /* The keyboard's visible focus, drawn on the graph because the focused
+     element itself is the visually hidden list item (skills-keys.ts). */
+  .ring {
+    inset: calc(-1 * var(--r) - 6px);
+    border: 2px solid var(--accent);
+    opacity: 0;
+  }
+
+  .node[data-focus] .ring {
+    opacity: 1;
+  }
+
+  /* A cluster under hover or focus: everything else recedes — the stars
+     to a quarter here, the labels only to 0.72 (SkillLabel.astro). */
+  :global(.graph[data-hl]) .node:not([data-lit]) .star {
+    opacity: 0.25;
+  }
+
+
+  /* Draggable where a fine pointer can hold it (scripts/skills-graph.ts).
+     Its own layer there, so moving it is a compositor-only change rather
+     than a repaint of its label and halo every frame. */
+  @media (pointer: fine) {
+    .node {
+      will-change: transform;
+    }
+
+    .core {
+      pointer-events: auto;
+      cursor: grab;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .star {
+      transition: none;
+    }
+
+    .glow {
+      animation: none;
+    }
+  }
+</style>

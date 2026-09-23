@@ -6,7 +6,7 @@
  * sky and a diff of the output is stable; nothing is randomised at runtime.
  */
 
-/** Same PRNG family as boot-fill.ts and skill-scatter.ts. */
+/** Same PRNG family as boot-fill.ts and skills-layout.ts. */
 function mulberry32(a: number): () => number {
   return () => {
     a |= 0;

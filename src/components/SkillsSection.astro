@@ -1,0 +1,66 @@
+---
+// Skills (PRD §5.6, increment 31): one section, one graph. Replaces the
+// skill tree and the video-editing constellation — two sections in two
+// visual languages — with a single Obsidian-style map of every skill, on
+// the section's sky. From 960px the graph (SkillsGraph.astro) is what you
+// see and the list (SkillsList.astro) is what a screen reader and the
+// keyboard use; below 960px, and without JavaScript, the list is the
+// layout. Content is the owner's, verbatim (lib/skills-data.ts).
+import SkillsGraph from "./SkillsGraph.astro";
+import SkillsList from "./SkillsList.astro";
+import Starfield from "./Starfield.astro";
+---
+
+<section class="skills shell" id="skills" aria-labelledby="skills-heading" data-skills>
+  {/* Without JS nothing moves the graph or routes the keyboard through it,
+      so the stacked list is the layout at every width. */}
+  <noscript>
+    <style>
+      [data-skills-graph] { display: none !important; }
+      [data-skills-list] { position: static !important; width: auto !important; height: auto !important; overflow: visible !important; clip-path: none !important; white-space: normal !important; }
+    </style>
+  </noscript>
+
+  <Starfield variant={1} />
+
+  <p class="label eyebrow">Toolkit</p>
+  <h2 id="skills-heading" class="heading">Skills</h2>
+
+  <div class="body">
+    <SkillsGraph />
+    <SkillsList />
+  </div>
+</section>
+
+<script>
+  import { initSkillsGraph } from "../scripts/skills-graph";
+
+  const root = document.querySelector<HTMLElement>("[data-skills]");
+  if (root) initSkillsGraph(root);
+</script>
+
+<style>
+  /* Positioned so the Starfield bounds itself to this section, and the
+     content lifted above it. */
+  .skills {
+    position: relative;
+    padding-block: var(--rhythm);
+  }
+
+  .eyebrow,
+  .heading,
+  .body {
+    position: relative;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: var(--size-h2);
+  }
+</style>

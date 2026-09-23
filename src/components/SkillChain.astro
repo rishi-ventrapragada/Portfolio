@@ -1,11 +1,9 @@
 ---
-// The leaves of one skill-tree category below 960px (PRD §5.6): a wrapping
-// chain hung from a left spine, every leaf ticked to the spine or to the leaf
-// before it, so nothing ever shrinks. Increment 19's layout, unchanged.
-//
-// Desktop is a different layout entirely — the free-scatter mind map in
-// SkillGroup.astro (increment 22) — which hides this list from 960px. The
-// column grid this file used to carry went with the fan it belonged to.
+// The skills of one hub below 960px (PRD §5.6): a wrapping chain hung from a
+// left spine, every skill ticked to the spine or to the one before it, so
+// nothing ever shrinks. Increment 19's layout, unchanged in increment 31,
+// when it became one hub's part of the skills list (SkillsList.astro) —
+// the mobile and no-JS layout, and the graph's accessible content.
 //
 // Leaves are static text: there is no per-skill detail to reveal
 // (inventing one is CLAUDE.md §7), so a list reads faster than a widget
@@ -14,13 +12,22 @@ interface Props {
   items: string[];
   /** Currently learning: the shared `.planned` treatment, dashed lines. */
   learning?: boolean;
+  /** Graph node id of the first item (increment 31): each item carries
+   * data-node so the keyboard's focus can light its star. */
+  start?: number;
 }
 
-const { items, learning = false } = Astro.props;
+const { items, learning = false, start } = Astro.props;
 ---
 
 <ul class="chain" data-planned={learning ? "" : undefined}>
-  {items.map((item) => <li class:list={["node", { planned: learning }]}>{item}</li>)}
+  {
+    items.map((item, i) => (
+      <li class:list={["node", { planned: learning }]} data-node={start === undefined ? undefined : start + i}>
+        {item}
+      </li>
+    ))
+  }
 </ul>
 
 <style>

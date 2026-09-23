@@ -5,8 +5,8 @@
  * into it. A real movement, not pointerenter: scrolling the page under a
  * resting cursor fires enter (and a synthetic zero-movement move) on
  * whatever passes beneath it, the experience-timeline.ts lesson.
- * Used by skill-drift.ts and constellation-motion.ts (increment 29): their
- * autonomous motion waits for this.
+ * Used by skills-graph.ts (increment 31; the skill tree's and the
+ * constellation's loops before it, increment 29): its drift waits for this.
  */
 export function onEngage(section: HTMLElement, go: () => void): void {
   const ctrl = new AbortController();

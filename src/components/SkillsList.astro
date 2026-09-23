@@ -1,0 +1,87 @@
+---
+// The skills as a real list (PRD §5.6, increment 31): each hub a heading,
+// its skills beneath on the increment-19 spine (SkillChain.astro). Three
+// jobs, one markup:
+//   - below 960px it is the layout (the graph is hidden there);
+//   - from 960px it is visually hidden — the graph is aria-hidden, so this
+//     is what a screen reader reads — and it is the keyboard's route
+//     through the graph: scripts/skills-keys.ts makes it one Tab stop with
+//     arrow-key focus, each focused item lighting its star;
+//   - without JS it is shown at every width (SkillsSection.astro).
+// Every element carries its graph node's id (data-node). The centre's own
+// name, "Skills", is the first stop but visually hidden everywhere: the
+// section heading already says it.
+import { nodes } from "../lib/skills-layout";
+import { hubs } from "../lib/skills-data";
+import SkillChain from "./SkillChain.astro";
+
+const hubId = (h: number) => nodes.find((n) => n.kind === "hub" && n.hub === h)!.id;
+---
+
+<div class="list" data-skills-list>
+  <p class="centre" data-node="0">Skills</p>
+  <ul class="hubs">
+    {
+      hubs.map((hub, h) => (
+        <li class="group" data-planned={hub.learning ? "" : undefined}>
+          <h3 class="label root" data-node={hubId(h)}>
+            {hub.name}
+          </h3>
+          <SkillChain items={hub.items} learning={hub.learning} start={hubId(h) + 1} />
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .hubs {
+    display: grid;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The increment-19 root chip: solid accent, dark ink, uppercase mono,
+     sitting over its chain's spine. */
+  .root {
+    display: inline-block;
+    margin: 0 0 0 1rem;
+    padding: 0.625rem 1rem;
+    color: var(--on-accent);
+    background-color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+  }
+
+  /* Currently learning: outlined, dashed. */
+  .group[data-planned] .root {
+    color: var(--accent);
+    background-color: var(--bg);
+    border-style: dashed;
+  }
+
+  /* Visually hidden — still read, still focusable: the centre's name
+     always, the whole list from 960px, where the graph shows it (the
+     section's <noscript> rule reverses both for no-JS visitors). */
+  .centre {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 960px) {
+    .list {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+</style>
