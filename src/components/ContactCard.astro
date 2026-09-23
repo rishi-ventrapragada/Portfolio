@@ -115,17 +115,20 @@ const address = href
   .label-text {
     font-family: var(--font-display);
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.2;
     color: var(--heading);
   }
 
   /* Long addresses (the LinkedIn path) wrap at any character rather than
-     widen the card past a phone's width. */
+     widen the card past a phone's width. 0.02em, not 0.04: at 0.04 the
+     LinkedIn path overran its 1280px card by about a pixel and wrapped,
+     making that card 97px to the others' 80 (increment 28). It now fits on
+     one line wherever the three cards reach full width (1120px up). */
   .address {
     overflow-wrap: anywhere;
     text-transform: none;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
   }
 
   @media (max-width: 479.98px) {

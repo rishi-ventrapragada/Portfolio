@@ -139,23 +139,28 @@ const canvasH = box.h + 16;
       list-style: none;
     }
 
-    /* A leaf is a label centred on its own point, over the lines. */
-    .leaf {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      z-index: 1;
-      padding: 0.5rem 0.625rem;
-      font-family: var(--font-mono);
-      font-size: 0.875rem;
-      letter-spacing: 0.04em;
-      line-height: 1.2;
-      white-space: nowrap;
-      color: var(--fg);
-      background-color: var(--bg-raised);
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
+    /* A leaf is a label centred on its own point, over the lines. In
+       @layer components, like SkillChain's nodes, so the shared unlayered
+       `.planned` utility wins border-style: unlayered, this scoped rule
+       outranked it and the learning leaves stayed solid (increment 28). */
+    @layer components {
+      .leaf {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 1;
+        padding: 0.5rem 0.625rem;
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+        white-space: nowrap;
+        color: var(--fg);
+        background-color: var(--bg-raised);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
+      }
     }
 
     /* Draggable where a fine pointer can hold it (scripts/skill-drag.ts). */

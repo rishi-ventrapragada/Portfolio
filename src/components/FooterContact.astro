@@ -80,13 +80,13 @@ const contacts = [
   }
 
   /* h2: the footer is its own landmark with no heading of its own; the
-     credits above are decorative text, so this is the section's title. */
+     credits above are decorative text, so this is the section's title.
+     Sentence case like every other section heading (increment 28 — it was
+     the only uppercase one), so it keeps the h2 tracking too. */
   .get-in-touch {
     margin: 0;
     font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 3.5rem);
-    letter-spacing: 0.01em;
-    text-transform: uppercase;
     color: var(--heading);
     text-shadow: 0 0 0.5rem var(--bg);
   }
@@ -107,6 +107,13 @@ const contacts = [
     .cards {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+  }
+
+  /* Between 960 and 1120px an address can still wrap in its narrower card;
+     every card in the row then takes the tallest one's height rather than
+     one card standing out. */
+  .cards > li {
+    display: grid;
   }
 
   /* Phone: tighter spacing so the whole screen clears the © line pinned to
