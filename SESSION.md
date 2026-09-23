@@ -104,6 +104,105 @@ placeholders, which CLAUDE.md §7 means for the owner, not for visitors.
 `About.astro` in place of the `.bio` block — one import and one line.
 Don't delete the dormant files as dead code.
 
+## 2026-09-23 — increment 31 (one skills graph)
+
+### Last milestone completed
+
+`fd07437` **skills** — the skill tree and the video-editing constellation
+are one section: an Obsidian-style graph (a centre, eight hubs, 43 skills)
+from 960px, a stacked list below it and without JS. Two review rounds with
+the owner before the commit (spacing, link crossings, width, hover dim,
+then content). Built clean, pushed, aliased
+(`rishi-ventrapragada-pg4tw8yrc-rishiventra.vercel.app`) and re-measured
+live; live matched local on every check below.
+
+### Decisions worth knowing before you touch this
+
+- **Content is the owner's revised list** (`lib/skills-data.ts`, PRD §5.6
+  table). `hubs` is the owner's order (list, keyboard, screen readers);
+  `ring` is only where each hub sits in the graph. Don't conflate them.
+- **The layout is computed at build time and asserted.** `skills-layout.ts`
+  throws — failing the build — on label boxes closer than 12px (24px across
+  clusters), any two links crossing, or any link within 12px of a label or
+  dot it doesn't end at. **Changing a skill can fail the build**: that is the
+  point. If it does, rebalance `ring` first (this increment's fixes were all
+  ring moves: big clusters on diagonals, Tools/Cloud opposite on the side
+  axes). Tuning harness: `tune.sh` + `preview.mjs` in this session's
+  scratchpad (a soft-fail copy that prints problems and draws the boxes).
+- **Percent positions, never-smaller box.** x and y are % of the graph box,
+  type is px, and the box is never smaller than the 864 × 720 reference —
+  that is what makes the build-time checks hold at every width. Don't give
+  the box a smaller height or width than `--ref-h` / 864px.
+- **HTML nodes, SVG links, on purpose.** Opacity animations on SVG children
+  repaint the SVG every frame; on HTML they're composited. Keep twinkle on
+  HTML.
+- **Drift runs on a 125ms timer and is placed, not simulated.** Waiting
+  through skipped rAFs cost ~200 ms/s (every requested frame is a full
+  main-thread frame). Links couple *deviations from drift*, or pure drift
+  never settles and the loop falls back to 60fps.
+- **The hovered node is never pushed** (else it runs from the cursor and
+  can't be hovered). Hit test: its label, or its dot within 26px.
+- **Hover dim: labels 0.72, stars 0.25.** 0.72 is the floor for AA —
+  periwinkle and coral hub labels need 0.69.
+- **Reduced motion keeps drag** (direct manipulation); release snaps home.
+- `offscreen-pause.ts` now dispatches `offscreenchange` on marked elements.
+- `SkillChain.astro` is kept (owner's call): it is the list's spine.
+  Starfield variant 2 (Video editing's) is unused now; left in Starfield.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD** §3 (site map row; seams sentence), §5.6 (Skills rewritten in full;
+  the increment-29 drift note for the old sections removed), §5.14 (mount
+  list), §10 (increments 30 and 31 — **increment 30 had missed its §10
+  entry; added here**).
+- **README** — components, lib and scripts lists.
+- CLAUDE.md, ASSETS.md not touched. `AGENTS.md` (untracked) and
+  `Nav.astro` (line endings only) still left alone, unstaged.
+
+### Verified by measurement (local, then live)
+
+- Rendered page, 960 / 1280 / 1920 (box 864×720 / 1184×720 / 1680×840):
+  **0 label overlaps, 0 link crossings, 0 links within 12px of an unrelated
+  label or dot**; min label gap 14.8 / 14.8 / 20px; min across clusters
+  26.8 / 27 / 88.5px; min link clearance 14.1 / 21.6 / 26.1px.
+- Content: graph leaves = list = the owner's 43 names; list order =
+  Languages, Frameworks, AI, Tools, Platforms, Cloud, Currently learning,
+  Video editing.
+- Hover: a cluster lights (9 nodes / 9 links for Languages); worst dimmed
+  label 4.88:1. Contrast sweep: 0 failures (1280 / 375, top / end).
+- Drag: hub follows exactly, its leaf ~1/3 as far; after release its offset
+  is inside the drift's ±4px. Reduced motion: cluster still, snap home.
+- Keyboard: one Tab stop, arrows through every node with the ring on it,
+  End → Color Grading. No-JS: graph hidden, 43 skills in the list.
+- CPU (ms/s): before interaction 4 (old sections 3 / 1), drifting 36–48
+  (old 225 / 265), off-screen 0, reduced motion 1. rAF 7/s drifting, 0
+  off-screen.
+- JS: skills 2,606 B gz (old 3,120); page ≈ 7.1 KB of 40. Every file ≤ 200
+  lines — **`skills-layout.ts` is at 199**: split before adding to it.
+
+### Harness notes
+
+- `skills31.mjs` (overlaps, crossings, clearance from rendered rects;
+  content; hover dim), `interact31.mjs` (push / drag / release / keys /
+  off-screen / no-JS), `cpu31.mjs` (ms/s, `REDUCE=1`), `cpuexp*.mjs` (what a
+  frame costs). `LIVE=<url>` redirects all of them.
+- The first fetch after `vercel alias set` returned the previous build's
+  HTML twice this session; re-fetch before concluding the deploy failed.
+- Python heredocs with long prose broke bash quoting; write the script to a
+  file and run it.
+
+### Still open
+
+- The cursor push is hard to see while drift runs (both ~4px); owner to
+  judge by hand.
+- Carried over: résumé PDF, Google brand terms, 320px nav, hero on short
+  landscape, contact cards at 960–1119px, the credits scrim over the beam,
+  the tape over the slate's stripes.
+
+### Next milestone planned
+
+None queued. Waiting on the owner.
+
 ## 2026-09-23 — increment 30 (ten-part batch)
 
 ### Last milestone completed
