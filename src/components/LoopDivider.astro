@@ -1,7 +1,8 @@
 ---
 // A drifting pattern seam between two sections (PRD §5.12, increment 25):
 // a checkered finish-line flag, clapperboard stripes with an accent
-// pinstripe, or a barcode. Each loops right to left forever, in CSS only.
+// pinstripe, or (since increment 29) an SVG film strip slotted in by its
+// own component — EdgeCode.astro. Each loops right to left forever.
 //
 // The loop is Starfield.astro's: a track twice the width of one copy of the
 // pattern, translated -50%, so the second copy lands exactly where the first
@@ -12,18 +13,21 @@
 // whole number of tiles and the wrap cannot show.
 //
 // The sprocket Divider.astro still owns Hero/About; this owns the rest.
-import { barcode } from "../lib/barcode-data";
-
 interface Props {
-  variant: "checker" | "clapper" | "barcode";
+  variant: "checker" | "clapper" | "strip";
+  /** "strip" only: the slotted SVG's tile width and height, px. */
+  tile?: number;
+  height?: number;
 }
 
-const { variant } = Astro.props;
-const style = variant === "barcode" ? `--code: ${barcode.gradient}; --tile-w: ${barcode.width}px` : undefined;
+const { variant, tile, height } = Astro.props;
+const style = variant === "strip" ? `--tile-w: ${tile}px; --h: ${height}px` : undefined;
 ---
 
+{/* A "strip" draws its tile as SVG (EdgeCode.astro), slotted into the
+    track: the loop mechanics below are the same. */}
 <div class="loop" data-variant={variant} data-offscreen-pause aria-hidden="true" style={style}>
-  <div class="track"></div>
+  <div class="track"><slot /></div>
 </div>
 
 <style>
@@ -106,21 +110,11 @@ const style = variant === "barcode" ? `--code: ${barcode.gradient}; --tile-w: ${
     );
   }
 
-  /* --- Barcode -------------------------------------------------------------
-     Black bars on off-white, never the accent. The tile comes from
-     lib/barcode-data.ts; the bars stop 8px short of each edge, as on a
-     label. 64px since increment 26, twice its first scale. */
-  [data-variant="barcode"] {
-    --h: 64px;
-    --tile-h: calc(100% - 16px);
+  /* --- SVG strips (increment 29) -------------------------------------------
+     The slotted SVG fills the track and repeats its tile with a <pattern>;
+     its own component owns the drawing and the colours. */
+  [data-variant="strip"] {
     --loop: 48s;
-    --bar: var(--bg);
-  }
-
-  [data-variant="barcode"] .track {
-    background-color: var(--heading);
-    background-image: var(--code);
-    background-position: 0 8px;
   }
 
   /* Decorative, autonomous drift: frozen at its first frame, the Starfield

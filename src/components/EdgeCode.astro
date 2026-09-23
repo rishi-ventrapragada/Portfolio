@@ -1,0 +1,47 @@
+---
+// The About/Skills seam since increment 29 (PRD §5.12): the edge of a strip
+// of film stock, with the markings real stock carries — a machine-readable
+// code and a printed key number once per foot, counting up, and small marks
+// at the frame lines. Replaces the plain barcode. Drawn as one SVG tile
+// (lib/film-strips.ts) repeated by a <pattern> inside LoopDivider's drifting
+// track, so the numbers are real type in --font-mono, not an image.
+import { edgeCode } from "../lib/film-strips";
+import LoopDivider from "./LoopDivider.astro";
+
+const e = edgeCode();
+---
+
+<LoopDivider variant="strip" tile={e.tile} height={e.H}>
+  <svg class="strip" width="100%" height="100%" focusable="false">
+    <defs>
+      <pattern id="edge-code" width={e.tile} height={e.H} patternUnits="userSpaceOnUse">
+        <rect class="stock" width={e.tile} height={e.H} />
+        {e.ink.map((r) => <rect class="ink" x={r.x} y={r.y} width={r.w} height={r.h} />)}
+        {e.keys.map((k) => <text class="key" x={k.x} y={k.y}>{k.text}</text>)}
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#edge-code)" />
+  </svg>
+</LoopDivider>
+
+<style>
+  .strip {
+    display: block;
+  }
+
+  /* Dark stock, printing in the wordmark's off-white — never the accent. */
+  .stock {
+    fill: var(--bg);
+  }
+
+  .ink {
+    fill: var(--heading);
+  }
+
+  .key {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    fill: var(--heading);
+  }
+</style>

@@ -3,6 +3,7 @@
 // links to them.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
+import EdgeCode from "../components/EdgeCode.astro";
 import LoopDivider from "../components/LoopDivider.astro";
 import Hero from "../components/Hero.astro";
 import About from "../components/About.astro";
@@ -18,8 +19,8 @@ import ExperienceTimeline from "../components/ExperienceTimeline.astro";
 >
   {/* Seams (PRD §5.12). Hero→About keeps the film perforation, told which
       side is light (§5.16) so each half punches its own section's surface.
-      About→Skills is a drifting barcode and Experience→Projects a
-      clapperboard (LoopDivider.astro, increment 25). Skills→Video editing
+      About→Skills is a strip of film edge code (EdgeCode.astro, increment
+      29) and Experience→Projects a clapperboard (LoopDivider.astro). Skills→Video editing
       and Video editing→Experience have none (owner's calls, increments 24
       and 25). Projects→Contact, the checkered flag, is at the top of
       Footer.astro: the footer is rendered by the layout, outside this
@@ -27,7 +28,7 @@ import ExperienceTimeline from "../components/ExperienceTimeline.astro";
   <Hero />
   <Divider below="var(--light-bg)" stock="var(--light-stock)" />
   <About />
-  <LoopDivider variant="barcode" />
+  <EdgeCode />
   <SkillTree />
   <SkillConstellation />
   <ExperienceTimeline />
