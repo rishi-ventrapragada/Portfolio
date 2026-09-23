@@ -92,6 +92,122 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+### About is a TEMPORARY content swap (increment 29) — not a design decision
+
+The live About section shows the owner's approved bio as plain text. The
+comic page it replaced is **kept intact and dormant**: `AboutComic.astro`
+(grid, colour grade, reveal), `AboutPanel.astro` and
+`scripts/about-reveal.ts` are untouched and simply not imported. It came
+off the page only because its art and dialogue are still `[TODO]`
+placeholders, which CLAUDE.md §7 means for the owner, not for visitors.
+**When real panel art and captions exist**, render `<AboutComic />` in
+`About.astro` in place of the `.bio` block — one import and one line.
+Don't delete the dormant files as dead code.
+
+## 2026-09-23 — increment 29 (audit Bucket 2: design and content)
+
+### Last milestone completed
+
+All 12 items, in 13 commits on `main` (`60c65cd`..`58aba5c`) plus this
+handoff. Each built clean, then pushed, aliased
+(`rishi-ventrapragada-iussy272v-rishiventra.vercel.app`) and re-measured
+live; live matched local everywhere.
+
+| Commit | Item |
+| --- | --- |
+| `60c65cd` about | 1 — bio stand-in, comic dormant (see Standing constraints) |
+| `f5c9a92` hero | 2 — "CSE · Data Science · VJIT" caption |
+| `61fe483` boot | 3 — 2s dwell, 4s grace cap |
+| `c0ac431` projects | 4 — KalaCart's detail shown, no hover |
+| `59136d6` accent | 6 — crimson only; violet + toggle removed |
+| `a2bb4cb` starfield | 11 — mirrored, phase-shifted sky per section |
+| `0c85096` motion | 12 — drift waits for a first interaction |
+| `b8baf64` projects | 5 — slate for the planned frame (owner's pick) |
+| `9549d2e` dividers | 8 — film edge code (owner's pick) |
+| `72381cd` dividers | 9 — countdown leader (owner's pick) |
+| `689de08` contact | 10 — projector beam (owner's pick) |
+| `58aba5c` docs | PRD, README, ASSETS |
+
+Item 7 (clapper) was kept as is. Owner's picks from the screenshot review:
+slate over clear leader; inline bars over dots + perforations; countdown
+over tail leader; beam over denoised contours.
+
+### Decisions worth knowing before you touch this
+
+- **Violet is removed, not dormant.** There is no `data-accent`, no toggle
+  and no localStorage key. Every "both accents" pairing was re-measured
+  under crimson and passes (`accent.mjs`, 13 pairings).
+- **Caption placement** (`HeroCaption.astro`): on the letters' right edge,
+  under them from 1024px and above them below that. Under the letters the
+  head covered 20–62% of it. Short landscape (≤500px tall): under the
+  letters on the left; still 42% covered at 844×390 — accepted.
+- **Open detail rule**: `ProjectsSection.astro` shows the detail in place
+  when there is exactly **one** non-planned project. Add a second real
+  project and the hover expand comes back on its own.
+- **Sky variants** mirror one shared star set (`variant` 0–3). Hero and boot
+  must stay variant 0; the hero sky is byte-identical to increment 28's.
+- **Drift gate** (`scripts/engage.ts`): a mouse *move* with non-zero
+  movement, a `pointerup`, or `focusin`. **Not** `pointerenter`: scrolling
+  under a resting cursor fired it and started the constellation unasked.
+- **Film strips** are an SVG `<pattern>` slotted into `LoopDivider`
+  (`variant="strip"`), with tiles from `lib/film-strips.ts`.
+  `barcode-data.ts`, the checker CSS and `TopoBackdrop.astro` are deleted.
+- **Beam dust** rises exactly 240px per loop (LCM of its 60/80/120px
+  periods). Change a period and the wrap will show.
+- **Boot at 2s**: each step's slot is ~83ms, so a slow load-time frame can
+  carry two steps at once (15–25 of 25 values seen). Honesty is unaffected.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **CLAUDE.md §3** — the accent line now says crimson, fixed, no switch;
+  new accent elements must pass in the dark root and the light scope.
+- **PRD** §3, §4.2, §5.2, §5.3, §5.6, §5.9 (removed), §5.10, §5.12,
+  §5.14, §5.15 (rewritten), §5.16, §8, §10, §11 (accent decision
+  resolved, removed).
+- **README** (components, lib, scripts, accent) and **ASSETS.md** (comic
+  dormant; `recurzn-cover.png` now used only for its aspect ratio).
+
+### Verified by measurement (local, then live)
+
+- About: bio verbatim; no `PANEL` text on the page. **The résumé card's
+  `[TODO]` is the one placeholder still visible** (the PDF is pending).
+- Caption: 0% covered at 11 of 12 viewports; hero overlap unchanged at
+  25–27% / 56–57%.
+- Boot (live): instant 2.47s, throttled 3.09s, stalled → grace cap at 4.42s
+  showing 96%. 0 never-ahead violations, no 100% before `load`.
+- KalaCart detail visible at 1280 and 375 with no hover, 18.93:1; Recurzn
+  has no detail and no focus stops. Slate text 6.44 / 17.02.
+- Contrast sweep, crimson: 0 failures at 1280 and 375.
+- Seams: all three strips' frame 0 vs −50% byte-identical at 1280, 1000
+  and 375; reduced motion `none`; no overflow.
+- Credits over the beam, dust frozen or paused at 7/19/33s: crimson ≥5.06,
+  name ≥14.56, © ≥6.72, zero pixels under 4.5. (Measured with the dust
+  running, a moving mote enters the glyph mask and fakes 1.5:1 — freeze it
+  first.)
+- CPU parked, every section: ≤6 ms/s before interaction (the increment-27
+  audit had up to 939). Drift after a hover or tap: 220–300 ms/s.
+- Page: 143 KB HTML (20.4 KB gz), 905 DOM nodes, client JS 6.7 KB gz.
+
+### Harness notes
+
+- Scratchpad scripts: `boot.mjs` (per-frame honesty recorder),
+  `accent.mjs`, `loopseam.mjs`, `glyphs.mjs`, `engage.mjs`, `review.mjs`
+  and `topotest.mjs` (in-page SVG filter variants, no rebuild).
+  `LIVE=<url>` redirects any of them to the live site.
+- Build-and-show items were switched with `REVIEW_OPT=b npm run build`
+  (`import.meta.env` in the frontmatter). All switches are gone now.
+
+### Still open
+
+- Twinkle-per-group and sky variants: owner to eyeball live.
+- Experience sky still reads denser (same stars in a short box).
+- Contact cards at 960–1119px, hero on short landscape, 320px nav, résumé
+  PDF, Google brand terms — carried over.
+
+### Next milestone planned
+
+None queued. Waiting on the owner.
+
 ## 2026-09-23 — increment 28 (audit fixes and cleanup)
 
 ### Last milestone completed
