@@ -108,11 +108,11 @@ const style = variant === "barcode" ? `--code: ${barcode.gradient}; --tile-w: ${
 
   /* --- Barcode -------------------------------------------------------------
      Black bars on off-white, never the accent. The tile comes from
-     lib/barcode-data.ts; the bars stop 4px short of each edge, as on a
-     label. */
+     lib/barcode-data.ts; the bars stop 8px short of each edge, as on a
+     label. 64px since increment 26, twice its first scale. */
   [data-variant="barcode"] {
-    --h: 32px;
-    --tile-h: calc(100% - 8px);
+    --h: 64px;
+    --tile-h: calc(100% - 16px);
     --loop: 48s;
     --bar: var(--bg);
   }
@@ -120,7 +120,7 @@ const style = variant === "barcode" ? `--code: ${barcode.gradient}; --tile-w: ${
   [data-variant="barcode"] .track {
     background-color: var(--heading);
     background-image: var(--code);
-    background-position: 0 4px;
+    background-position: 0 8px;
   }
 
   /* Decorative, autonomous drift: frozen at its first frame, the Starfield
