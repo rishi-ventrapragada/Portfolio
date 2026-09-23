@@ -24,7 +24,7 @@ Governing rules for Claude Code in this repository. Read fully before any action
 
 - Astro 7 (latest stable), TypeScript strict, static output. No adapter unless PRD.md adds a server feature.
 - Tailwind v4 via `@tailwindcss/vite`. Tailwind for layout and spacing. Distinctive visual work (gradients, blur, clip-path, animation) lives in scoped `<style>` blocks in the component that owns it.
-- @astrojs/react is installed for islands only. Default to plain `.astro` + a small `<script>`. Use a React island only when the component holds real state across interactions. Every island must justify its `client:*` directive in a one-line comment.
+- @astrojs/react is not installed (it was removed; the site has no islands). Default to plain `.astro` + a small `<script>`. A React island is only for a component that holds real state across interactions, and re-adding the integration is a new dependency (ask first, below). Every island must justify its `client:*` directive in a one-line comment.
 - Fonts via Astro's Fonts API. No `<link>` to Google Fonts.
 - No animation libraries (no GSAP, Motion, Lenis) unless PRD.md names one. Motion is CSS scroll-driven animations or CSS transitions, with a script fallback only where support is missing.
 - No new dependency without asking. State the package, why, size, and license.

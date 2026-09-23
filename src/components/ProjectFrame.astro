@@ -59,8 +59,9 @@ const expandable = !!(summary || stack || links);
 </article>
 
 <style>
-  /* Layered so the shared, unlayered `.planned` utility in global.css wins
-     its border-style and opacity without !important. */
+  /* Layered so the shared, unlayered `.planned` utility (utilities.css)
+     wins its border-style without !important; `.frame.planned` below then
+     replaces the utility's fade. */
   @layer components {
     .frame {
       position: relative;

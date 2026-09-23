@@ -5,8 +5,8 @@
 //
 // The loop is Starfield.astro's: a track twice the width of one copy of the
 // pattern, translated -50%, so the second copy lands exactly where the first
-// began. Starfield gets an exact copy for free because its stars are placed
-// in % and cqw. A pattern tile is in px, so here "one copy" is the section
+// began. Starfield gets an exact copy for free because every star is drawn a
+// second time exactly 100cqw to the right. A pattern tile is in px, so here "one copy" is the section
 // width rounded UP to a whole number of tiles (--half) — the track is 2 ×
 // --half wide and overflows the seam, clipped. The -50% shift is then a
 // whole number of tiles and the wrap cannot show.

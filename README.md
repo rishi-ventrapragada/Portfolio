@@ -11,7 +11,9 @@ carries the handoff between sessions. `ASSETS.md` logs every non-code asset.
 
 - **Astro 7** — static output, TypeScript strict, no integrations
 - **Tailwind v4** via `@tailwindcss/vite` — layout and spacing only; distinctive
-  visual work lives in scoped `<style>` blocks
+  visual work lives in scoped `<style>` blocks. No component uses a utility
+  class yet, so automatic source scanning is off (`source(none)` in
+  `global.css`); register a file with `@source` when one first does
 - **Astro Fonts API** — Space Grotesk and JetBrains Mono, self-hosted
 - Motion is CSS scroll-driven animation with a `requestAnimationFrame` fallback.
   No animation libraries, no client router, no islands.
@@ -38,15 +40,17 @@ src/
                               ExperienceClip,
                               Footer, FooterStage, FooterCredits, FooterContact,
                               ContactCard, ContactIcon,
-                              Divider, Starfield, StarfieldMeteors, TopoBackdrop,
+                              Divider, LoopDivider, Starfield, StarfieldMeteors,
+                              StarfieldDefs, TopoBackdrop,
                               BootPreloader, BootSquare,
                               AccentToggle (dev only)
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
+  lib/barcode-data.ts         the About/Skills barcode seam's seeded bars
   lib/is-url.ts               the href guard shared by ProjectLinks and FooterContact
   lib/skill-scatter.ts        build-time leaf placement + collision assert
-  lib/starfield-data.ts       seeded star layers and meteors
+  lib/starfield-data.ts       seeded star layers (as box-shadow lists) and meteors
   lib/constellation-data.ts   the video-editing constellation's geometry
   lib/constellation-labels.ts build-time name placement (min line crossings, asserted bounds)
   pages/index.astro           the whole site: one page, anchored sections
@@ -54,10 +58,14 @@ src/
                               experience-timeline.ts, experience-scrub.ts,
                               experience-playhead.ts, about-reveal.ts,
                               skill-drift.ts, skill-physics.ts, skill-drag.ts,
-                              constellation-motion.ts
-  styles/global.css           all design tokens
+                              constellation-motion.ts, magnetic.ts,
+                              offscreen-pause.ts
+  styles/global.css           all design tokens and base element styles
+  styles/utilities.css        the shared .label / .meta / .shell / .planned utilities
   styles/theme-light.css      the section-scoped light theme
 ```
 
-The accent toggle bottom-right is dev-only and disappears from production builds;
-it exists to choose between crimson and violet on the live site.
+The accent toggle bottom-right exists only in `npm run dev` and is not in
+production builds; it is there to choose between crimson and violet. On the
+live site, violet can be previewed by setting `localStorage.accent = "violet"`
+and reloading.

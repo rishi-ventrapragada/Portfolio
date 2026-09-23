@@ -120,7 +120,8 @@ const bars = (seed: number) => {
   }
 
   /* Four equal columns in every lane; the lane grows with the scroller and
-     never drops below four × --lane-min, so phones scroll it sideways. */
+     never drops below four × --lane-min, so on phones it scrolls sideways —
+     by swipe, and experience-timeline.ts pages it to each committed clip. */
   .lane {
     display: grid;
     flex: 1 0 auto;

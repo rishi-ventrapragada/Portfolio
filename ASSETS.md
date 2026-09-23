@@ -15,7 +15,8 @@ material that must be replaced before launch.
 | Date | 2026-09-21 |
 
 There are **no image files**. `src/components/AboutPanel.astro` renders each of
-the five panels as a solid fill (a palette word mixed 60% into `--bg-raised`)
+the five panels as a solid fill (a palette word mixed 72% into the light
+scope's `--fg` — About is light-themed; 52% into `--bg-raised` on a dark ground)
 with a centred `[PANEL N — placeholder art]` mono tag, and every caption box
 reads `[TODO: panel N dialogue]`. Nothing goes through `<Image>` until real
 art arrives. This entry replaced the increment 6 "About page photo"
@@ -65,9 +66,10 @@ deviation the original KalaCart placeholder had, acceptable for a placeholder.
 Token values are baked in because a PNG cannot reference a CSS custom property.
 If the surface or muted-text tokens change, regenerate this file to match.
 
-It is the cover of the **planned** Recurzn card (PRD §5.3), which renders at
-half opacity with no summary, stack or links. Rebranding the deployed Life OS
-app to Recurzn is a separate task in a different repo, not this portfolio.
+It is the cover of the **planned** Recurzn frame (PRD §5.3), which shows it
+at half opacity (the cover only, since increment 28) with no summary, stack or
+links. Rebranding the deployed Life OS app to Recurzn is a separate task in a
+different repo, not this portfolio.
 
 **[TODO: replace with a real Recurzn screenshot once there is one.]**
 
@@ -89,15 +91,17 @@ the artisan" headline, and the scattered craft-photo collage.
 PNG (1600 × 900, solid `--bg-raised` with "KALACART" in `--fg-muted`), which was
 deleted in the same change and is no longer referenced anywhere.
 
-As of increment 6 it renders only in the Projects card on the single page
-(`ProjectCard.astro`); the case study page that also showed it is gone.
+It renders in the Projects frame (`ProjectFrame.astro`, which replaced
+`ProjectCard.astro` in increment 15) and on the KalaCart Experience monitor
+frame (`ExperienceFrame.astro`); the case study page that also showed it is gone.
 
 Two notes for whoever touches the tile next:
 
-- **The tile no longer forces 16:9.** The old placeholder was generated at 16:9
-  precisely so it needed no layout change; this screenshot is 1.82:1, so
-  `ProjectCard.astro` (then `ProjectTile.astro`) lets the image set its own ratio instead of cropping
-  ~14px off each side. Demo **video** still uses 16:9 per PRD §7.
+- **The frame never forces 16:9.** The old placeholder was generated at 16:9
+  precisely so it needed no layout change; this screenshot is 1.82:1, so the
+  frame (`ProjectFrame.astro` today; `ProjectCard.astro` and `ProjectTile.astro`
+  before it) lets the image set its own ratio instead of cropping ~14px off
+  each side. Demo **video** still uses 16:9 per PRD §7.
 - **Body text in the screenshot is not legible at tile size.** Rendered ~700px
   wide, the source's 16px body text lands near 8px. The headline stays readable;
   the rest reads as texture. That is inherent to a full desktop screenshot in a

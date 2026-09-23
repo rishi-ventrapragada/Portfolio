@@ -38,8 +38,8 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
      along the bottom, the way NLE clips are drawn — no texture (increment
      14.1 tried a faint stripe as well; the flat fill read as software, the
      stripes as a sticker). Layered so the shared, unlayered `.planned`
-     utility in global.css wins its border-style and opacity without
-     !important. */
+     utility (utilities.css) wins its border-style without !important; the
+     planned clip's own rule below then replaces the utility's fade. */
   @layer components {
     .clip {
       --edge: color-mix(in srgb, var(--tone) 65%, var(--timeline-bg));
