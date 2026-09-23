@@ -115,3 +115,31 @@ Two notes for whoever touches the tile next:
 
 Transparent-background cutout used as the hero subject and LCP element
 (PRD §5.2). Logged here retroactively — it predates this file.
+
+---
+
+## Contact card brand marks — GitHub, LinkedIn (inline SVG paths)
+
+| | |
+| --- | --- |
+| Source | Simple Icons, simpleicons.org — `github` from v16.32.0 (github.com/simple-icons/simple-icons, `icons/github.svg`); `linkedin` from **v13.21.0**, the last release that shipped it (removed in v14 at LinkedIn's request) |
+| Licence | Simple Icons is CC0 1.0 for its SVG data. **The marks themselves remain trademarks** of GitHub, Inc. and LinkedIn Corporation; CC0 does not license them |
+| Date | 2026-09-23 (increment 25) |
+| Where | `src/components/ContactIcon.astro`, path data inlined — no file, no network request |
+
+Used under each brand's own terms for linking to a profile:
+
+- **GitHub** (brand.github.com/foundations/logo): the Invertocat may be used
+  "as a social button to link to your GitHub profile"; only in white, black,
+  or in few cases grey or green; do not change its colour.
+- **LinkedIn** (brand.linkedin.com/in-logo): members may use the [in] logo
+  "as a hyperlink to your LinkedIn profile"; blue, black or white only; do
+  not modify its colour or shape.
+
+So both are rendered **white** (`var(--fg)`, `#ffffff`) under both accents
+and on hover/focus, unmodified in shape. Hover is signalled by the card's
+border and address, never the mark. Re-check both pages if either brand's
+rules change.
+
+The **mail** glyph is a plain hand-drawn envelope, not the Gmail logo: Google's
+brand terms could not be verified (increment 25), so no Google mark is used.

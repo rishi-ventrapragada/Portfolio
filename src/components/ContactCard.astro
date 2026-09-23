@@ -1,6 +1,7 @@
 ---
 // One contact button-card on the footer's contact screen (PRD §5.8,
-// increment 23): a rectangular link with a hand-authored glyph, the label,
+// increment 23): a rectangular link with a brand mark or envelope (see
+// ContactIcon.astro — the glyph never takes the accent), the label,
 // and the address itself underneath, so the card says where it goes before
 // it is clicked. Only ever rendered for a real URL (FooterContact.astro keeps
 // the isUrl guard).
@@ -43,10 +44,21 @@ const address = href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "")
       color 160ms ease;
   }
 
+  .address {
+    transition: color 160ms ease;
+  }
+
   .card:hover,
   .card:focus-visible {
     color: var(--accent);
     border-color: var(--accent);
+  }
+
+  /* The address carries the hover colour the glyph no longer can: crimson
+     4.95:1 and violet 6.33:1 on --bg-raised. */
+  .card:hover .address,
+  .card:focus-visible .address {
+    color: var(--accent);
   }
 
   .text {
@@ -83,7 +95,8 @@ const address = href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "")
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .card {
+    .card,
+    .address {
       transition: none;
     }
   }
