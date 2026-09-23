@@ -14,9 +14,16 @@
  * Only groups on screen are stepped, and the loop stops entirely when none
  * are. Reduced motion: no drift, no sway, no spin — the loop runs only while
  * a drag is in progress, and everything lands in place without easing.
+ *
+ * Nothing drifts until the visitor has engaged with the section
+ * (increment 29): a mouse moving over it, a tap or a focus inside it. Until then
+ * the scatter is its build-time rest frame and the loop never starts — the
+ * audit measured the always-on drift at ~300ms of main-thread time per
+ * second for an effect few would notice unprompted.
  */
 import { DRIFT, ROTATE_MAX } from "../lib/skill-scatter";
 import { bindDrag } from "./skill-drag";
+import { onEngage } from "./engage";
 import { separate, write, type SkillGroup } from "./skill-physics";
 
 const SWAY = (3 * Math.PI) / 180; // Autonomous rotation amplitude.
@@ -27,6 +34,7 @@ const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 const groups: SkillGroup[] = [];
 let frame = 0;
 let last = 0;
+let engaged = false;
 
 function step(g: SkillGroup, dt: number): void {
   const still = reduced.matches;
@@ -73,7 +81,7 @@ function tick(now: number): void {
   let live = false;
   for (const g of groups) {
     if (!g.visible && !g.drag) continue;
-    if (reduced.matches && !g.drag) continue;
+    if ((reduced.matches || !engaged) && !g.drag) continue;
     step(g, dt);
     live = true;
   }
@@ -149,4 +157,8 @@ export function initSkillDrift(tree: HTMLElement): void {
 
   start();
   desktop.addEventListener("change", () => (desktop.matches ? start() : stop()));
+  onEngage(tree.closest("section") ?? tree, () => {
+    engaged = true;
+    wake();
+  });
 }

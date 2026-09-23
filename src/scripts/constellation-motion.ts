@@ -15,12 +15,16 @@
  * limit per layout arrives as data attributes from lib/constellation-labels.ts
  * so the build-time solver itself never ships.
  *
- * Moves only while the box is on screen. Reduced motion: never moves; the
+ * Moves only while the box is on screen, and only once the visitor has
+ * engaged with the section (a mouse moving over it, a tap, a focus — increment 29;
+ * scripts/engage.ts). Reduced motion: never moves; the
  * build-time positions are the rest frame. The preference is read live, like
  * skill-drift.ts and magnetic.ts: switching it on mid-turn stops the loop
  * and puts the figure back at rest, switching it off resumes (increment 28 —
  * it used to be read once at load).
  */
+
+import { onEngage } from "./engage";
 
 const TURN_PERIOD = 40; // s, one full sway of the rotation
 const DRIFT_X = 12; // px
@@ -84,6 +88,7 @@ export function initConstellation(box: HTMLElement): void {
 
   let frame = 0;
   let visible = false;
+  let engaged = false;
   let clock = 0; // ms of motion so far; paused while off screen
   let last = 0;
 
@@ -143,7 +148,7 @@ export function initConstellation(box: HTMLElement): void {
   };
 
   const sync = () => {
-    const run = visible && !reduced.matches;
+    const run = visible && engaged && !reduced.matches;
     if (run && !frame) {
       // Resume where the clock stopped, so re-entering never jumps.
       last = performance.now();
@@ -160,4 +165,8 @@ export function initConstellation(box: HTMLElement): void {
     sync();
   }).observe(box);
   reduced.addEventListener("change", sync);
+  onEngage(box.closest("section") ?? box, () => {
+    engaged = true;
+    sync();
+  });
 }
