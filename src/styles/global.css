@@ -56,6 +56,11 @@
   --sprocket-hole: var(--bg);
   --shadow: color-mix(in srgb, var(--monitor-bg) 60%, transparent);
 
+  /* Caution-tape yellow for a planned project frame (increment 30, owner
+     approved): the only yellow on the site, used for nothing else. Always
+     paired with black bands, never as text or behind text. */
+  --hazard: #ffcc00;
+
   /* Small colour palette. First chosen for the boot preloader's greeting
      cycle (retired in increment 8, PRD §5.10) and kept by the owner's
      decision; since increment 13.1 the Experience timeline's clips use

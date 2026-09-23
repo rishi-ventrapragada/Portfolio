@@ -1,0 +1,36 @@
+---
+// Caution tape across the top of a planned project frame (PRD §5.3,
+// increment 30): the "still building this" signal, in place of any dimming —
+// the frame itself stays at full strength. Yellow-and-black diagonal bands,
+// construction-site tape, in the one hazard colour (--hazard). Decorative:
+// no text on it, hidden from assistive tech (the slate says "In production"
+// in real text).
+//
+// Laid on at a slight angle and overhanging the frame, like tape stuck
+// across it (the owner's pick over a flat band flush with the edges).
+---
+
+<div class="tape" aria-hidden="true"></div>
+
+<style>
+  /* Across the top sprocket strip, 8px past each side of the frame and
+     turned 1.5deg. The stops are softened by a pixel so the diagonals
+     render smooth rather than stair-stepped. The overhang stays inside the
+     page gutters (no horizontal overflow at 320px). */
+  .tape {
+    position: absolute;
+    inset-inline: -0.5rem;
+    top: 0.5rem;
+    z-index: 1;
+    height: 1.25rem;
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--hazard) 0 11.5px,
+      var(--monitor-bg) 12.5px 23.5px,
+      var(--hazard) 24.5px 24.5px
+    );
+    box-shadow: 0 2px 6px var(--shadow);
+    transform: rotate(-1.5deg);
+    pointer-events: none;
+  }
+</style>

@@ -9,6 +9,7 @@
 // cover, and has no detail. No script.
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import HazardTape from "./HazardTape.astro";
 import PlannedCard from "./PlannedCard.astro";
 import ProjectDetail from "./ProjectDetail.astro";
 import ProjectLinks from "./ProjectLinks.astro";
@@ -33,6 +34,9 @@ const shown = hasDetail && open;
 ---
 
 <article class="frame" data-expandable={expandable ? "" : undefined}>
+  {/* Planned only (increment 30): caution tape across the top is the whole
+      "not shipped" signal; nothing on the frame is dimmed. */}
+  {planned && <HazardTape />}
   {
     planned ? (
       <PlannedCard title={title} ratio={`${cover.width} / ${cover.height}`} />
