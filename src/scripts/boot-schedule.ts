@@ -10,6 +10,10 @@
  *
  * Only the paced reveal reads this. On a slow load the slots are already
  * behind when a checkpoint lands, and it shows the frame it happens.
+ *
+ * The ms below are the table's own scale (a 6000ms dwell, increment 11).
+ * slotAt() rescales it to whatever dwell BootPreloader.astro passes — 2000ms
+ * since increment 29, so every gap and hold here runs at a third.
  */
 
 /** Cumulative time at which step `to` unlocks; linear between rows. */

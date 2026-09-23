@@ -60,11 +60,13 @@ import { statusFor } from "../scripts/boot-copy";
 <script>
   import { runBootSequence } from "../scripts/boot-preloader";
 
-  // 6000ms dwell, paced on the fixed pause points in boot-schedule.ts: an
-  // instant load still walks every step rather than flashing (2800 in
-  // increment 9, 4200 in 10 — both read too fast). 9000ms grace cap so a
-  // stalled resource can never strand the visitor.
-  runBootSequence(6000, 9000);
+  // 2000ms dwell, paced on the fixed pause points in boot-schedule.ts (which
+  // scale to it): an instant load still walks every step rather than
+  // flashing, and the whole overlay is gone in ~2.4s with the fade
+  // (increment 29 — the owner's call; 6000 since increment 11 read as a
+  // wait). 4000ms grace cap so a stalled resource can never strand the
+  // visitor for long.
+  runBootSequence(2000, 4000);
 </script>
 
 <style>
