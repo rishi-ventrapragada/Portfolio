@@ -4,28 +4,46 @@
 // ContactIcon.astro — the glyph never takes the accent), the label,
 // and the address itself underneath, so the card says where it goes before
 // it is clicked. Only ever rendered for a real URL (FooterContact.astro keeps
-// the isUrl guard).
+// the isUrl guard) — except the résumé card (increment 25), which has no
+// href while its file is missing and then renders as a dashed placeholder
+// that is not a link, with `pending` as its visible address.
 import ContactIcon from "./ContactIcon.astro";
 
 interface Props {
   label: string;
-  href: string;
-  icon: "github" | "linkedin" | "mail";
+  href?: string;
+  icon: "github" | "linkedin" | "mail" | "resume";
+  /** What the card says in place of an address while there is no href. */
+  pending?: string;
 }
 
-const { label, href, icon } = Astro.props;
+const { label, href, icon, pending = "[TODO]" } = Astro.props;
 // The address as a reader would say it: no scheme, no "www.", no trailing
-// slash, the bare address for mail.
-const address = href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+// slash, the bare address for mail, the file name for a root-relative path.
+const address = href
+  ? href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "").replace(/^\//, "").replace(/\/$/, "")
+  : pending;
 ---
 
-<a class="card" href={href} rel="noopener">
-  <ContactIcon name={icon} />
-  <span class="text">
-    <span class="label-text">{label}</span>
-    <span class="meta address">{address}</span>
-  </span>
-</a>
+{
+  href ? (
+    <a class="card" href={href} rel="noopener">
+      <ContactIcon name={icon} />
+      <span class="text">
+        <span class="label-text">{label}</span>
+        <span class="meta address">{address}</span>
+      </span>
+    </a>
+  ) : (
+    <div class="card" data-pending>
+      <ContactIcon name={icon} />
+      <span class="text">
+        <span class="label-text">{label}</span>
+        <span class="meta address">{address}</span>
+      </span>
+    </div>
+  )
+}
 
 <style>
   .card {
@@ -54,9 +72,20 @@ const address = href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "")
     border-color: var(--accent);
   }
 
+  /* Not a link yet: a dashed edge, the .planned cue (PRD §5.3), and no
+     hover. The opacity half of .planned is left out on purpose — it would
+     take the [TODO] text below AA. */
+  .card[data-pending] {
+    border-style: dashed;
+  }
+
+  .card[data-pending]:hover {
+    border-color: var(--line);
+  }
+
   /* The address carries the hover colour the glyph no longer can: crimson
      4.95:1 and violet 6.33:1 on --bg-raised. */
-  .card:hover .address,
+  a.card:hover .address,
   .card:focus-visible .address {
     color: var(--accent);
   }

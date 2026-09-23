@@ -9,10 +9,15 @@
 // Contact values go through the shared isUrl guard (src/lib/is-url.ts):
 // only an http(s) URL or a mailto: address becomes an <a>, anything else
 // (a "[TODO]" placeholder, CLAUDE.md §7) renders as visible mono text.
-// The résumé link stays outside the guard as built: a root-relative path
-// to public/resume.pdf, which is still pending from the owner.
+// The résumé is a card of its own under the three (increment 25), outside
+// the guard: it links to /resume.pdf only if public/resume.pdf exists at
+// build time, and until then renders as a dashed "[TODO]" card that is not
+// a link, so the page never ships a 404.
 import { isUrl } from "../lib/is-url";
 import ContactCard from "./ContactCard.astro";
+
+// A glob match is only a listing: nothing is imported unless it is called.
+const hasResume = Object.keys(import.meta.glob("/public/resume.pdf")).length > 0;
 
 const year = new Date().getFullYear();
 
@@ -41,7 +46,9 @@ const contacts = [
         )
       }
     </ul>
-    <a class="meta resume" href="/resume.pdf">Résumé [TODO]</a>
+    <div class="resume">
+      <ContactCard label="Résumé" icon="resume" href={hasResume ? "/resume.pdf" : undefined} />
+    </div>
   </div>
 
   <p class="meta copyright">&copy; {year} Rishi</p>
@@ -104,7 +111,15 @@ const contacts = [
 
   /* Phone: tighter spacing so the whole screen clears the © line pinned to
      the stage's bottom edge even on a 320×568 viewport. */
+  /* Since increment 25 the résumé card adds a fourth row, so the body is
+     also centred in the space above the © line (2rem off the bottom plus
+     its own line) rather than the whole stage — at 320×568 it otherwise
+     lands on it. The résumé keeps the cards' own gap. */
   @media (max-width: 479.98px) {
+    .contact {
+      padding-bottom: 3.5rem;
+    }
+
     .body {
       gap: 1.25rem;
     }
@@ -112,14 +127,23 @@ const contacts = [
     .cards {
       gap: 0.625rem;
     }
+
+    .resume {
+      margin-top: -0.625rem;
+    }
   }
 
+  /* One card wide, centred under the three: the same scale as each of
+     them. Below 960px the cards are one column and so is this. */
   .resume {
-    color: var(--fg-muted);
+    width: 100%;
   }
 
-  .resume:hover {
-    color: var(--accent);
+  @media (min-width: 960px) {
+    .resume {
+      width: calc((100% - 2rem) / 3);
+      margin-top: -1rem;
+    }
   }
 
   .copyright {

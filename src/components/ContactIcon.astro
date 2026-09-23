@@ -3,7 +3,8 @@
 // LinkedIn are the brands' own marks, as path data from Simple Icons (CC0;
 // sources and trademark notes in ASSETS.md) — LinkedIn from v13.21.0, the
 // last release that shipped it. Mail stays a plain hand-drawn envelope
-// rather than an unverified Gmail logo. Inline, so nothing is fetched.
+// rather than an unverified Gmail logo, and the résumé a plain document,
+// both drawn here in the same stroke. Inline, so nothing is fetched.
 //
 // Both brands allow their mark as a link to a profile only in white, black
 // or (GitHub) grey/green, and never recoloured — so the glyph is pinned to
@@ -11,7 +12,7 @@
 // its border and address instead (ContactCard.astro). aria-hidden, because
 // the card's text label is the accessible name.
 interface Props {
-  name: "github" | "linkedin" | "mail";
+  name: "github" | "linkedin" | "mail" | "resume";
 }
 
 const { name } = Astro.props;
@@ -40,6 +41,15 @@ const { name } = Astro.props;
       <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
         <rect x="2.8" y="5" width="18.4" height="14" rx="2.2" />
         <path d="M3.4 6.2 12 12.9l8.6-6.7" />
+      </g>
+    )
+  }
+  {
+    name === "resume" && (
+      // A page with a folded corner and three lines of text.
+      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M6 2.8h8.2l4.8 4.8v12.4a1.2 1.2 0 0 1-1.2 1.2H6a1.2 1.2 0 0 1-1.2-1.2V4a1.2 1.2 0 0 1 1.2-1.2z" />
+        <path d="M14 2.8v4.8h5M8.2 12h7.6M8.2 15.2h7.6M8.2 18.4h4.6" />
       </g>
     )
   }

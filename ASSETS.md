@@ -35,10 +35,11 @@ owner's dialogue in the captions verbatim, and log the files here.
 | Licence | Owner's own material |
 | Date | Not yet added |
 
-The footer links to `/resume.pdf`. **The file is not in the repo**, so the
-link 404s until the owner adds it. A static build cannot verify
-link targets, so this does not fail the build and will not surface as an error —
-it has to be remembered.
+**The file is not in the repo.** Since increment 25 the footer's résumé card
+checks for it at build time (`import.meta.glob` in `FooterContact.astro`):
+while it is missing the card renders as a dashed "Résumé [TODO]" placeholder
+that is not a link, so nothing 404s. Adding the file and redeploying turns
+the card into a live link with no code change.
 
 **[TODO: owner to add `public/resume.pdf`.]**
 
