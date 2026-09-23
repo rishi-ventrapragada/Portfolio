@@ -24,15 +24,9 @@ const { lines } = Astro.props;
 </div>
 
 <style>
-  /* A soft --bg scrim behind the block, so the contour lines of the
-     topographic backdrop never pass at full strength behind the letters —
-     crimson measured 2.51:1 over a contour without it (PRD §5.15). A
-     rounded panel blurred at the edges: it covers the whole text area at
-     full strength and reads as the contours thinning out around the text,
-     not as a box. (A radial gradient was tried first and left the ends of
-     the wide lines uncovered.) */
+  /* Increment 25: no panel behind the block — the words sit straight on
+     the topographic backdrop and carry their own glow (.line below). */
   .credits {
-    position: relative;
     display: grid;
     gap: 0.35em;
     max-width: 100%;
@@ -45,21 +39,29 @@ const { lines } = Astro.props;
     text-wrap: balance;
   }
 
-  .credits::before {
-    content: "";
-    position: absolute;
-    inset: -2.5rem -3rem;
-    z-index: -1;
-    border-radius: 3rem;
-    background-color: color-mix(in srgb, var(--bg) 94%, transparent);
-    filter: blur(1.25rem);
-    pointer-events: none;
-  }
-
+  /* Two parts, and the order is load-bearing (the first shadow paints on
+     top). --halo is a solid --bg outline 3px deep — the letter shifted
+     around two rings, 8 copies at 1.5px and 12 at 3px, no blur — then a
+     blurred falloff. That keeps the contour lines off the ground right at
+     each stroke: crimson measured 2.51:1 over a contour with nothing there,
+     and still 3.27 with blurred shadows alone, which are only half opaque
+     at the letter's edge (PRD §5.8). Under it, a wide faint off-white
+     bloom is the glow you see. A white glow cannot sit right behind the
+     accent lines: crimson falls below 4.5:1 once the ground under it lifts
+     past about 8%. */
   .line {
+    --halo:
+      1.5px 0 0 var(--bg), 1.1px 1.1px 0 var(--bg), 0 1.5px 0 var(--bg), -1.1px 1.1px 0 var(--bg),
+      -1.5px 0 0 var(--bg), -1.1px -1.1px 0 var(--bg), 0 -1.5px 0 var(--bg), 1.1px -1.1px 0 var(--bg),
+      3px 0 0 var(--bg), 2.6px 1.5px 0 var(--bg), 1.5px 2.6px 0 var(--bg), 0 3px 0 var(--bg),
+      -1.5px 2.6px 0 var(--bg), -2.6px 1.5px 0 var(--bg), -3px 0 0 var(--bg), -2.6px -1.5px 0 var(--bg),
+      -1.5px -2.6px 0 var(--bg), 0 -3px 0 var(--bg), 1.5px -2.6px 0 var(--bg), 2.6px -1.5px 0 var(--bg),
+      0 0 6px var(--bg), 0 0 12px var(--bg);
     margin: 0;
     color: var(--accent);
-    text-shadow: 0 0 1.25rem var(--bg);
+    text-shadow:
+      var(--halo),
+      0 0 2.5rem color-mix(in srgb, var(--heading) 16%, transparent);
     opacity: 0;
     transform: translateY(0.5em);
     transition:
@@ -67,9 +69,15 @@ const { lines } = Astro.props;
       transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
+  /* The name is off-white text, so it can take a brighter glow of its own
+     colour (still ~9:1 at a 20% lift). */
   .line.name {
     margin-top: 0.3em;
     color: var(--heading);
+    text-shadow:
+      var(--halo),
+      0 0 1.5rem color-mix(in srgb, var(--heading) 30%, transparent),
+      0 0 3rem color-mix(in srgb, var(--heading) 16%, transparent);
   }
 
   .line[data-shown] {
