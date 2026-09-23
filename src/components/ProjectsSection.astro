@@ -8,13 +8,24 @@ import ProjectFrame from "./ProjectFrame.astro";
 
 // Loader order is not `order`, so sort explicitly.
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+// With a single real (non-planned) project, its detail is simply shown —
+// hiding the site's most important text behind a hover is wrong when there
+// is nothing else to compare it with (increment 29). From two real projects
+// on, every frame goes back to the hover / focus expand.
+const openDetail = projects.filter((p) => p.data.status !== "planned").length === 1;
 ---
 
 {/* Light-scoped (PRD §5.16) on the section, which runs full width, with
     .shell moved to an inner wrapper. The section used to carry .shell
     itself, and a background there would have stopped at 1280px and left the
     page's dark ground either side of it on a wide screen. */}
-<section class="projects" id="projects" data-theme="light" aria-labelledby="projects-heading">
+<section
+  class="projects"
+  id="projects"
+  data-theme="light"
+  data-open-detail={openDetail ? "" : undefined}
+  aria-labelledby="projects-heading"
+>
   <div class="shell">
     <p class="label eyebrow">Selected work</p>
     <h2 id="projects-heading" class="heading">Projects</h2>
@@ -22,7 +33,7 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
     {/* auto-fill, not auto-fit: frames keep their slot size and a later entry
         drops into the next empty slot, like a contact sheet. */}
     <div class="sheet">
-      {projects.map((entry, i) => <ProjectFrame entry={entry} index={i} />)}
+      {projects.map((entry, i) => <ProjectFrame entry={entry} index={i} open={openDetail} />)}
     </div>
   </div>
 </section>
@@ -40,7 +51,7 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
      touch it is display: none), and is sized for the panel plus the frame's
      1.02 lift with room to spare. Re-measure if the summary grows. */
   @media (hover: hover) and (pointer: fine) {
-    .projects {
+    .projects:not([data-open-detail]) {
       --detail-reserve: 12rem;
       padding-block-end: calc(var(--rhythm) + var(--detail-reserve));
     }
@@ -61,5 +72,8 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
     gap: 1.5rem;
     /* 32rem minimum: two frames per row at 1280, one column on phones. */
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 32rem), 1fr));
+    /* Each frame its own height: an open detail makes KalaCart taller, and
+       a stretched neighbour would grow an empty black tail. */
+    align-items: start;
   }
 </style>

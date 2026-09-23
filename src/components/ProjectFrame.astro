@@ -1,14 +1,11 @@
 ---
 // One film frame of the Projects contact sheet (PRD §5.3): sprocket strips
-// top and bottom, the cover, then a caption of title and frame number. On
-// fine-pointer devices, hovering or focusing a link inside lifts the frame
-// a little and opens a panel of summary, stack and links below it — the
-// cover itself is never covered;
-// everywhere else the links sit under the caption as small always-visible
-// affordances and nothing expands. `status` is never printed: a planned
-// entry takes the shared `.planned` utility and renders no detail at all,
-// because its schema gives it nothing real to reveal. No client script.
-// The detail panel is ProjectDetail.astro (split for the line cap).
+// top and bottom, the cover, then a caption of title and frame number, then
+// the detail (summary, stack, links — ProjectDetail.astro). With one real
+// project the detail is simply shown (`open`, increment 29); with more, on
+// fine pointers it opens below the frame on hover / focus and the frame
+// lifts, and elsewhere quick links sit under the caption. `status` is never
+// printed; a planned entry takes `.planned` and has no detail. No script.
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 import ProjectDetail from "./ProjectDetail.astro";
@@ -18,14 +15,19 @@ interface Props {
   entry: CollectionEntry<"projects">;
   /** Position in the sheet, for the frame number. */
   index: number;
+  /** Show the detail in place, on every device, instead of on hover
+   * (ProjectsSection.astro decides: one real project). */
+  open?: boolean;
 }
 
-const { entry, index } = Astro.props;
+const { entry, index, open = false } = Astro.props;
 const { title, summary, stack, status, links, cover } = entry.data;
 const planned = status === "planned";
 const number = `Frame ${String(index + 1).padStart(3, "0")}`;
 // Anything real to reveal? A planned entry has none of these by schema.
-const expandable = !!(summary || stack || links);
+const hasDetail = !!(summary || stack || links);
+const expandable = hasDetail && !open;
+const shown = hasDetail && open;
 ---
 
 <article class:list={["frame", { planned }]} data-expandable={expandable ? "" : undefined}>
@@ -49,13 +51,17 @@ const expandable = !!(summary || stack || links);
     <p class="meta number">{number}</p>
   </div>
 
-  <div class="quick">
-    <ProjectLinks links={links} variant="quick" />
-  </div>
+  {
+    !shown && (
+      <div class="quick">
+        <ProjectLinks links={links} variant="quick" />
+      </div>
+    )
+  }
 
-  {/* Absolutely positioned under the frame's bottom edge, so it never
-      takes grid space. */}
-  {expandable && <ProjectDetail summary={summary} stack={stack} links={links} />}
+  {/* Hover mode: absolutely positioned under the frame's bottom edge, so it
+      never takes grid space. Open mode: in the frame, in flow. */}
+  {hasDetail && <ProjectDetail summary={summary} stack={stack} links={links} open={shown} />}
 </article>
 
 <style>

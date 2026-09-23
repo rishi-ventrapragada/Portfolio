@@ -16,12 +16,14 @@ interface Props {
   summary?: string;
   stack?: string[];
   links?: { live?: string; repo?: string };
+  /** Shown in place on every device, never hidden (increment 29). */
+  open?: boolean;
 }
 
-const { summary, stack, links } = Astro.props;
+const { summary, stack, links, open = false } = Astro.props;
 ---
 
-<div class="detail">
+<div class="detail" data-open={open ? "" : undefined}>
   <div class="inner">
     <div class="pad">
       {summary && <p class="summary">{summary}</p>}
@@ -85,5 +87,25 @@ const { summary, stack, links } = Astro.props;
     .detail {
       transition: none;
     }
+  }
+
+  /* Open (ProjectsSection.astro, one real project): part of the frame,
+     under the caption, on every device. Each rule above is undone here —
+     same selectors plus the attribute, so these win on specificity. */
+  .detail[data-open] {
+    display: block;
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .detail[data-open] .inner {
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .detail[data-open] .pad {
+    padding: 0.25rem 0.75rem 1rem;
   }
 </style>
