@@ -37,12 +37,13 @@ src/
                               SkillTree, SkillGroup, SkillChain, SkillConstellation,
                               ConstellationStar, Pills,
                               ProjectsSection, ProjectFrame, ProjectDetail,
-                              ProjectLinks, PlannedCard,
+                              ProjectLinks, PlannedCard, HazardTape,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
                               ExperienceClip,
                               Footer, FooterStage, FooterCredits, FooterContact,
                               ContactCard, ContactIcon,
                               Divider, LoopDivider, EdgeCode, LeaderStrip,
+                              ClapperStrip,
                               Starfield, StarfieldMeteors, StarfieldDefs,
                               ProjectorBeam,
                               BootPreloader, BootSquare
@@ -50,7 +51,8 @@ src/
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
   lib/film-strips.ts          the edge-code and countdown-leader seams' SVG tiles
-  lib/is-url.ts               the href guard shared by ProjectLinks and FooterContact
+  lib/is-url.ts               the href guard + new-tab linkAttrs, shared by
+                              ProjectLinks, FooterContact and ContactCard
   lib/skill-scatter.ts        build-time leaf placement + collision assert
   lib/starfield-data.ts       seeded star layers (as box-shadow lists) and meteors
   lib/constellation-data.ts   the video-editing constellation's geometry

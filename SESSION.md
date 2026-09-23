@@ -104,6 +104,107 @@ placeholders, which CLAUDE.md §7 means for the owner, not for visitors.
 `About.astro` in place of the `.bio` block — one import and one line.
 Don't delete the dormant files as dead code.
 
+## 2026-09-23 — increment 30 (ten-part batch)
+
+### Last milestone completed
+
+All ten parts, one commit each on `main` (`9bc83d0`..`f7ccb9f`) plus this
+handoff. Each built clean (0 errors / warnings / hints), pushed, aliased and
+re-measured on `rishi-ventrapragada.vercel.app`; live matched local
+everywhere. Order C → A → G → B+D → H → I → J → E → F (E and F waited on
+the owner's pick).
+
+| Commit | Part |
+| --- | --- |
+| `9bc83d0` tokens | C — `--bg` #0b0b0d, `--bg-raised` #141518, boot / timeline #060607 |
+| `85726d0` contact | A — credits back to the pre-increment-25 scrim styling |
+| `2e1e770` contact | G — six accumulating stages, blank → name, pin 380vh |
+| `7ccdaf4` experience | B + D — heading inside the pin, full-bleed sky |
+| `b6a9cbf` contact | H — visible card borders (`--edge`) |
+| `cbdb7b0` contact | I — résumé two cards wide, 40px above it |
+| `09c4e64` links | J — `linkAttrs()`: http(s) and .pdf open in a new tab |
+| `a341632` dividers | E — clapper as SVG hinged sticks (owner's pick), red line gone |
+| `f7ccb9f` projects | F — tilted caution tape on planned frames (owner's pick) |
+
+### Decisions worth knowing before you touch this
+
+- **Credits accumulate** over six stages (owner, restating increment 23):
+  zones are `blank`, one per line, `contact`; the name's zone is the hold.
+  The scrim fades in with the first line so the blank stage is bare beam.
+  Line size is capped by pin height too (five lines overflowed 844×390).
+- **The restored scrim now covers most of the beam** once the first line
+  lands — it sits behind a 523px block at 1280, not a 3-line one. That is
+  exactly the pre-25 styling on a taller block; owner to judge live.
+- **B was still broken** (no later increment fixed it): the sky sat in
+  `.shell`, so from 1280 up it stopped at the shell (x 320–1600 at 1920).
+  D fixed it by putting the heading band — sky full-bleed — in the pin.
+- **Experience monitor is ~100–116px shorter** (1280×800: 644 → 528).
+  Short landscape (≤500px tall) has its own compact band and a `13cqh`
+  sentence cap; without it 844×390 clipped 108px (it clipped 8 before).
+- **`--on-accent` stays #111214** — it is ink on the accent, not a
+  surface. The favicon's `#111214` rect is also unchanged (an asset, not
+  the page). Surface steps shrank slightly (raised vs bg 1.09 → 1.08,
+  timeline vs monitor 1.07 → 1.04).
+- **Hazard tape keys on `planned` only.** KalaCart is `in-progress`; the
+  owner confirmed it gets no tape. `--hazard` is new (owner approved) and
+  must never be text or sit behind text.
+- **`LoopDivider` draws nothing itself now** — `variant` is `"strip"` only;
+  every seam pattern is an SVG component slotted in.
+- **Every data-driven `<a>` spreads `linkAttrs(href)`** — a new link
+  component should too, or it will not open off-site links in a new tab.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD** §4.2 (bg values, increment-30 contrast note, `--hazard`), §5.3
+  (caution tape), §5.8 (scrim revert, six stages, card edge, résumé,
+  new-tab links), §5.10 (boot square value), §5.11 (heading in the pin,
+  monitor heights), §5.12 (SVG clapper), §5.14 (Experience sky), §5.15
+  (credits over the beam).
+- **README** — ClapperStrip, HazardTape, `linkAttrs`.
+- CLAUDE.md, ASSETS.md not touched. `AGENTS.md` (untracked) and
+  `Nav.astro` (line endings only, no content diff) left alone, unstaged.
+
+### Verified by measurement (local, then live)
+
+- C: 452 text reads re-swept; every ratio that changed went up (body
+  17.22 → 18.26, crimson labels 5.38 → 5.65, "Now" 4.98 → 5.18), 0 fails.
+- A/G: over the beam, dust paused at 7 / 19 / 33s, five viewports: crimson
+  ≥5.50, name ≥17.10, © 7.08; zero pixels under 4.5. Zones step in order
+  forward and back, reduced motion 0s, no-JS shows all lines + contact;
+  nav Contact and keyboard focus land on the contact screen.
+- B/D: sky x 0 → viewport width, 0px gap to the monitor, seven viewports;
+  every clip fits in all four states; nav Experience lands pin-stuck.
+- H: card edges 1.29 → 3.83–3.90:1 rendered; hover / focus accent.
+- I: © clearance 164 / 142 / 102 / 26px (1280 / 1024 / 375 / 320×568).
+- J: five external links `_blank` + `noopener noreferrer`, mailto none,
+  anchors none; a throwaway `resume.pdf` (deleted) rendered both.
+- E: loop wrap 0/255 at 1280 / 1000 / 375 / 320, no accent under the seam.
+- F: opacity 1 on both frames and every descendant; tape clears text by
+  18–22px; no overflow at 320; frame text ratios unchanged.
+- Client JS 4.7 KB gz referenced. No file over 200 lines —
+  **ExperienceTimeline.astro is at 199**: split before adding to it.
+
+### Harness notes
+
+- This session's scratchpad: `sweep.mjs` (JSON contrast sweep) + `diff.mjs`
+  (before/after by pairing), `glyphs.mjs` (credits over the beam, now five
+  lines), `partG.mjs`, `partD.mjs`, `partH.mjs`, `partEF.mjs`, `tape.mjs`.
+  `LIVE=<url>` redirects any of them.
+- Card-edge sampling must scan across the edge for the brightest pixel;
+  rounding fractional rects lands on the fill and reads 1.00.
+
+### Still open
+
+- Owner to eyeball live: the scrim over the beam (above), tilted tape
+  over the slate's own stripes (two stripe bands stacked), the hinged
+  clapper in motion.
+- Carried over: résumé PDF, Google brand terms, Experience sky density,
+  320px nav, hero on short landscape, contact cards at 960–1119px.
+
+### Next milestone planned
+
+None queued. Waiting on the owner.
+
 ## 2026-09-23 — increment 29 (audit Bucket 2: design and content)
 
 ### Last milestone completed
