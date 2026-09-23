@@ -2,11 +2,10 @@
 import { Font } from "astro:assets";
 import "../styles/global.css";
 import "../styles/utilities.css";
-// After global.css on purpose: the section-scoped light tokens have to win
-// over :root[data-accent=...] on order, since they cannot on specificity.
+// After global.css on purpose: [data-theme="light"] and :root are both
+// (0,1,0), so the section-scoped light tokens win on order.
 import "../styles/theme-light.css";
 import Footer from "../components/Footer.astro";
-import AccentToggle from "../components/AccentToggle.astro";
 import BootPreloader from "../components/BootPreloader.astro";
 import Nav from "../components/Nav.astro";
 import StarfieldDefs from "../components/StarfieldDefs.astro";
@@ -23,7 +22,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 ---
 
 <!doctype html>
-<html lang="en" data-accent="crimson">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -74,18 +73,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 
     <Font cssVariable="--font-display-src" preload />
     <Font cssVariable="--font-mono-src" />
-
-    {/* Set the accent before first paint so the toggle never flashes. */}
-    <script is:inline>
-      try {
-        const saved = localStorage.getItem("accent");
-        if (saved === "violet" || saved === "crimson") {
-          document.documentElement.dataset.accent = saved;
-        }
-      } catch {
-        /* localStorage unavailable — keep the crimson default. */
-      }
-    </script>
   </head>
   {/* tabindex="-1" so the preloader can move focus here on removal. */}
   <body tabindex="-1">
@@ -101,7 +88,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
       <slot />
     </main>
     <Footer />
-    {import.meta.env.DEV && <AccentToggle />}
   </body>
 </html>
 

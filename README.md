@@ -42,8 +42,7 @@ src/
                               ContactCard, ContactIcon,
                               Divider, LoopDivider, Starfield, StarfieldMeteors,
                               StarfieldDefs, TopoBackdrop,
-                              BootPreloader, BootSquare,
-                              AccentToggle (dev only)
+                              BootPreloader, BootSquare
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
@@ -65,7 +64,4 @@ src/
   styles/theme-light.css      the section-scoped light theme
 ```
 
-The accent toggle bottom-right exists only in `npm run dev` and is not in
-production builds; it is there to choose between crimson and violet. On the
-live site, violet can be previewed by setting `localStorage.accent = "violet"`
-and reloading.
+The accent is crimson, fixed since increment 29; there is no accent switch.

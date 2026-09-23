@@ -96,10 +96,9 @@ const shown = hasDetail && open;
     --sprocket-hole: var(--light-bg);
   }
 
-  /* The light-scope accents are darkened for paper and fail on black
-     (crimson 3.49, violet 2.96). --accent cannot be mixed into itself, so
-     its two uses in here are lifted at the use site instead: crimson 5.41,
-     violet 5.23. */
+  /* The light-scope accent is darkened for paper and fails on black
+     (3.49). --accent cannot be mixed into itself, so its two uses in here
+     are lifted at the use site instead: 5.41. */
   :global([data-theme="light"]) .frame :global(.link:hover) {
     color: color-mix(in srgb, var(--accent) 70%, var(--light-bg));
     border-bottom-color: color-mix(in srgb, var(--accent) 70%, var(--light-bg));

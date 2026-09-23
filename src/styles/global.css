@@ -36,7 +36,8 @@
   --monitor-bg: #000000;
   --timeline-bg: #0b0c0e;
 
-  /* Accent — crimson default, switched by data-accent on <html> */
+  /* Accent — crimson, fixed (increment 29: the owner locked it; the violet
+     alternative and its dev-only toggle were removed). */
   --accent: #ff3b5c;
   --accent-soft: rgba(255, 59, 92, 0.18);
 
@@ -85,11 +86,6 @@
     --gutter: 3rem;
     --rhythm: 6rem;
   }
-}
-
-:root[data-accent="violet"] {
-  --accent: #a78bfa;
-  --accent-soft: rgba(167, 139, 250, 0.18);
 }
 
 /* ---------------------------------------------------------------

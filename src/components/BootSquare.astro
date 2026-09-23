@@ -37,7 +37,7 @@ const cells = Array.from({ length: CELLS }, (_, i) => i);
     transition: background-color 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  /* Not --accent, so a filled cell reads the same under both accents. */
+  /* Not --accent: the accent is reserved for the leading edge below. */
   .boot-cell[data-on] {
     background-color: var(--heading);
   }

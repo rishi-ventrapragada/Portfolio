@@ -34,7 +34,7 @@ Governing rules for Claude Code in this repository. Read fully before any action
 - All colors and fonts are CSS custom properties defined once in `src/styles/global.css` `:root`. Components never hardcode a hex or a font-family.
 - Token names are fixed by PRD.md §4. Do not add tokens without asking.
 - Big headings use `--heading`. Side headings, eyebrows, uppercase labels, active nav, link hover use `--accent`. Body `--fg`, secondary `--fg-muted`. Backgrounds `--bg` / `--bg-raised`. Never pure black.
-- Accent is switchable through `data-accent` on `<html>` (`crimson` default, `violet`). Any new accent-colored element must work in both.
+- The accent is crimson, fixed (increment 29 — there is no accent switch; violet and its toggle were removed). Light-scoped sections use its darkened variant from `theme-light.css`. Any new accent-colored element must pass contrast in both the dark root and the light scope.
 - Type: `--font-display` (Space Grotesk) for headings and wordmarks, `--font-mono` (JetBrains Mono) for labels, meta, captions. Labels are uppercase with `letter-spacing: 0.12em`.
 
 ## 4. Motion rules
