@@ -8,6 +8,7 @@
 // href while its file is missing and then renders as a dashed placeholder
 // that is not a link, with `pending` as its visible address. Link cards are
 // magnetic on a fine pointer (scripts/magnetic.ts); the placeholder is not.
+import { linkAttrs } from "../lib/is-url";
 import ContactIcon from "./ContactIcon.astro";
 
 interface Props {
@@ -30,7 +31,7 @@ const address = href
 
 {
   href ? (
-    <a class:list={["card", { prominent }]} href={href} rel="noopener" data-magnetic>
+    <a class:list={["card", { prominent }]} href={href} {...linkAttrs(href)} data-magnetic>
       <ContactIcon name={icon} />
       <span class="text">
         <span class="label-text">{label}</span>

@@ -6,7 +6,7 @@
 // as mono text so the placeholder stays visible; `quick` (the always-visible
 // affordances on no-hover devices) simply skips it. The guard itself is
 // src/lib/is-url.ts, shared with the footer since increment 16.
-import { isUrl } from "../lib/is-url";
+import { isUrl, linkAttrs } from "../lib/is-url";
 
 interface Props {
   links?: { live?: string; repo?: string };
@@ -26,7 +26,7 @@ const rows = [
       {rows.map(({ label, value }) =>
         isUrl(value) ? (
           <li>
-            <a class="label link" href={value} rel="noopener">
+            <a class="label link" href={value} {...linkAttrs(value)}>
               {label}
               {variant === "quick" && <span aria-hidden="true"> &#8599;</span>}
             </a>
