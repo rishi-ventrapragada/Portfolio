@@ -92,6 +92,86 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-23 — increment 24 (three-part batch)
+
+### Last milestone completed
+
+Three commits on `main`, each built clean (0 errors / warnings / hints),
+pushed, aliased and verified on `rishi-ventrapragada.vercel.app`:
+
+- `44f5e2c` **skills** — divider between the tree and the constellation
+  removed (the `<Divider />` after `<SkillTree />` in `index.astro`; the
+  component is untouched). Five seams now.
+- `79a7f63` **experience** — a fifth Starfield, in `.head` only.
+- `4237946` **projects** — light-scoped frames are black film; perforations
+  show the paper.
+
+### Decisions worth knowing before you touch this
+
+- **Experience sky is heading-only (owner's choice).** The monitor and
+  timeline are opaque and fill the pin, so a whole-section sky would never
+  show elsewhere. `.head` now runs to the monitor's top edge: the heading's
+  2rem gap is padding, and `.head` has `margin-bottom: -var(--nav-height)`
+  so the track slides up under it (the pin's transparent top padding). The
+  monitor's document position is unchanged; each scrub zone starts 64px of
+  scroll earlier. Same 160 stars in a 276px box → denser than the other
+  skies. Owner to judge live.
+- **Black frames re-point existing tokens on `.frame` only**
+  (`ProjectFrame.astro`, `[data-theme="light"] .frame`). No new tokens, no
+  literals. `--accent` can't be mixed into itself on one element, so link
+  hover and `:focus-visible` inside the frame mix at the use site.
+- **Sprocket holes: increment 23's "black in every theme" is superseded on
+  the project frames** (owner's choice: `#111214` holes measured 1.1:1 on
+  black). The section scope still doesn't redefine `--sprocket-hole`;
+  the theme-light.css comment says so.
+- **`--monitor-bg` (#000) now has two uses**: the Experience monitor and the
+  light-scoped project frames. PRD §4.2 updated.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §3** — seams six → five; starfield four → five sections.
+- **PRD §5.12** — Skills/Video editing has no divider.
+- **PRD §5.14** — new "Experience" paragraph; **§5.11** — heading over a sky.
+- **PRD §4.2** — `--monitor-bg` and `--sprocket-hole` rows and paragraph.
+- **PRD §5.3** — new "Black frame in the light scope" paragraph.
+- **PRD §5.16** — audit line.
+- CLAUDE.md not touched.
+
+### Verified by measurement
+
+- **A**: 5 dividers; order `DIV #about DIV #skills #skills-video DIV
+  #experience DIV #projects` (+ the footer's); tree→video gap 0px.
+- **B**: five skies (boot, hero, skills, skills-video, experience); the
+  experience sky box equals `.head` exactly, `contain: strict`,
+  `overflow: clip`, touching the divider above (0px), bottom = monitor top
+  (4396 / 4794px at 1280 / 375). Stars `rgb(242,242,242)` only. Reduced
+  motion: drift `none`, twinkle `none` @ 0.8. Scrub commits all four clips.
+- **C** (both accents, 1280 hover + 375 touch): frame and panel `rgb(0,0,0)`;
+  title / summary / pills / links 18.93; frame number 7.16; hover link +
+  focus ring 5.40 crimson / 5.22 violet; hole centre `rgb(244,243,240)`;
+  page, eyebrow 5.43 / 6.40 and heading 16.89 unchanged.
+
+### Harness notes
+
+- Chrome reports `color-mix()` results as `color(srgb 0–1 …)`. Scale by
+  255 before computing a ratio, or everything reads 1.00.
+- Right after `vercel alias set`, the first request can still get the old
+  deployment. Re-run before you trust a mismatch.
+- Astro 7's `astro preview` daemonises and listens on `localhost` (IPv6).
+  `127.0.0.1:4321` refuses. Stop it with `npx astro preview stop`.
+
+### Still open
+
+- **Planned frame contrast**: `.planned` 0.5 opacity makes the black
+  Recurzn frame read mid-grey; composited title 3.88, number 2.49. Below AA,
+  but it was already below AA on the white card (3.63 / 2.24). The fade is
+  the "not shipped" signal. Owner's call.
+- **Experience sky density**: see above.
+
+### Next milestone planned
+
+None queued. Waiting on the owner.
+
 ## 2026-09-23 — increment 23 (six-part batch)
 
 ### Last milestone completed
