@@ -15,9 +15,11 @@ import ExperienceTimeline from "../components/ExperienceTimeline.astro";
   title="Sai Rishi Ventrapragada — Building for the web"
   description="Portfolio of Sai Rishi Ventrapragada, CSE (Data Science) student at VJIT building with React, Astro and Supabase."
 >
-  {/* Perforated seams at every top-level boundary (PRD §5.12). The sixth,
-      Projects→Contact, is at the top of Footer.astro: the footer is rendered
-      by the layout, outside this slot.
+  {/* Perforated seams at every top-level boundary (PRD §5.12) but one:
+      Skills→Video editing has none (owner's call, increment 24), so the two
+      skill sections meet directly. The fifth, Projects→Contact, is at the
+      top of Footer.astro: the footer is rendered by the layout, outside
+      this slot.
 
       About and Projects are light (§5.16), so the three seams that touch
       them are told which side is which: each half punches its own section's
@@ -29,7 +31,6 @@ import ExperienceTimeline from "../components/ExperienceTimeline.astro";
   <About />
   <Divider above="var(--light-bg)" stock="var(--light-stock)" />
   <SkillTree />
-  <Divider />
   <SkillConstellation />
   <Divider />
   <ExperienceTimeline />
