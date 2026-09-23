@@ -47,7 +47,7 @@ const contacts = [
       }
     </ul>
     <div class="resume">
-      <ContactCard label="Résumé" icon="resume" href={hasResume ? "/resume.pdf" : undefined} />
+      <ContactCard label="Résumé" icon="resume" href={hasResume ? "/resume.pdf" : undefined} prominent />
     </div>
   </div>
 
@@ -136,20 +136,23 @@ const contacts = [
     }
 
     .resume {
-      margin-top: -0.625rem;
+      margin-top: 0;
     }
   }
 
-  /* One card wide, centred under the three: the same scale as each of
-     them. Below 960px the cards are one column and so is this. */
+  /* Increment 30: set apart from the three and more prominent — two cards
+     wide, centred, with the body's full gap plus 0.75rem above it (40px at
+     1280, was 16) and the card itself larger (ContactCard `prominent`).
+     Below 960px the cards are one column and so is this; on phones the gap
+     is the body's 1.25rem (20px, was 10). */
   .resume {
     width: 100%;
   }
 
   @media (min-width: 960px) {
     .resume {
-      width: calc((100% - 2rem) / 3);
-      margin-top: -1rem;
+      width: calc((100% - 2rem) * 2 / 3 + 1rem);
+      margin-top: 0.5rem;
     }
   }
 

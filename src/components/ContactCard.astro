@@ -16,9 +16,11 @@ interface Props {
   icon: "github" | "linkedin" | "mail" | "resume";
   /** What the card says in place of an address while there is no href. */
   pending?: string;
+  /** Larger and heavier (the résumé, increment 30). */
+  prominent?: boolean;
 }
 
-const { label, href, icon, pending = "[TODO]" } = Astro.props;
+const { label, href, icon, pending = "[TODO]", prominent = false } = Astro.props;
 // The address as a reader would say it: no scheme, no "www.", no trailing
 // slash, the bare address for mail, the file name for a root-relative path.
 const address = href
@@ -28,7 +30,7 @@ const address = href
 
 {
   href ? (
-    <a class="card" href={href} rel="noopener" data-magnetic>
+    <a class:list={["card", { prominent }]} href={href} rel="noopener" data-magnetic>
       <ContactIcon name={icon} />
       <span class="text">
         <span class="label-text">{label}</span>
@@ -36,7 +38,7 @@ const address = href
       </span>
     </a>
   ) : (
-    <div class="card" data-pending>
+    <div class:list={["card", { prominent }]} data-pending>
       <ContactIcon name={icon} />
       <span class="text">
         <span class="label-text">{label}</span>
@@ -138,6 +140,23 @@ const address = href
     letter-spacing: 0.02em;
   }
 
+  /* The résumé (increment 30): taller, a larger label and glyph, so it
+     carries the weight of the row above rather than trailing under it. */
+  .prominent {
+    min-height: 6rem;
+    padding: 1.25rem 1.75rem;
+    gap: 1.25rem;
+  }
+
+  .prominent .label-text {
+    font-size: 1.5rem;
+  }
+
+  .prominent :global(.icon) {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
   @media (max-width: 479.98px) {
     .card {
       min-height: 3.75rem;
@@ -146,6 +165,14 @@ const address = href
 
     .label-text {
       font-size: 1.0625rem;
+    }
+
+    .prominent {
+      min-height: 4.25rem;
+    }
+
+    .prominent .label-text {
+      font-size: 1.25rem;
     }
   }
 
