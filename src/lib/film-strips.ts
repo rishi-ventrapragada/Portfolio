@@ -56,3 +56,17 @@ export function edgeCode() {
   }
   return { H, tile: FOOT * FEET, ink, keys };
 }
+
+/**
+ * Countdown leader, the Projects/Contact seam (LeaderStrip.astro): the
+ * SMPTE-style run a projectionist sees before the picture — a START frame,
+ * then 8 down to 2, each a ring and crosshair. The site ends on its credits,
+ * so the seam before them is the reel's leader. The owner's pick of two
+ * screenshotted options (the other was a light "END" tail leader).
+ */
+export function countdown() {
+  const H = 48;
+  const F = 72;
+  const frames = ["START", "8", "7", "6", "5", "4", "3", "2"].map((n, i) => ({ x: i * F, n }));
+  return { H, F, tile: F * frames.length, frames };
+}

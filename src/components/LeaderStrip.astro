@@ -1,0 +1,90 @@
+---
+// The Projects/Contact seam since increment 29 (PRD §5.12): a countdown
+// leader, replacing the checkered racing flag, which was never film. Drawn
+// as one SVG tile (lib/film-strips.ts) repeated by a <pattern> inside
+// LoopDivider's drifting track: a START frame, then 8 down to 2, each a ring
+// and crosshair on dark leader, in off-white and --fg-muted — no accent.
+import { countdown } from "../lib/film-strips";
+import LoopDivider from "./LoopDivider.astro";
+
+const c = countdown();
+const mid = c.H / 2;
+---
+
+<LoopDivider variant="strip" tile={c.tile} height={c.H}>
+  <svg class="strip" width="100%" height="100%" focusable="false">
+    <defs>
+      <pattern id="countdown-leader" width={c.tile} height={c.H} patternUnits="userSpaceOnUse">
+        <rect class="stock" width={c.tile} height={c.H} />
+        {
+          c.frames.map(({ x, n }) => (
+            <g transform={`translate(${x} 0)`}>
+              <rect class="frame" x="2" y="3" width={c.F - 4} height={c.H - 6} rx="3" />
+              {n === "START" ? (
+                <text class="start" x={c.F / 2} y={mid + 4}>
+                  START
+                </text>
+              ) : (
+                <Fragment>
+                  <line class="hair" x1="2" y1={mid} x2={c.F - 2} y2={mid} />
+                  <line class="hair" x1={c.F / 2} y1="3" x2={c.F / 2} y2={c.H - 3} />
+                  <circle class="ring" cx={c.F / 2} cy={mid} r="16" />
+                  <text class="num" x={c.F / 2} y={mid + 7}>
+                    {n}
+                  </text>
+                </Fragment>
+              )}
+            </g>
+          ))
+        }
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#countdown-leader)" />
+  </svg>
+</LoopDivider>
+
+<style>
+  .strip {
+    display: block;
+  }
+
+  .stock {
+    fill: var(--bg);
+  }
+
+  .frame {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .hair {
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+
+  .ring {
+    fill: none;
+    stroke: var(--heading);
+    stroke-width: 1.5;
+  }
+
+  .num,
+  .start {
+    text-anchor: middle;
+    fill: var(--heading);
+  }
+
+  .num {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .start {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+  }
+</style>

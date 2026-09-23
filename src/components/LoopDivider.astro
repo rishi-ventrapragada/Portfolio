@@ -1,8 +1,8 @@
 ---
 // A drifting pattern seam between two sections (PRD §5.12, increment 25):
-// a checkered finish-line flag, clapperboard stripes with an accent
-// pinstripe, or (since increment 29) an SVG film strip slotted in by its
-// own component — EdgeCode.astro. Each loops right to left forever.
+// clapperboard stripes with an accent pinstripe, or (since increment 29) an
+// SVG film strip slotted in by its own component — EdgeCode.astro and
+// LeaderStrip.astro. Each loops right to left forever.
 //
 // The loop is Starfield.astro's: a track twice the width of one copy of the
 // pattern, translated -50%, so the second copy lands exactly where the first
@@ -14,7 +14,7 @@
 //
 // The sprocket Divider.astro still owns Hero/About; this owns the rest.
 interface Props {
-  variant: "checker" | "clapper" | "strip";
+  variant: "clapper" | "strip";
   /** "strip" only: the slotted SVG's tile width and height, px. */
   tile?: number;
   height?: number;
@@ -24,8 +24,8 @@ const { variant, tile, height } = Astro.props;
 const style = variant === "strip" ? `--tile-w: ${tile}px; --h: ${height}px` : undefined;
 ---
 
-{/* A "strip" draws its tile as SVG (EdgeCode.astro), slotted into the
-    track: the loop mechanics below are the same. */}
+{/* A "strip" draws its tile as SVG (EdgeCode.astro, LeaderStrip.astro),
+    slotted into the track: the loop mechanics below are the same. */}
 <div class="loop" data-variant={variant} data-offscreen-pause aria-hidden="true" style={style}>
   <div class="track"><slot /></div>
 </div>
@@ -69,22 +69,6 @@ const style = variant === "strip" ? `--tile-w: ${tile}px; --h: ${height}px` : un
     to {
       transform: translateX(-50%);
     }
-  }
-
-  /* --- Checkered finish-line flag ---------------------------------------
-     One tile is 2 × 2 squares; the conic gradient paints its quadrants. */
-  [data-variant="checker"] {
-    --square: 16px;
-    --rows: 3;
-    --h: calc(var(--square) * var(--rows));
-    --tile-w: calc(var(--square) * 2);
-    --tile-h: var(--tile-w);
-    --loop: 40s;
-  }
-
-  [data-variant="checker"] .track {
-    background-repeat: repeat;
-    background-image: conic-gradient(var(--bg) 25%, var(--heading) 0 50%, var(--bg) 0 75%, var(--heading) 0);
   }
 
   /* --- Clapperboard ------------------------------------------------------
