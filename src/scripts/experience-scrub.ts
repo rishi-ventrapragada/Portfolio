@@ -5,7 +5,7 @@
 // Reads only, one requestAnimationFrame per scroll event, absolute scrollY
 // each frame so direction does not matter (the hero-dissolve.ts pattern).
 // Listeners are live only while the track is on screen. `section` is the
-// scroll track ([data-scrub]) — the heading above it is ordinary flow.
+// scroll track ([data-scrub]); since increment 30 the heading is inside it.
 
 export function initScrub(section: HTMLElement, ids: readonly string[], commit: (id: string) => void): void {
   let zone = -1;

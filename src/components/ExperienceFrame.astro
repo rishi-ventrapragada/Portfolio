@@ -142,6 +142,19 @@ const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
     }
   }
 
+  /* Short landscape: the monitor is under 200px tall once the heading band
+     sits in the pin (increment 30), so the sentence is capped by the
+     monitor's height as well and the padding tightens. */
+  @media (max-height: 500px) {
+    .frame {
+      padding-block: 0.75rem 2rem;
+    }
+
+    .body {
+      font-size: min(clamp(1.75rem, 4vw, 3rem), 13cqh);
+    }
+  }
+
   .timecode {
     position: absolute;
     right: var(--gutter);
