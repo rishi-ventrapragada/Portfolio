@@ -1,58 +1,29 @@
 ---
-// About (PRD §5.6): a comic page. The eyebrow, heading and panel grid share
-// the shell, so the panels line up with the heading and stop at its gutter
-// (increment 23 — edge to edge, the grid read as spilling off the page).
-// Increment 16 ships the structure and the mechanic only: every panel's art
-// and dialogue is a visibly marked placeholder (CLAUDE.md §7) until the
-// owner supplies them. One panel = AboutPanel.astro.
-//
-// Colour grade: one CSS animation on the grid cycles a `filter` through full
-// colour → grayscale → warm duotone and back, so every panel shifts together.
-// It runs on the clock, not on scroll (owner's decision), and needs no
-// script. Reduced motion removes the animation, which leaves the filter at
-// its rest value — frozen on full colour.
-//
-// Reveal (increment 23): each panel fades up the first time it scrolls into
-// view and then stays (scripts/about-reveal.ts). Normal scroll, no pinning.
-import AboutPanel from "./AboutPanel.astro";
-
-// The five fills come from the small palette in global.css (all five words
-// are now in use). The first panel is the establishing shot: two columns by
-// two rows on desktop, first in the stack on a phone.
-const panels = [
-  { n: 1, tone: "amber", establishing: true },
-  { n: 2, tone: "sky" },
-  { n: 3, tone: "mint" },
-  { n: 4, tone: "periwinkle" },
-  { n: 5, tone: "coral" },
-] as const;
+// About (PRD §5.6). Since increment 29 this shows the owner's approved bio as
+// plain text: a TEMPORARY content swap, not a design decision. The comic page
+// (AboutComic.astro, with AboutPanel.astro and scripts/about-reveal.ts) is
+// kept intact but not rendered, because its art and dialogue are still
+// "[TODO]" placeholders that visitors should never see (CLAUDE.md §7). Swap
+// the .bio block below for <AboutComic /> once real panel art and captions
+// exist. The copy is the owner's, verbatim.
+const bio =
+  "CSE (Data Science) student at VJIT, started 2025. I build things end to end — plan the architecture, make the calls, and use AI tools like Claude Code to implement fast. KalaCart, an artisan marketplace built for Smart India Hackathon 2026, is the first thing I've shipped that had to survive contact with a real deadline and a real ministry review.";
+const club = "Production team member, GDG on Campus VJIT — social media and video editing for the club's channels.";
 ---
 
-{/* Light-scoped (PRD §5.16). The attribute sits on the section, not on an
-    inner wrapper: .page runs full-bleed inside it and its gutters are the
-    section's own background showing between the panels, so an ancestor that
-    actually paints is the only place this works. */}
+{/* Light-scoped (PRD §5.16). No top rule: the hero subject fades into this
+    section, and a hairline right under the fade would read as a cut. */}
 <section class="about" id="about" data-theme="light" aria-labelledby="about-heading">
-  {/* No top rule: the hero subject fades into this section, and a hairline
-      right under the fade would read as a cut. */}
-  <div class="shell head">
+  <div class="shell">
     <p class="label eyebrow">Origin story</p>
     <h2 id="about-heading" class="heading">About</h2>
-  </div>
 
-  <div class="shell">
-    <div class="page" data-about-page data-offscreen-pause>
-      {panels.map((panel) => <AboutPanel {...panel} />)}
+    <div class="bio">
+      <p class="lede">{bio}</p>
+      <p class="club">{club}</p>
     </div>
   </div>
 </section>
-
-<script>
-  import { initAboutReveal } from "../scripts/about-reveal";
-
-  const page = document.querySelector<HTMLElement>("[data-about-page]");
-  if (page) initAboutReveal(page);
-</script>
 
 <style>
   .about {
@@ -69,62 +40,29 @@ const panels = [
     font-size: var(--size-h2);
   }
 
-  /* Phone: one column, the establishing panel first. The gap is the page
-     background showing between the panels' hairline borders. Inside the
-     shell, so its edges are the heading's gutter, never the viewport's. */
-  .page {
+  /* A reading measure, not the full shell: ~34em of display type. */
+  .bio {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.75rem;
-    animation: grade 15s linear infinite;
+    gap: 1.5rem;
+    max-width: 44rem;
   }
 
-  /* From 768px: four columns by two rows, the establishing panel spanning
-     the left half. aspect-ratio makes each cell roughly square without a
-     fixed height; max-height caps it at the viewport below the fixed bar, so
-     on a short wide screen the whole page still fits in view at once rather
-     than running up under the nav (the rows just get shorter). */
-  @media (min-width: 768px) {
-    .page {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      grid-template-rows: repeat(2, minmax(0, 1fr));
-      aspect-ratio: 2 / 1;
-      max-height: calc(100dvh - var(--nav-height) - 2rem);
-    }
-
-    .page > :global(.establishing) {
-      grid-column: 1 / 3;
-      grid-row: 1 / 3;
-    }
+  .lede,
+  .club {
+    margin: 0;
   }
 
-  /* Three 5s holds with ~0.6s crossfades between them (15s loop). Every
-     keyframe lists the same four functions in the same order so the browser
-     interpolates the filter instead of snapping. The rest value (the first
-     keyframe) is full colour: filters at their identity. */
-  @keyframes grade {
-    0%,
-    31% {
-      filter: grayscale(0) sepia(0) saturate(1) hue-rotate(0deg);
-    }
-    35%,
-    64% {
-      filter: grayscale(1) sepia(0) saturate(1) hue-rotate(0deg);
-    }
-    68%,
-    97% {
-      filter: grayscale(0) sepia(1) saturate(1.3) hue-rotate(-15deg);
-    }
-    100% {
-      filter: grayscale(0) sepia(0) saturate(1) hue-rotate(0deg);
-    }
+  .lede {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--fg);
   }
 
-  /* A recurring filter change is motion (CLAUDE.md §4): freeze on full
-     colour rather than keep cycling. No animation means no filter at all. */
-  @media (prefers-reduced-motion: reduce) {
-    .page {
-      animation: none;
-    }
+  .club {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--fg-muted);
   }
 </style>
