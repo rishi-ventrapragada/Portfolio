@@ -104,7 +104,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
   </body>
 </html>
 
+<script>
+  import { initOffscreenPause } from "../scripts/offscreen-pause";
+
+  initOffscreenPause();
+</script>
+
 <style>
+  /* Decorative loops pause while out of view (scripts/offscreen-pause.ts).
+     !important is load-bearing, not a shortcut: every paused element runs
+     its loop from a component's own scoped `animation` shorthand, and that
+     shorthand resets animation-play-state to `running` at a higher
+     specificity (a scoped class plus attributes) than this generic,
+     component-agnostic rule can ever have. Only an important declaration
+     outranks every one of them without restating each selector here. */
+  :global([data-offscreen]),
+  :global([data-offscreen] *) {
+    animation-play-state: paused !important;
+  }
+
   .skip-link {
     position: absolute;
     top: 0;

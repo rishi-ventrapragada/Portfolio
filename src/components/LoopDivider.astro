@@ -22,7 +22,7 @@ const { variant } = Astro.props;
 const style = variant === "barcode" ? `--code: ${barcode.gradient}; --tile-w: ${barcode.width}px` : undefined;
 ---
 
-<div class="loop" data-variant={variant} aria-hidden="true" style={style}>
+<div class="loop" data-variant={variant} data-offscreen-pause aria-hidden="true" style={style}>
   <div class="track"></div>
 </div>
 

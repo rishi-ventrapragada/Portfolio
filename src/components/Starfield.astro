@@ -19,7 +19,7 @@ import { layers } from "../lib/starfield-data";
 import StarfieldMeteors from "./StarfieldMeteors.astro";
 ---
 
-<div class="sky" data-sky aria-hidden="true">
+<div class="sky" data-sky data-offscreen-pause aria-hidden="true">
   {
     layers.map((layer) => (
       <div class="layer" data-layer={layer.name} style={`--drift: ${layer.drift}s; --layer-opacity: ${layer.opacity}`}>
