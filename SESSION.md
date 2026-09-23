@@ -92,6 +92,41 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-23 — increment 26 (barcode scale-up)
+
+### Last milestone completed
+
+One `dividers:` commit plus this handoff: the About/Skills barcode is now
+**64px tall, bars 2–8px, gaps 2–6px, 852px tile** (seed 26), bars 8px short
+of each edge. Owner picked it over a denser variant (200 × 1–3px bars,
+1–2px gaps, 32px, 716px tile) from side-by-side 1280 / 375 shots taken in
+the live seam. Clapper and checker untouched.
+
+`barcode-data.ts` is now a `makeBarcode({ seed, bars, bar, gap })`
+generator; the old and rejected specs are recorded in its comment.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.12** — barcode table row, increment 26 paragraph, track widths.
+- CLAUDE.md not touched.
+
+### Verified
+
+Local and live: half-track 1704px = 2 tiles (1280, 1000), 852 = 1 tile
+(375); frame 0 vs −50% byte-identical at all three; `reduce` →
+`animation-name: none`; no horizontal overflow; one sprocket, clapper 28px,
+checker 48px unchanged.
+
+### Still open
+
+- The seam is 32px taller than before — owner to judge live.
+- Carried over from increment 25: résumé PDF, Google brand terms,
+  planned-frame contrast, Experience sky density, 320px nav.
+
+### Next milestone planned
+
+None queued. Waiting on the owner.
+
 ## 2026-09-23 — increment 25 (five-part batch)
 
 ### Last milestone completed
