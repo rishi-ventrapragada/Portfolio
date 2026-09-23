@@ -17,9 +17,11 @@
   /* Surfaces and text.
      NOTE: --bg is duplicated as a literal in BaseLayout.astro's inline
      critical-paint <style>, because this file is an external stylesheet and
-     is not parsed in time for the first paint. Change both together. */
-  --bg: #111214;
-  --bg-raised: #1a1b1e;
+     is not parsed in time for the first paint. Change both together.
+     Increment 30: darkened from #111214 / #1a1b1e, which read grey; the
+     two tokens darker than --bg below moved with it to stay darker. */
+  --bg: #0b0b0d;
+  --bg-raised: #141518;
   --fg: #ffffff;
   --fg-muted: #9a9ca3;
   --line: #2a2b30;
@@ -27,14 +29,14 @@
   /* Boot preloader square backdrop (PRD §5.10): the not-yet-revealed area of
      the loading square. Darker than --bg so the box reads as a distinct object
      against the overlay's starfield. */
-  --boot-square-bg: #0b0c0e;
+  --boot-square-bg: #060607;
   /* Experience monitor and timeline (PRD §5.11). The monitor is the one
      surface allowed to be pure black: an NLE preview monitor reads as a
      screen, not a card, and the owner chose #000 for it (increment 13.1).
      The timeline sits between the monitor and --bg so the whole editor
      reads as one dark object on the page. */
   --monitor-bg: #000000;
-  --timeline-bg: #0b0c0e;
+  --timeline-bg: #060607;
 
   /* Accent — crimson, fixed (increment 29: the owner locked it; the violet
      alternative and its dev-only toggle were removed). */

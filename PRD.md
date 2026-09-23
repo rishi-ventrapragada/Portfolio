@@ -44,15 +44,15 @@ Dark editorial. Magazine-cover hero (full-width wordmark behind a cutout subject
 ### 4.2 Tokens (single source in `src/styles/global.css`)
 
 ```
---bg:        #111214   page background
---bg-raised: #1a1b1e   cards, nav after scroll
+--bg:        #0b0b0d   page background (increment 30; was #111214)
+--bg-raised: #141518   cards, nav after scroll (increment 30; was #1a1b1e)
 --fg:        #ffffff   body text
 --fg-muted:  #9a9ca3   secondary text, meta labels
 --line:      #2a2b30   hairlines, dividers
 --heading:   #f2f2f2   large headings and wordmarks
---boot-square-bg: #0b0c0e   boot preloader square backdrop (§5.10) — the only place it is used
+--boot-square-bg: #060607   boot preloader square backdrop (§5.10) — the only place it is used
 --monitor-bg:  #000000   Experience monitor (§5.11) — pure black, chosen so the NLE monitor reads as a screen; since increment 24 also the light-scoped project frames' film (§5.3), the only other use
---timeline-bg: #0b0c0e   Experience timeline ground (§5.11), between the monitor and --bg
+--timeline-bg: #060607   Experience timeline ground (§5.11), between the monitor and --bg
 
 Small palette (the Experience clips use amber, sky, mint and periwinkle, §5.11; the dormant About comic's placeholder fills use all five, coral included, §5.6):
   --word-amber: #ffb454; --word-coral: #ff8f6b; --word-sky: #6ec9f5; --word-mint: #4ade80; --word-periwinkle: #8ea9ff
@@ -64,17 +64,19 @@ Accent, crimson, fixed (increment 29 — the violet alternative, its data-accent
 --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace (weights 400, 500)
 ```
 
+**Increment 30 — darker ground.** `--bg` and `--bg-raised` read grey and were darkened to a richer near-black (not `#000`, which stays the monitor's alone). `--boot-square-bg` and `--timeline-bg` are defined as darker than `--bg`, so they moved with it (the timeline still sits between the monitor and `--bg`). `BaseLayout.astro`'s first-paint literals and `theme-color` follow `--bg`. `--on-accent` stays `#111214`: it is ink on the accent, not a surface. Every text pairing was re-swept (452 reads, 1280 and 375, top and end): **every ratio that changed went up**, 0 failures — e.g. body 17.22 → 18.26, nav links 18.74 → 19.66, headings 16.74 → 17.57, crimson labels 5.38 → 5.65, `--fg-muted` meta 6.28 → 6.66, the "Now" clip 4.98 → 5.18, the learning leaves 5.11 → 5.16. Non-text: focus ring on `--bg-raised` 4.95 → 5.24; surface steps shrink slightly (`--bg-raised` vs `--bg` 1.09 → 1.08, timeline vs monitor 1.07 → 1.04); `--line` hairlines stay decorative (1.33 → 1.39 on `--bg`).
+
 Usage: big headings `--heading`; side headings, eyebrows, labels, active nav, link hover `--accent`; body `--fg`; secondary `--fg-muted`.
 
 **Tokens that are not surfaces (increment 22).** Three tokens exist because a component needed a colour whose *meaning* was not "this section's background", and using `--bg` or `--monitor-bg` as a stand-in broke the moment a section was light-scoped (§5.16):
 
 ```
 --on-accent      ink on a solid accent fill      #111214 dark / #ffffff light
---sprocket-hole  a film perforation's fill                      #111214 (dark root value), except on a light-scoped project frame: --light-bg (increment 24)
+--sprocket-hole  a film perforation's fill                      #0b0b0d (dark root value, = --bg), except on a light-scoped project frame: --light-bg (increment 24)
 --shadow         the colour a card's drop shadow mixes from
 ```
 
-`--on-accent` is not `--bg`: measured, near-black reads **5.38:1** on dark-theme crimson but only **3.11:1** on the light scope's darkened crimson, where white reads **6.02:1** — the right ink flips with the theme while `--bg` flips the other way. `--sprocket-hole` is not `--bg` because ProjectFrame's holes are *painted*, not punched. **Increment 23 made the perforations black in every theme** (owner's decision — film stock is dark whatever it lies on): the light scope deliberately does *not* redefine the token, so every element inside it inherits the value `:root` already resolved, `#111214`. Increment 22 had redefined it there as `var(--bg)`, which re-resolved to paper. **Increment 24 superseded that for the project frames only**: the frame itself went black (§5.3), `#111214` holes measured 1.1:1 on it, and the owner chose holes that show the paper — the frame re-points the token to `--light-bg` on itself. The section scope still does not redefine it. `--shadow` replaces a `color-mix` of `--monitor-bg`, which is the Experience NLE surface being borrowed purely as a source of black, and is far too heavy on a light card. `AboutPanel` carries a fourth, local `--tag-ink`, which flips the *opposite* way from `--on-accent` (see §5.6).
+`--on-accent` is not `--bg`: measured, near-black reads **5.38:1** on dark-theme crimson but only **3.11:1** on the light scope's darkened crimson, where white reads **6.02:1** — the right ink flips with the theme while `--bg` flips the other way. `--sprocket-hole` is not `--bg` because ProjectFrame's holes are *painted*, not punched. **Increment 23 made the perforations black in every theme** (owner's decision — film stock is dark whatever it lies on): the light scope deliberately does *not* redefine the token, so every element inside it inherits the value `:root` already resolved (`#111214` then, `#0b0b0d` since increment 30). Increment 22 had redefined it there as `var(--bg)`, which re-resolved to paper. **Increment 24 superseded that for the project frames only**: the frame itself went black (§5.3), `#111214` holes measured 1.1:1 on it, and the owner chose holes that show the paper — the frame re-points the token to `--light-bg` on itself. The section scope still does not redefine it. `--shadow` replaces a `color-mix` of `--monitor-bg`, which is the Experience NLE surface being borrowed purely as a source of black, and is far too heavy on a light card. `AboutPanel` carries a fourth, local `--tag-ink`, which flips the *opposite* way from `--on-accent` (see §5.6).
 
 ### 4.3 Type scale
 - Wordmark: not a type-scale token. An inline SVG sized by width — `clamp(320px, 72vw, 1100px)`, 88vw below 640px — weight 700, placed from the hero subject (§5.2).
@@ -320,7 +322,7 @@ Full-viewport overlay, content vertically and horizontally **centred**, max-widt
 
 **Foreground**, stacked and centred with a 1rem gap:
 1. **Percentage readout** — `--font-mono`, `1.125rem`, `--fg`, `tabular-nums`. Directly above the square. Rendered `0%` in the markup, so the overlay is never blank before script runs.
-2. **The square** (`BootSquare.astro`) — `clamp(120px, 20vw, 180px)` (120px at 375, 180px at 1280), background `--boot-square-bg` (`#0b0c0e`): the unfilled box, darker than `--bg` so it reads as a distinct object against the starfield. Since increment 12 it is a CSS grid of **8 × 8 = 64 cells** with **2px gaps** (cells 20.75px at 1280, 13.25px at 375), so they read as distinct blocks rather than a smooth surface. An unfilled cell is transparent over the box; a filled cell (`data-on`) is `--heading` — not `--accent`, so the fill reads the same under both accents. The **two newest cells carry `data-lead` and sit in `--accent`** until the next step lands, then settle to `--heading`: a leading edge that shows where the fill is now, and the one accent-switchable element on the boot screen (the job the old ring did). Chosen over a plain `--heading`-only fill by eye, both built and screenshotted at the same steps. Each cell pops in with a `120ms` ease-out `background-color` transition, `none` under reduced motion. All 64 cells render unfilled, so the frame before script runs shows the empty box.
+2. **The square** (`BootSquare.astro`) — `clamp(120px, 20vw, 180px)` (120px at 375, 180px at 1280), background `--boot-square-bg` (`#060607` since increment 30): the unfilled box, darker than `--bg` so it reads as a distinct object against the starfield. Since increment 12 it is a CSS grid of **8 × 8 = 64 cells** with **2px gaps** (cells 20.75px at 1280, 13.25px at 375), so they read as distinct blocks rather than a smooth surface. An unfilled cell is transparent over the box; a filled cell (`data-on`) is `--heading` — not `--accent`, so the fill reads the same under both accents. The **two newest cells carry `data-lead` and sit in `--accent`** until the next step lands, then settle to `--heading`: a leading edge that shows where the fill is now, and the one accent-switchable element on the boot screen (the job the old ring did). Chosen over a plain `--heading`-only fill by eye, both built and screenshotted at the same steps. Each cell pops in with a `120ms` ease-out `background-color` transition, `none` under reduced motion. All 64 cells render unfilled, so the frame before script runs shows the empty box.
 
    **Fill order.** `FILL_ORDER` in `src/scripts/boot-fill.ts` is a literal permutation of 0–63 (row-major index = row × 8 + column), generated **once, offline**, by a Fisher–Yates shuffle over mulberry32 with **seed 73** and pasted into source — nothing is shuffled at runtime, so the pattern is identical on every load and inspectable in the file. Seed 73 was chosen because its first eight cells `[5, 15, 8, 25, 46, 57, 43, 9]` land in five rows, six columns and no more than three per quadrant, so the fill reads scattered from the first step; it is neither raster nor spiral. Fixed rather than random for the same reason the pause points and the readiness table are: reproducible for the harness, and this plays once per session.
 

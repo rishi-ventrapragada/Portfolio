@@ -37,12 +37,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <style is:inline>
       :root {
         color-scheme: dark;
-        background-color: #111214;
+        background-color: #0b0b0d;
       }
       html,
       body {
         margin: 0;
-        background-color: #111214;
+        background-color: #0b0b0d;
       }
       /* The preloader overlay covers the hero from the first paint, so the
          hero must never be visible behind it even before global.css lands. */
@@ -50,7 +50,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
         position: fixed;
         inset: 0;
         z-index: 200;
-        background-color: #111214;
+        background-color: #0b0b0d;
       }
     </style>
 
@@ -58,7 +58,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <link rel="canonical" href={canonical} />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#111214" />
+    <meta name="theme-color" content="#0b0b0d" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />

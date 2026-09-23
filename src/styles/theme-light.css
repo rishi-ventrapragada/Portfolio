@@ -51,7 +51,7 @@
   /* --sprocket-hole is deliberately NOT redefined here (increment 23). The
      film perforations stay black in every theme — film stock is dark
      whatever it is lying on. A custom property inherits its value already
-     resolved: :root's `var(--bg)` becomes #111214 there, and that is what
+     resolved: :root's `var(--bg)` becomes #0b0b0d there, and that is what
      every element inside this scope receives. Redefining it here as
      `var(--bg)` (increment 22) re-resolved it to the paper colour.
      Exception since increment 24: a project frame is black film here, so
