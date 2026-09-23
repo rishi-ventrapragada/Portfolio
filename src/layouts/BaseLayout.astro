@@ -8,6 +8,7 @@ import Footer from "../components/Footer.astro";
 import AccentToggle from "../components/AccentToggle.astro";
 import BootPreloader from "../components/BootPreloader.astro";
 import Nav from "../components/Nav.astro";
+import StarfieldDefs from "../components/StarfieldDefs.astro";
 
 interface Props {
   title: string;
@@ -67,6 +68,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <meta name="twitter:url" content={canonical} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+
+    <StarfieldDefs />
 
     <Font cssVariable="--font-display-src" preload />
     <Font cssVariable="--font-mono-src" />

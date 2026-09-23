@@ -2,8 +2,13 @@
 // A drifting star sky behind a section (PRD §5.14), ported from the Recurzn /
 // Life OS effect. Three parallax layers drift left at different speeds; the
 // two nearer ones twinkle; three meteors cross on coprime periods, at
-// Recurzn's own scale (StarfieldMeteors.astro, split for the line cap). Positions
-// are generated at build time (lib/starfield-data.ts) — no client script.
+// Recurzn's own scale (StarfieldMeteors.astro, split for the line cap).
+// Positions are generated at build time (lib/starfield-data.ts).
+//
+// Since increment 28 the stars are not elements. Every star of every layer
+// is a box-shadow in a list defined ONCE per page (StarfieldDefs.astro, in
+// the <head>); a mount is a dozen-odd elements that paint those lists — one
+// per twinkle group — so five mounts no longer ship 800 spans.
 //
 // Monochrome on purpose: every star, twinkle and streak is --heading, the
 // wordmark's off-white. The accent belongs to the interface, not the sky.
@@ -14,19 +19,18 @@ import { layers } from "../lib/starfield-data";
 import StarfieldMeteors from "./StarfieldMeteors.astro";
 ---
 
-<div class="sky" aria-hidden="true">
+<div class="sky" data-sky aria-hidden="true">
   {
     layers.map((layer) => (
       <div class="layer" data-layer={layer.name} style={`--drift: ${layer.drift}s; --layer-opacity: ${layer.opacity}`}>
-        {/* 200% wide and translated -50%: the second half is the first
-            half's copy, so the wrap is invisible. */}
+        {/* 200% wide and translated -50%: every star is also drawn one layer
+            width to the right, so the wrap is invisible. */}
         <div class="track">
-          {layer.stars.map((star) => (
+          {layer.groups.map((group) => (
             <span
-              class="star"
+              class="stars"
               data-twinkle={layer.twinkles ? "" : undefined}
-              data-bloom={star.size > 1 ? "" : undefined}
-              style={`left: ${star.x}%; top: ${star.y}%; --s: ${star.size}px; --dur: ${star.duration}s; --delay: ${star.delay}s`}
+              style={`box-shadow: var(${group.prop}); --dur: ${group.duration}s; --delay: ${group.delay}s`}
             />
           ))}
         </div>
@@ -50,17 +54,18 @@ import StarfieldMeteors from "./StarfieldMeteors.astro";
     pointer-events: none;
   }
 
-  /* A size container so each star's seam copy can be offset by exactly one
-     layer width (100cqw), whatever the section's width turns out to be. */
+  /* A size container: every star offset is in cqw / cqh of the layer, so
+     the sky scales with its section and the seam copy is exactly one layer
+     width (100cqw) to the right. */
   .layer {
     position: absolute;
     inset: 0;
-    container-type: inline-size;
+    container-type: size;
     opacity: var(--layer-opacity);
   }
 
-  /* will-change on the two moving wrappers only, never on the hundreds of
-     stars inside them: a layer is one composited surface. */
+  /* will-change on the two moving wrappers only: a layer is one composited
+     surface. */
   .layer[data-layer="near"],
   .layer[data-layer="mid"] {
     will-change: transform;
@@ -84,38 +89,20 @@ import StarfieldMeteors from "./StarfieldMeteors.astro";
     }
   }
 
-  .star {
-    position: absolute;
-    width: var(--s);
-    height: var(--s);
-    border-radius: 50%;
-    background-color: var(--heading);
-  }
-
-  /* Each star is authored once in the track's left half and repeated by a
-     sibling exactly one half-track to the right, so when the animation ends
-     at -50% the copy sits where the original started. The offset is in the
-     layer's own width (the track is 200% of it), which is what `100cqw`
-     resolves to here — hence the inline-size container on .layer. */
-  .star::after {
-    content: "";
+  /* One twinkle group: a 1px round dot at the track's corner that paints
+     nothing itself — its stars are its shadows. Shadows without a colour
+     take currentColor, so the whole sky follows --heading. */
+  .stars {
     position: absolute;
     top: 0;
-    left: 100cqw;
-    width: var(--s);
-    height: var(--s);
+    left: 0;
+    width: 1px;
+    height: 1px;
     border-radius: 50%;
-    background-color: inherit;
-    box-shadow: inherit;
+    color: var(--heading);
   }
 
-  /* Bloom is a static shadow on the 2px and 3px stars only — it is depth,
-     not animation, so it costs nothing per frame. */
-  .star[data-bloom] {
-    box-shadow: 0 0 calc(var(--s) * 3) calc(var(--s) / 3) color-mix(in srgb, var(--heading) 45%, transparent);
-  }
-
-  .star[data-twinkle] {
+  .stars[data-twinkle] {
     animation: twinkle var(--dur) ease-in-out var(--delay) infinite;
   }
 
@@ -138,7 +125,7 @@ import StarfieldMeteors from "./StarfieldMeteors.astro";
       animation: none;
     }
 
-    .star[data-twinkle] {
+    .stars[data-twinkle] {
       animation: none;
       opacity: 0.8;
     }

@@ -1,0 +1,11 @@
+---
+// The star lists every Starfield mount paints (PRD §5.14, increment 28):
+// one inline <style> per page, rendered once by BaseLayout, instead of the
+// same 160 star elements repeated in all five mounts. Inline because the
+// lists are generated at build time (lib/starfield-data.ts) and a scoped
+// <style> cannot take data. Custom properties only — no colours, no fonts:
+// the shadows use currentColor, which Starfield.astro sets to --heading.
+import { skyCss } from "../lib/starfield-data";
+---
+
+<style is:inline set:html={skyCss} />
