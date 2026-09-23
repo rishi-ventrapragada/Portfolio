@@ -8,19 +8,21 @@
 //
 // Increment 23: the credit lines ACCUMULATE. Each scroll zone adds one line
 // and keeps the ones before it, so the block assembles in place
-// (FooterCredits.astro); one more zone holds it complete, and the last
-// cross-fades to the contact screen. scripts/footer-scrub.ts owns the zones
-// and the keyboard reveal.
+// (FooterCredits.astro). Since increment 30 there are six credit stages — a
+// blank screen, then one line per zone up to the name, which holds the
+// complete block — and the last zone cross-fades to the contact screen.
+// scripts/footer-scrub.ts owns the zones and the keyboard reveal.
 import FooterContact from "./FooterContact.astro";
 import FooterCredits from "./FooterCredits.astro";
 import FooterStage from "./FooterStage.astro";
 import LeaderStrip from "./LeaderStrip.astro";
 import ProjectorBeam from "./ProjectorBeam.astro";
 
-// The credit, one line per entry, in the order they build up. Plain text —
-// regroup or reword freely; the zones follow the number of lines. The last
-// line is styled as the name.
-const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapragada"];
+// The credit, one line per entry, in the order they build up (the owner's
+// copy, increment 30 — "And" spelled out). Plain text; the zones follow the
+// number of lines, so remember --pin-length below. The last line is styled
+// as the name.
+const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ventrapragada"];
 ---
 
 {/* The Projects→Contact seam (PRD §5.12): the countdown leader (increment
@@ -39,7 +41,7 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
       [data-credits-pin] { position: static !important; height: auto !important; overflow: visible !important; }
       [data-credits-stack] { display: block !important; }
       [data-credits-stage] { opacity: 1 !important; pointer-events: auto !important; transform: none !important; }
-      [data-credit-line] { opacity: 1 !important; transform: none !important; }
+      [data-credit-line], .credits::before { opacity: 1 !important; transform: none !important; }
       [data-contact-anchor] { top: calc(100% - var(--pin-inner) - var(--nav-height)) !important; }
     </style>
   </noscript>
@@ -57,8 +59,8 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
       <ProjectorBeam />
 
       {/* Both stages are in the HTML, stacked in one grid cell, so the swap
-          is a cross-fade in a box that never moves. The credits are active
-          from the server with their first line shown. */}
+          is a cross-fade in a box that never moves. The credits stage is
+          active from the server with no line shown: the blank first stage. */}
       <div class="stack" data-credits-stack data-lines={creditLines.length}>
         <FooterStage id="credits" active>
           <FooterCredits lines={creditLines} />
@@ -102,11 +104,12 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
   }
 
   /* --pin-length is the one number to tune: the scroll distance the track
-     occupies. The pin travels (--pin-length − 100dvh), split evenly into one
-     zone per credit line, a hold on the assembled block, and the contact
-     screen — five zones for three lines, 40vh each. */
+     occupies. The pin travels (--pin-length − 100dvh), split evenly into a
+     blank zone, one zone per credit line (the name's doubles as the hold)
+     and the contact screen — seven zones for five lines, 40vh each, the
+     same zone length as before increment 30. */
   .track {
-    --pin-length: 300vh;
+    --pin-length: 380vh;
     position: relative;
     height: var(--pin-length);
   }

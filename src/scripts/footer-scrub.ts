@@ -4,12 +4,13 @@
  *
  * 1. Scroll-zone commit, reusing experience-scrub.ts's initScrub unmodified:
  *    absolute scrollY each frame (direction-free, reversible), one rAF per
- *    event, equal zones — one per credit line, one hold on the assembled
- *    block, one for the contact screen. commit(id) is the single state
- *    owner. Since increment 23 the lines ACCUMULATE: zone n shows lines
- *    0..n and keeps them, so the credits build into one block rather than
- *    replacing each other; scrolling back up takes them away again in
- *    reverse.
+ *    event, equal zones — a blank one first, one per credit line, one for
+ *    the contact screen (increment 30: six credit stages, blank to name;
+ *    the name's zone is also the hold on the assembled block). commit(id)
+ *    is the single state owner. Since increment 23 the lines ACCUMULATE:
+ *    each zone adds its line and keeps the ones before it, so the credits
+ *    build into one block rather than replacing each other; scrolling back
+ *    up takes them away again in reverse.
  * 2. Keyboard reveal, the increment-17 behaviour kept: focus a link in the
  *    sequence and the window jumps to the track's end, where it has settled
  *    on the contact stage. This is why FooterStage.astro hides an inactive
@@ -28,13 +29,13 @@ export function initFooterStages(root: HTMLElement): void {
   const lines = [...stack.querySelectorAll<HTMLElement>("[data-credit-line]")];
   if (stages.length === 0) return;
 
-  const zones = [...lines.map((_, i) => `line-${i}`), "hold", "contact"];
+  const zones = ["blank", ...lines.map((_, i) => `line-${i}`), "contact"];
 
   const commit = (id: string) => {
+    // Zone 0 is blank; zone n shows lines 0..n-1. The contact zone leaves
+    // every line shown, so going back up from it lands on the whole block.
     const zone = zones.indexOf(id);
-    // The hold and the contact zone both leave every line shown, so going
-    // back up from the contact screen lands on the complete block.
-    lines.forEach((line, i) => line.toggleAttribute("data-shown", i <= zone));
+    lines.forEach((line, i) => line.toggleAttribute("data-shown", i < zone));
     const stage = id === "contact" ? "contact" : "credits";
     for (const s of stages) s.toggleAttribute("data-active", s.dataset.creditsStage === stage);
   };

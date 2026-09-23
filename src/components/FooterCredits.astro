@@ -5,7 +5,9 @@
 // replacing another. Every line is laid out from the start (hidden with
 // opacity), so the block is already its final size and centred — a line
 // arriving never pushes the others around. scripts/footer-scrub.ts sets
-// data-shown. The last line is the name, in --heading; the rest are accent.
+// data-shown; none is shown from the server (the first stage is blank,
+// increment 30). The last line is the name, in --heading and larger; the
+// rest are accent.
 interface Props {
   lines: readonly string[];
 }
@@ -16,7 +18,7 @@ const { lines } = Astro.props;
 <div class="credits">
   {
     lines.map((line, i) => (
-      <p class:list={["line", { name: i === lines.length - 1 }]} data-credit-line={i} data-shown={i === 0 ? "" : undefined}>
+      <p class:list={["line", { name: i === lines.length - 1 }]} data-credit-line={i}>
         {line}
       </p>
     ))
@@ -37,7 +39,10 @@ const { lines } = Astro.props;
     gap: 0.35em;
     max-width: 100%;
     font-family: var(--font-display);
-    font-size: clamp(1.75rem, 7vw, 4.5rem);
+    /* Five lines since increment 30, so the size is capped by the pin's
+       height as well as its width: the whole block, name included, is
+       about 7.3 × this tall and must clear a short landscape pin. */
+    font-size: clamp(1.75rem, min(7vw, calc((100dvh - var(--nav-height)) * 0.1)), 4.5rem);
     font-weight: 700;
     line-height: 1.02;
     letter-spacing: 0.01em;
@@ -54,6 +59,14 @@ const { lines } = Astro.props;
     background-color: color-mix(in srgb, var(--bg) 94%, transparent);
     filter: blur(1.25rem);
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 480ms ease;
+  }
+
+  /* The first stage is blank (increment 30), so the panel arrives with the
+     first line rather than sitting as a dark patch in the empty beam. */
+  .credits:has(.line[data-shown])::before {
+    opacity: 1;
   }
 
   .line {
@@ -67,8 +80,11 @@ const { lines } = Astro.props;
       transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
+  /* The name reads larger than the stage lines (increment 30), capped by
+     the width so "Ventrapragada" alone still fits a 320px screen. */
   .line.name {
     margin-top: 0.3em;
+    font-size: min(1.35em, 10.5vw);
     color: var(--heading);
   }
 
@@ -79,7 +95,8 @@ const { lines } = Astro.props;
 
   /* Lines still accumulate one by one; they just land without moving. */
   @media (prefers-reduced-motion: reduce) {
-    .line {
+    .line,
+    .credits::before {
       transform: none;
       transition: none;
     }
