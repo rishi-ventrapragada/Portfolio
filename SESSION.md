@@ -92,6 +92,122 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-23 — increment 28 (audit fixes and cleanup)
+
+### Last milestone completed
+
+All 18 audit items, in 11 commits on `main` (`64a7b2e`..`8589db7`), each
+built clean (0 errors / warnings / hints), pushed, aliased
+(`rishi-ventrapragada-6jtglm50r-rishiventra.vercel.app`) and re-measured on
+`rishi-ventrapragada.vercel.app`. Live matched local on every check below.
+
+| Commit | Items |
+| --- | --- |
+| `64a7b2e` hero | 1 — wordmark placed from the subject's head |
+| `12d1012` contact | 2 — `#contact` is an anchor at the track's end |
+| `f016297` motion | 3 — no meteors / skip-link slide under reduce |
+| `827d15b` experience | 4 — timeline pages to the committed clip |
+| `8471c79` a11y | 5, 6, 7 — planned Recurzn, © halo, no-JS nav |
+| `30bde3d` starfield | 14 — stars as box-shadow lists, defined once |
+| `02bfcdd` perf | 8 — decorative loops paused off-screen |
+| `e6ab23e` fix | 9, 10, 15, 18 — dashed leaves, cards, weights, casing |
+| `be46ada` tokens | 11, 12 — utilities.css split, About / topo tokens |
+| `04ece53` chore | 13, 16 — Tailwind `source(none)`, dead code |
+| `8589db7` docs | 17 — PRD, CLAUDE.md, README, ASSETS, stale comments |
+
+### Decisions worth knowing before you touch this
+
+- **Hero overlap targets are the two approved layouts**: 56% from 640px
+  (1280×800), 26% below (375×667). `Hero.astro` publishes the subject's
+  geometry; `--subject-head: 0.0394` is measured off the PNG (row 47 of
+  1192). **New cutout → re-measure it.** Short landscape screens (844×390,
+  1280×600) hit the nav floor and overlap more (102% / 90%), as before.
+- **`#contact` is not the footer any more.** It is a 1px anchor at
+  `top: calc(100% − 100dvh)` of the credits track, `scroll-margin-top: 0`.
+  Harness scripts that select `#contact .card` must use `[data-contact]`.
+- **Planned elements override `.planned`'s fade.** The clip dims its fill
+  and flips its ink to `--fg`; the frame dims only its cover. The skill
+  leaves still take the utility's 0.5 (5.11:1, AA).
+- **Stars are box-shadows** (`starfield-data.ts` → `StarfieldDefs.astro`,
+  one inline `<style>` in `<head>`). Offsets are `round(…, 1px)` under
+  `@supports`: unrounded, 1px stars smear to half brightness. Twinkle is
+  per group (8 per layer), not per star — **the one visible change in this
+  batch, owner to judge live.** Static sky is pixel-identical to before
+  (≤2/255). The loop point is 5/255 on 62px, not byte-identical.
+- **Off-screen pause** (`scripts/offscreen-pause.ts` + a rule in
+  `BaseLayout.astro`) covers skies, loop dividers and the About grade. The
+  `!important` there is load-bearing and commented in the code.
+- **Tailwind scans nothing** (`source(none)` in `global.css`). No component
+  uses a utility today. **The first one that does needs an `@source` line**,
+  or its classes silently won't exist. Flagged, not a standing rule.
+- **No hex left in components except comments.** AboutPanel's light-scope
+  mix partner went from a `#2a2b30` literal to `--fg` (#1a1b1e): fills move
+  4–5/255, tag contrast worst 5.28 → 4.97 (still AA). Topo is now a mask
+  over `var(--fg-muted)`, byte-identical. No token exceptions to record
+  beyond the existing `#111214` one above.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD** §3 (seams), §4.2 (coral used), §4.3 (wordmark / H1 tokens gone),
+  §4.4 (no 12-column grid), §5.1 (no-JS nav, Contact target), §5.2
+  (placement + before/after table), §5.3 (sprocket contradiction, planned
+  frame), §5.6 (learning leaves, grade pause), §5.8 (anchor, © halo, cards,
+  casing), §5.11 (planned clip, timeline paging, weight), §5.12, §5.14
+  (rewritten: box-shadows, groups, reduced motion, pause, CPU), §5.15
+  (mask), §10 (increments 24–28), §11 (accent wording).
+- **CLAUDE.md** §2 — the `@astrojs/react` line now says it is not installed.
+  Meaning otherwise unchanged. `AGENTS.md` (untracked, not mine) still has
+  the old line; left alone.
+- **README** — layout list (LoopDivider, StarfieldDefs, barcode-data.ts,
+  magnetic.ts, offscreen-pause.ts, utilities.css), Tailwind note, accent.
+- **ASSETS.md** — About fill percentages, ProjectCard → ProjectFrame,
+  Recurzn cover dimming.
+
+### Verified by measurement (local, then live)
+
+- Hero overlap, 17 viewports 320×568–2560×1440: 25–27% below 640, 56–57%
+  from 640 (was −170% to +57%).
+- Contact: click / tap / reduce / deep link at 1280, 1920, 375, 320 → stage
+  `contact`, all four cards visible. No-JS → contact screen at 297 / 251px.
+- Timeline: at 320, 360, 375 (both motion settings), 768 and 1280, every
+  committed clip and the playhead are in view, forward and back. Real touch
+  drag still scrolls the lane; taps commit.
+- Reduced motion: only `progress-grow` and the opacity-only dissolve run.
+- Contrast sweep: 0 failures at 1280 / 375, both accents. "Recurzn" 6.69,
+  "Now" 4.98, frame title 18.93, number 7.16. © worst 5.66 (was 3.16).
+  No-JS nav 17.22 over About / Projects.
+- CPU parked (ms/s): hero 166→4, Projects 821→7, Contact 668→0. Skills
+  939→307, Video 933→261 — the remainder is their visible JS motion.
+- HTML 196→142 KB raw, 27.5→22.8 KB gz; CSS 46.4→39.7 KB; DOM 1,323→752.
+  Client JS ≈6.2 KB gz of 40. No file over 200 lines.
+
+### Harness notes
+
+- `lib.mjs` in this session's scratchpad (copied from the audit's) takes
+  `LIVE=<url>` to redirect every `Page.navigate` to the live site.
+- `Input.synthesizeScrollGesture` with `gestureSourceType: "touch"` does
+  **not** scroll an overflow-x container in headless Chrome. Use a manual
+  `dispatchTouchEvent` start/move/end sequence. Probably what made the
+  audit read the 375 timeline as unscrollable.
+- The project in `vercel ls` is now `rishiventra/rishi-ventrapragada`; the
+  alias step in Standing constraints still applies (the vanity URL did not
+  follow the push until `vercel alias set`).
+
+### Still open
+
+- **Twinkle per group** (above): owner to eyeball live.
+- **Contact cards at 960–1119px**: addresses still wrap there; the row is a
+  uniform 97px, the résumé card 80.
+- **Wordmark on tall screens** now sits mid-sky (1920×1080: top at 324px).
+  That is what holding the overlap means; owner to judge live.
+- **Hero on short landscape** (≤600px tall) still overlaps 90–102%.
+- Carried over: résumé PDF, Google brand terms, Experience sky density,
+  320px nav.
+
+### Next milestone planned
+
+None queued. Waiting on the owner.
+
 ## 2026-09-23 — increment 26 (barcode scale-up)
 
 ### Last milestone completed
