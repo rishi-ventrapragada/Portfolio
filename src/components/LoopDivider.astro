@@ -1,8 +1,9 @@
 ---
 // A drifting pattern seam between two sections (PRD §5.12, increment 25):
-// clapperboard stripes with an accent pinstripe, or (since increment 29) an
-// SVG film strip slotted in by its own component — EdgeCode.astro and
-// LeaderStrip.astro. Each loops right to left forever.
+// an SVG strip slotted in by its own component — EdgeCode.astro and
+// LeaderStrip.astro since increment 29, ClapperStrip.astro since increment
+// 30 (the CSS-gradient clapper this used to draw is gone). Each loops right
+// to left forever.
 //
 // The loop is Starfield.astro's: a track twice the width of one copy of the
 // pattern, translated -50%, so the second copy lands exactly where the first
@@ -14,14 +15,14 @@
 //
 // The sprocket Divider.astro still owns Hero/About; this owns the rest.
 interface Props {
-  variant: "clapper" | "strip";
-  /** "strip" only: the slotted SVG's tile width and height, px. */
-  tile?: number;
-  height?: number;
+  variant: "strip";
+  /** The slotted SVG's tile width and height, px. */
+  tile: number;
+  height: number;
 }
 
 const { variant, tile, height } = Astro.props;
-const style = variant === "strip" ? `--tile-w: ${tile}px; --h: ${height}px` : undefined;
+const style = `--tile-w: ${tile}px; --h: ${height}px`;
 ---
 
 {/* A "strip" draws its tile as SVG (EdgeCode.astro, LeaderStrip.astro),
@@ -69,29 +70,6 @@ const style = variant === "strip" ? `--tile-w: ${tile}px; --h: ${height}px` : un
     to {
       transform: translateX(-50%);
     }
-  }
-
-  /* --- Clapperboard ------------------------------------------------------
-     Two diagonal bands per tile. `to top right` puts the gradient's 0/50/100
-     lines through the tile's corners at any aspect ratio, so the bands meet
-     edge to edge across tiles. The pinstripe is the seam's lower edge. */
-  [data-variant="clapper"] {
-    --h: 28px;
-    --tile-w: 48px;
-    --tile-h: 26px;
-    --loop: 36s;
-    border-bottom: 2px solid var(--accent);
-  }
-
-  [data-variant="clapper"] .track {
-    background-color: var(--bg);
-    background-image: linear-gradient(
-      to top right,
-      var(--bg) 25%,
-      var(--heading) 0 50%,
-      var(--bg) 0 75%,
-      var(--heading) 0
-    );
   }
 
   /* --- SVG strips (increment 29) -------------------------------------------

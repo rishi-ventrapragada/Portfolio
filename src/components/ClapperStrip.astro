@@ -1,0 +1,74 @@
+---
+// The Experience/Projects seam (PRD §5.12): clapperboard sticks. Since
+// increment 30 an SVG tile repeated by a <pattern> inside LoopDivider's
+// drifting track, like EdgeCode and LeaderStrip — the old CSS gradient hard
+// stops rendered the diagonals stair-stepped. No accent pinstripe any more
+// (the stray red line under the seam).
+//
+// Two hinged sticks, stripes slanting opposite ways as on a real clapper,
+// with a dark hinge gap between (the owner's pick of two screenshotted
+// options; the other was one taller stick with a highlight on its top edge).
+import LoopDivider from "./LoopDivider.astro";
+
+interface Stick {
+  y: number;
+  h: number;
+  /** 1 = "/" stripes, -1 = "\\" stripes. */
+  dir: 1 | -1;
+}
+
+const H = 44;
+const T = 48;
+const sticks: Stick[] = [
+  { y: 2, h: 18, dir: 1 },
+  { y: 24, h: 18, dir: -1 },
+];
+const w = T / 2;
+
+// One light band per tile, drawn at neighbouring offsets too so the part of
+// a slanted band that crosses the tile edge is present; the pattern clips.
+const bands = sticks.flatMap(({ y, h, dir }) =>
+  [-2 * T, -T, 0, T].map((x) =>
+    dir === 1
+      ? `${x},${y + h} ${x + h},${y} ${x + h + w},${y} ${x + w},${y + h}`
+      : `${x},${y} ${x + h},${y + h} ${x + h + w},${y + h} ${x + w},${y}`,
+  ),
+);
+---
+
+<LoopDivider variant="strip" tile={T} height={H}>
+  <svg class="strip" width="100%" height="100%" focusable="false">
+    <defs>
+      <pattern id="clapper-sticks" width={T} height={H} patternUnits="userSpaceOnUse">
+        <rect class="stock" width={T} height={H} />
+        {sticks.map(({ y, h }) => <rect class="stick" x="0" y={y} width={T} height={h} />)}
+        {bands.map((points) => <polygon class="band" points={points} />)}
+        <rect class="hinge" x="0" y="20" width={T} height="4" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#clapper-sticks)" />
+  </svg>
+</LoopDivider>
+
+<style>
+  .strip {
+    display: block;
+  }
+
+  .stock {
+    fill: var(--bg);
+  }
+
+  /* Black sticks, the monitor's black, with off-white bands. */
+  .stick {
+    fill: var(--monitor-bg);
+  }
+
+  .band {
+    fill: var(--heading);
+  }
+
+  .hinge {
+    fill: var(--bg-raised);
+  }
+</style>
