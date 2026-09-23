@@ -55,7 +55,10 @@
      whatever it is lying on. A custom property inherits its value already
      resolved: :root's `var(--bg)` becomes #111214 there, and that is what
      every element inside this scope receives. Redefining it here as
-     `var(--bg)` (increment 22) re-resolved it to the paper colour. */
+     `var(--bg)` (increment 22) re-resolved it to the paper colour.
+     Exception since increment 24: a project frame is black film here, so
+     ProjectFrame.astro re-points it to --light-bg on the frame itself and
+     its holes show the paper. Nothing else in the scope changes. */
 
   /* Drop shadows. Both Projects files borrowed --monitor-bg (the Experience
      NLE surface, pure black) purely as a source of black; on a light card a
