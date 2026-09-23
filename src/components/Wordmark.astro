@@ -43,11 +43,23 @@
 </script>
 
 <style>
-  /* Sticky wrapper spans the viewport; the SVG inside it is centred and capped,
-     pinned just under the nav so the head and shoulders cross the lower half of
-     the letters. grid-area places it in the hero's single cell, under the
-     subject (z-index 2, Hero.astro). */
+  /* Sticky wrapper spans the viewport; the SVG inside it is centred and capped.
+     grid-area places it in the hero's single cell, under the subject
+     (z-index 2, Hero.astro).
+
+     Placed from the subject's head, not from the top (increment 28). The
+     subject is bottom-anchored, so its head sits at
+     100dvh − (1 − head) × H, where H is its painted height (Hero.astro
+     publishes the inputs). The letters are lowered until their bottom
+     --overlap of height crosses that line, whatever the viewport's shape;
+     before this the overlap ran from −170% to +57% across common screens.
+     The two targets are the two layouts that were approved: 56% from 640px
+     (1280×800), 26% below it (375×667). The floor keeps the letters clear of
+     the nav on short screens, where the head then rises further into them. */
   .wordmark-wrap {
+    --wm-w: clamp(320px, 72vw, 1100px);
+    --wm-h: calc(var(--wm-w) * 735 / 2055);
+    --overlap: 0.56;
     position: sticky;
     top: 0;
     z-index: 1;
@@ -55,7 +67,13 @@
     height: 100dvh;
     /* Overflow stays visible so the dissolve's 8px blur is not clipped;
        .hero already clips anything that leaves the section. */
-    padding-top: calc(var(--nav-height) + 0.5rem);
+    padding-top: max(
+      calc(var(--nav-height) + 0.5rem),
+      calc(
+        100dvh - (1 - var(--subject-head)) * min(var(--subject-w) * var(--subject-ratio), var(--subject-max-h)) -
+          (1 - var(--overlap)) * var(--wm-h)
+      )
+    );
     pointer-events: none;
   }
 
@@ -63,7 +81,7 @@
     display: block;
     /* 72vw centred: ~14% margin each side at 1440px. Sits between the original
        22vw type and the edge-to-edge version. */
-    width: clamp(320px, 72vw, 1100px);
+    width: var(--wm-w);
     margin-inline: auto;
     /* Ratio matches the ink-box viewBox, so width drives height and the glyphs
        are never stretched. */
@@ -132,14 +150,9 @@
   /* 640px rather than the project's usual 768px: below this the 72vw cap makes
      the wordmark too small to carry the composition, so it goes near-full-bleed. */
   @media (max-width: 639px) {
-    .wordmark {
-      width: 88vw;
-    }
-
-    /* Pushed further down than on desktop: the mobile wordmark is short, so the
-       figure has to reach well up into it for the overlap to read. */
     .wordmark-wrap {
-      padding-top: calc(var(--nav-height) + 16dvh);
+      --wm-w: 88vw;
+      --overlap: 0.26;
     }
   }
 

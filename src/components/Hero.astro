@@ -11,7 +11,7 @@ import Wordmark from "./Wordmark.astro";
 {/* data-hero, not an id: every [id] inherits a 5rem scroll-margin from
     global.css, and nothing links here (the nav mark uses `#top`). The nav
     observes this box to hide its progress bar over the hero (PRD §5.1). */}
-<section class="hero" data-hero>
+<section class="hero" data-hero style={`--subject-ratio: ${(heroSubject.height / heroSubject.width).toFixed(4)}`}>
   <Starfield />
 
   <Wordmark />
@@ -33,7 +33,16 @@ import Wordmark from "./Wordmark.astro";
 </section>
 
 <style>
+  /* The subject's geometry is published here, on the section, because
+     Wordmark.astro places the letters from it (increment 28): the painted
+     height is min(width × ratio, max-height), and the head starts
+     --subject-head of the way down it. --subject-ratio comes from the image
+     metadata; --subject-head was measured off the PNG (first row with alpha
+     over 50%: row 47 of 1192) — re-measure it if the cutout changes. */
   .hero {
+    --subject-w: min(88vw, 470px);
+    --subject-max-h: 86dvh;
+    --subject-head: 0.0394;
     position: relative;
     display: grid;
     min-height: 100dvh;
@@ -48,9 +57,7 @@ import Wordmark from "./Wordmark.astro";
     grid-area: 1 / 1;
     align-self: end;
     justify-self: center;
-    /* Sized so the head and shoulders cross the lower half of the letters
-       rather than riding up over the whole wordmark. */
-    width: min(88vw, 470px);
+    width: var(--subject-w);
   }
 
   /* Bottom-anchored. The PNG's built-in fade lands at the hero's bottom edge,
@@ -58,7 +65,7 @@ import Wordmark from "./Wordmark.astro";
   .subject :global(img) {
     width: 100%;
     height: auto;
-    max-height: 86dvh;
+    max-height: var(--subject-max-h);
     object-fit: contain;
     object-position: bottom center;
   }
@@ -66,12 +73,9 @@ import Wordmark from "./Wordmark.astro";
   /* Same 640px breakpoint as the wordmark's near-full-bleed switch: a taller
      subject so the shoulders still reach up into the short mobile letters. */
   @media (max-width: 639px) {
-    .subject {
-      width: 88vw;
-    }
-
-    .subject :global(img) {
-      max-height: 82dvh;
+    .hero {
+      --subject-w: 88vw;
+      --subject-max-h: 82dvh;
     }
   }
 </style>
