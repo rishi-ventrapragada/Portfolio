@@ -5,9 +5,11 @@
 // project the detail is simply shown (`open`, increment 29); with more, on
 // fine pointers it opens below the frame on hover / focus and the frame
 // lifts, and elsewhere quick links sit under the caption. `status` is never
-// printed; a planned entry takes `.planned` and has no detail. No script.
+// printed as a word; a planned entry shows PlannedCard.astro in place of a
+// cover, and has no detail. No script.
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import PlannedCard from "./PlannedCard.astro";
 import ProjectDetail from "./ProjectDetail.astro";
 import ProjectLinks from "./ProjectLinks.astro";
 
@@ -30,19 +32,24 @@ const expandable = hasDetail && !open;
 const shown = hasDetail && open;
 ---
 
-<article class:list={["frame", { planned }]} data-expandable={expandable ? "" : undefined}>
-  <div class="cover">
-    {/* The cover is a screenshot, so it sets its own ratio rather than
-        being cropped. */}
-    <Image
-      src={cover}
-      alt={`${title} project cover`}
-      widths={[636, 1272]}
-      sizes="(min-width: 768px) 600px, 92vw"
-      loading="lazy"
-      decoding="async"
-    />
-  </div>
+<article class="frame" data-expandable={expandable ? "" : undefined}>
+  {
+    planned ? (
+      <PlannedCard title={title} ratio={`${cover.width} / ${cover.height}`} />
+    ) : (
+      <div class="cover">
+        {/* A screenshot sets its own ratio rather than being cropped. */}
+        <Image
+          src={cover}
+          alt={`${title} project cover`}
+          widths={[636, 1272]}
+          sizes="(min-width: 768px) 600px, 92vw"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    )
+  }
 
   {/* h3: the section owns the h2 and the hero owns the page's only h1.
       No year tag (increment 15.1): the caption is title and frame number. */}
@@ -65,9 +72,9 @@ const shown = hasDetail && open;
 </article>
 
 <style>
-  /* Layered so the shared, unlayered `.planned` utility (utilities.css)
-     wins its border-style without !important; `.frame.planned` below then
-     replaces the utility's fade. */
+  /* In @layer components, the project's convention for component defaults
+     (a planned frame no longer takes the `.planned` utility: since
+     increment 29 PlannedCard.astro says so in the picture area). */
   @layer components {
     .frame {
       position: relative;
@@ -106,19 +113,6 @@ const shown = hasDetail && open;
 
   :global([data-theme="light"]) .frame :global(:focus-visible) {
     outline-color: color-mix(in srgb, var(--accent) 70%, var(--light-bg));
-  }
-
-  /* Planned (Recurzn): only the cover steps back. The shared utility's 0.5
-     opacity on the whole article took the title to 3.90:1 and the frame
-     number to 2.50:1 on the paper (increment 28); dimming the picture alone
-     keeps the "not shipped yet" read while every word stays at the frame's
-     full contrast. The dashed edge still comes from the utility. */
-  .frame.planned {
-    opacity: 1;
-  }
-
-  .frame.planned .cover {
-    opacity: 0.5;
   }
 
   /* Sprocket strips: whole holes only. `space` lays complete 16px tiles

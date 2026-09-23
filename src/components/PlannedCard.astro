@@ -1,0 +1,99 @@
+---
+// The picture area of a planned project frame (PRD §5.3, increment 29): a
+// slate — a dark board with the clapper sticks along the top and chalk
+// fields — in place of a dimmed placeholder cover. It says "not shipped yet"
+// in real text on a real ground, so contrast holds by construction. The
+// owner's pick of two screenshotted options (the other was clear leader
+// stock). Same aspect ratio as the cover it replaces, so a planned frame
+// lines up with its neighbours.
+interface Props {
+  title: string;
+  /** The entry's cover, used only for its aspect ratio. */
+  ratio: string;
+}
+
+const { title, ratio } = Astro.props;
+---
+
+<div class="slate" style={`aspect-ratio: ${ratio}`}>
+  <div class="sticks" aria-hidden="true"></div>
+  <dl class="fields">
+    <div class="field">
+      <dt>Prod.</dt>
+      <dd>{title}</dd>
+    </div>
+    <div class="field">
+      <dt>Scene</dt>
+      <dd aria-label="none">—</dd>
+    </div>
+    <div class="field">
+      <dt>Take</dt>
+      <dd aria-label="none">—</dd>
+    </div>
+  </dl>
+  <p class="label stamp">In production</p>
+</div>
+
+<style>
+  /* A dark board a shade above the black film (in the light scope the
+     frame re-points --bg-raised to black and --fg to the paper colour), the
+     clapper sticks in the divider's stripes, chalk fields in mono. */
+  .slate {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    margin-inline: 0.75rem;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--fg) 7%, var(--bg-raised));
+    color: var(--fg);
+  }
+
+  .sticks {
+    height: 14%;
+    min-height: 1.25rem;
+    background: repeating-linear-gradient(-45deg, var(--fg) 0 1.25rem, var(--bg-raised) 1.25rem 2.5rem);
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    margin: 0;
+    border-bottom: 1px solid var(--fg-muted);
+  }
+
+  .field {
+    display: grid;
+    align-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-right: 1px solid var(--fg-muted);
+  }
+
+  .field:last-child {
+    border-right: 0;
+  }
+
+  .field dt {
+    font-family: var(--font-mono);
+    font-size: var(--size-meta);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .field dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.4vw, 2rem);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .stamp {
+    justify-self: start;
+    margin: 0.875rem 1rem;
+    padding: 0.375rem 0.625rem;
+    color: var(--fg);
+    border: 1px solid var(--fg);
+  }
+</style>
