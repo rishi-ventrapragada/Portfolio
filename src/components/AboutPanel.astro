@@ -82,17 +82,21 @@ const { n, tone, establishing = false } = Astro.props;
   .art {
     --panel-ink: var(--bg-raised);
     --panel-mix: 52%;
-    --tag-ink: #ffffff;
+    --tag-ink: var(--fg);
     background-color: color-mix(in srgb, var(--tone) var(--panel-mix), var(--panel-ink));
   }
 
   /* Light scope: a dark mix partner and a higher word share, so the swatches
-     stay swatches. The tag's ink flips with them — measured across all five
-     fills, near-black is 5.28:1 at worst here where white is only 2.86. */
+     stay swatches. The tag's ink flips with them. Tokens, not literals,
+     since increment 28: the scope's own --fg (#1a1b1e) is the partner (it
+     was a #2a2b30 literal, a hair lighter, which moves each fill by 4–5 of
+     255) and its --heading (#111214) the ink, the value the literal had.
+     Measured across all five fills: near-black 4.97:1 at worst (5.28 with
+     the old partner), where white is under 3. */
   :global([data-theme="light"]) .art {
-    --panel-ink: #2a2b30;
+    --panel-ink: var(--fg);
     --panel-mix: 72%;
-    --tag-ink: #111214;
+    --tag-ink: var(--heading);
   }
 
   /* Its own token, not --bg or --on-accent: the fills are neither the page

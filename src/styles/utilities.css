@@ -1,0 +1,52 @@
+/* Shared utility classes (PRD §4.3). Split out of global.css in increment 28
+ * for the CLAUDE.md §5 line cap; global.css keeps the tokens and the base
+ * element styles. Imported by BaseLayout.astro straight after global.css,
+ * so these still come after the base styles and before theme-light.css.
+ * Unlayered, like everything in global.css outside Tailwind's own import. */
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--size-label);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--size-meta);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.shell {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Planned, not shipped: the element steps back and its edge goes dashed
+   (PRD §5.3, §5.6, §5.11). Unlayered on purpose: a component keeps its own
+   defaults in @layer components so this utility wins border-style and
+   opacity without !important. Used by the skill tree's learning leaves; the
+   Experience clip and the project frame take the dashed edge but override
+   the fade, which took their text below AA (increment 28) — they dim only
+   what carries no text. */
+.planned {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

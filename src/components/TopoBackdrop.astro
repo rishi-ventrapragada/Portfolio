@@ -7,11 +7,14 @@
 //
 //   1. A very low baseFrequency with five octaves makes large, smooth,
 //      wandering shapes instead of fine noise — an elevation surface.
-//   2. feColorMatrix collapses the three channels to one luminance value and
-//      sets the RGB to the line colour. Turbulence generates each channel
-//      independently, so without the collapse the contours fringe green and
-//      magenta (the §5.10 lesson); without the tint they paint pure white,
-//      which measured 3.13:1 behind the contact links — below AA.
+//   2. feColorMatrix collapses the three channels to one luminance value, as
+//      alpha only. Turbulence generates each channel independently, so
+//      without the collapse the contours fringe green and magenta (the §5.10
+//      lesson). The image is then used as a MASK, and the colour comes from
+//      CSS: --fg-muted painted through it (increment 28 — the RGB used to be
+//      baked into the matrix as #9a9ca3, a hex the token could not reach).
+//      The tint is load-bearing: plain white contours measured 3.13:1 behind
+//      the contact links, below AA.
 //   3. The discrete alpha ramp is mostly 0 with a single 1 every fourteenth
 //      step. A narrow band across a smooth surface is exactly the definition
 //      of an iso-line, so the result is thin closed contour rings rather than
@@ -23,9 +26,9 @@ const contour =
   "%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'%3E" +
   "%3Cfilter id='t' color-interpolation-filters='sRGB'%3E" +
   "%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='5' seed='11' stitchTiles='stitch'/%3E" +
-  // RGB fixed to --fg-muted (#9a9ca3 = .604 .612 .639); alpha is the collapsed
-  // luminance, which the ramp below then slices into iso-lines.
-  "%3CfeColorMatrix type='matrix' values='0 0 0 0 0.604 0 0 0 0 0.612 0 0 0 0 0.639 0.34 0.34 0.34 0 0'/%3E" +
+  // Alpha only: the collapsed luminance, which the ramp below then slices
+  // into iso-lines. RGB is irrelevant to a mask, so it is left at black.
+  "%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.34 0.34 0.34 0 0'/%3E" +
   "%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='" +
   Array.from({ length: 84 }, (_, i) => (i % 14 === 0 ? 1 : 0)).join(" ") +
   "'/%3E%3C/feComponentTransfer%3E%3C/filter%3E" +
@@ -45,13 +48,23 @@ const contour =
     contain: strict;
     pointer-events: none;
     background-color: var(--bg);
-    background-image: var(--contour);
-    background-size: 1200px 800px;
     /* Low enough that the contours sit under the credits rather than
        competing with them. The figure that matters is the contrast of the
        stage text against a contour line passing directly behind it, sampled
        from rendered pixels rather than assumed — see the PRD for the
        measurement. */
     opacity: 0.42;
+  }
+
+  /* The contour lines: the token's colour, shown only where the generated
+     image has alpha. Same tile size and origin as the background it
+     replaces, so the lines land on the same pixels. */
+  .topo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--fg-muted);
+    mask-image: var(--contour);
+    mask-size: 1200px 800px;
   }
 </style>
