@@ -6,7 +6,8 @@
 // it is clicked. Only ever rendered for a real URL (FooterContact.astro keeps
 // the isUrl guard) — except the résumé card (increment 25), which has no
 // href while its file is missing and then renders as a dashed placeholder
-// that is not a link, with `pending` as its visible address.
+// that is not a link, with `pending` as its visible address. Link cards are
+// magnetic on a fine pointer (scripts/magnetic.ts); the placeholder is not.
 import ContactIcon from "./ContactIcon.astro";
 
 interface Props {
@@ -27,7 +28,7 @@ const address = href
 
 {
   href ? (
-    <a class="card" href={href} rel="noopener">
+    <a class="card" href={href} rel="noopener" data-magnetic>
       <ContactIcon name={icon} />
       <span class="text">
         <span class="label-text">{label}</span>
@@ -45,6 +46,12 @@ const address = href
   )
 }
 
+<script>
+  import { initMagnetic } from "../scripts/magnetic";
+
+  initMagnetic();
+</script>
+
 <style>
   .card {
     display: flex;
@@ -59,7 +66,16 @@ const address = href
     text-align: left;
     transition:
       border-color 160ms ease,
-      color 160ms ease;
+      color 160ms ease,
+      transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* While following the cursor: a short ease, so the lean tracks without
+     lag. On leave data-pulling goes and the long overshoot above springs it
+     back to rest. Transform only — the compositor does all of it. */
+  .card[data-pulling] {
+    transition-duration: 160ms, 160ms, 120ms;
+    transition-timing-function: ease, ease, ease-out;
   }
 
   .address {
