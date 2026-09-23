@@ -14,7 +14,10 @@ material that must be replaced before launch.
 | Licence | N/A |
 | Date | 2026-09-21 |
 
-There are **no image files**. `src/components/AboutPanel.astro` renders each of
+**Dormant since increment 29**: the comic is not on the page (About shows
+the owner's bio instead), but its code is kept for when real art exists —
+`AboutComic.astro` renders the panels. There are **no image files**.
+`src/components/AboutPanel.astro` renders each of
 the five panels as a solid fill (a palette word mixed 72% into the light
 scope's `--fg` — About is light-themed; 52% into `--bg-raised` on a dark ground)
 with a centred `[PANEL N — placeholder art]` mono tag, and every caption box
@@ -66,9 +69,10 @@ deviation the original KalaCart placeholder had, acceptable for a placeholder.
 Token values are baked in because a PNG cannot reference a CSS custom property.
 If the surface or muted-text tokens change, regenerate this file to match.
 
-It is the cover of the **planned** Recurzn frame (PRD §5.3), which shows it
-at half opacity (the cover only, since increment 28) with no summary, stack or
-links. Rebranding the deployed Life OS app to Recurzn is a separate task in a
+It is the cover of the **planned** Recurzn frame (PRD §5.3), but since
+increment 29 it is **not displayed**: the frame shows a slate
+(`PlannedCard.astro`) and uses this file only for its aspect ratio. The
+schema requires a cover, so it stays. Rebranding the deployed Life OS app to Recurzn is a separate task in a
 different repo, not this portfolio.
 
 **[TODO: replace with a real Recurzn screenshot once there is one.]**

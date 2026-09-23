@@ -32,21 +32,24 @@ npm run preview  # serve the production build locally
 ```
 src/
   assets/hero-subject.png     real cutout, transparent PNG (hero, LCP element)
-  components/                 Nav, Hero, Wordmark, About, AboutPanel, SkillTree, SkillGroup,
-                              SkillChain, SkillConstellation, ConstellationStar, Pills,
+  components/                 Nav, Hero, Wordmark, HeroCaption, About,
+                              AboutComic + AboutPanel (dormant — see SESSION.md),
+                              SkillTree, SkillGroup, SkillChain, SkillConstellation,
+                              ConstellationStar, Pills,
                               ProjectsSection, ProjectFrame, ProjectDetail,
-                              ProjectLinks,
+                              ProjectLinks, PlannedCard,
                               ExperienceTimeline, ExperienceFrame, ExperienceTrack,
                               ExperienceClip,
                               Footer, FooterStage, FooterCredits, FooterContact,
                               ContactCard, ContactIcon,
-                              Divider, LoopDivider, Starfield, StarfieldMeteors,
-                              StarfieldDefs, TopoBackdrop,
+                              Divider, LoopDivider, EdgeCode, LeaderStrip,
+                              Starfield, StarfieldMeteors, StarfieldDefs,
+                              ProjectorBeam,
                               BootPreloader, BootSquare
   content/projects/*.json     one data file per project, beside its cover image
   content.config.ts           the projects collection schema
   layouts/BaseLayout.astro    head, fonts, landmarks
-  lib/barcode-data.ts         the About/Skills barcode seam's seeded bars
+  lib/film-strips.ts          the edge-code and countdown-leader seams' SVG tiles
   lib/is-url.ts               the href guard shared by ProjectLinks and FooterContact
   lib/skill-scatter.ts        build-time leaf placement + collision assert
   lib/starfield-data.ts       seeded star layers (as box-shadow lists) and meteors
@@ -57,7 +60,7 @@ src/
                               experience-timeline.ts, experience-scrub.ts,
                               experience-playhead.ts, about-reveal.ts,
                               skill-drift.ts, skill-physics.ts, skill-drag.ts,
-                              constellation-motion.ts, magnetic.ts,
+                              constellation-motion.ts, engage.ts, magnetic.ts,
                               offscreen-pause.ts
   styles/global.css           all design tokens and base element styles
   styles/utilities.css        the shared .label / .meta / .shell / .planned utilities
