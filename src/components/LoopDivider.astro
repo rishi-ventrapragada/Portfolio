@@ -1,0 +1,133 @@
+---
+// A drifting pattern seam between two sections (PRD §5.12, increment 25):
+// a checkered finish-line flag, clapperboard stripes with an accent
+// pinstripe, or a barcode. Each loops right to left forever, in CSS only.
+//
+// The loop is Starfield.astro's: a track twice the width of one copy of the
+// pattern, translated -50%, so the second copy lands exactly where the first
+// began. Starfield gets an exact copy for free because its stars are placed
+// in % and cqw. A pattern tile is in px, so here "one copy" is the section
+// width rounded UP to a whole number of tiles (--half) — the track is 2 ×
+// --half wide and overflows the seam, clipped. The -50% shift is then a
+// whole number of tiles and the wrap cannot show.
+//
+// The sprocket Divider.astro still owns Hero/About; this owns the rest.
+import { barcode } from "../lib/barcode-data";
+
+interface Props {
+  variant: "checker" | "clapper" | "barcode";
+}
+
+const { variant } = Astro.props;
+const style = variant === "barcode" ? `--code: ${barcode.gradient}; --tile-w: ${barcode.width}px` : undefined;
+---
+
+<div class="loop" data-variant={variant} aria-hidden="true" style={style}>
+  <div class="track"></div>
+</div>
+
+<style>
+  /* contain: strict — fixed height, width from the parent, so nothing inside
+     can affect layout outside and the browser can skip it off-screen. The
+     inline-size container is what gives the track its 100cqw. */
+  .loop {
+    position: relative;
+    height: var(--h);
+    overflow: clip;
+    container-type: inline-size;
+    contain: strict;
+  }
+
+  /* Without round() the copy is one plain section width, and the wrap may
+     jump by part of a tile once per loop. */
+  .track {
+    --half: 100cqw;
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: calc(var(--half) * 2);
+    background-repeat: repeat-x;
+    background-size: var(--tile-w) var(--tile-h, 100%);
+    will-change: transform;
+    animation: loop var(--loop) linear infinite;
+  }
+
+  @supports (width: round(up, 1px, 1px)) {
+    .track {
+      --half: round(up, 100cqw, var(--tile-w));
+    }
+  }
+
+  @keyframes loop {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* --- Checkered finish-line flag ---------------------------------------
+     One tile is 2 × 2 squares; the conic gradient paints its quadrants. */
+  [data-variant="checker"] {
+    --square: 16px;
+    --rows: 3;
+    --h: calc(var(--square) * var(--rows));
+    --tile-w: calc(var(--square) * 2);
+    --tile-h: var(--tile-w);
+    --loop: 40s;
+  }
+
+  [data-variant="checker"] .track {
+    background-repeat: repeat;
+    background-image: conic-gradient(var(--bg) 25%, var(--heading) 0 50%, var(--bg) 0 75%, var(--heading) 0);
+  }
+
+  /* --- Clapperboard ------------------------------------------------------
+     Two diagonal bands per tile. `to top right` puts the gradient's 0/50/100
+     lines through the tile's corners at any aspect ratio, so the bands meet
+     edge to edge across tiles. The pinstripe is the seam's lower edge. */
+  [data-variant="clapper"] {
+    --h: 28px;
+    --tile-w: 48px;
+    --tile-h: 26px;
+    --loop: 36s;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  [data-variant="clapper"] .track {
+    background-color: var(--bg);
+    background-image: linear-gradient(
+      to top right,
+      var(--bg) 25%,
+      var(--heading) 0 50%,
+      var(--bg) 0 75%,
+      var(--heading) 0
+    );
+  }
+
+  /* --- Barcode -------------------------------------------------------------
+     Black bars on off-white, never the accent. The tile comes from
+     lib/barcode-data.ts; the bars stop 4px short of each edge, as on a
+     label. */
+  [data-variant="barcode"] {
+    --h: 32px;
+    --tile-h: calc(100% - 8px);
+    --loop: 48s;
+    --bar: var(--bg);
+  }
+
+  [data-variant="barcode"] .track {
+    background-color: var(--heading);
+    background-image: var(--code);
+    background-position: 0 4px;
+  }
+
+  /* Decorative, autonomous drift: frozen at its first frame, the Starfield
+     rule, so the seam is still complete and still. */
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+    }
+  }
+</style>

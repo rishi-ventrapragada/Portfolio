@@ -3,6 +3,7 @@
 // links to them.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
+import LoopDivider from "../components/LoopDivider.astro";
 import Hero from "../components/Hero.astro";
 import About from "../components/About.astro";
 import SkillTree from "../components/SkillTree.astro";
@@ -15,25 +16,21 @@ import ExperienceTimeline from "../components/ExperienceTimeline.astro";
   title="Sai Rishi Ventrapragada — Building for the web"
   description="Portfolio of Sai Rishi Ventrapragada, CSE (Data Science) student at VJIT building with React, Astro and Supabase."
 >
-  {/* Perforated seams at every top-level boundary (PRD §5.12) but one:
-      Skills→Video editing has none (owner's call, increment 24), so the two
-      skill sections meet directly. The fifth, Projects→Contact, is at the
-      top of Footer.astro: the footer is rendered by the layout, outside
-      this slot.
-
-      About and Projects are light (§5.16), so the three seams that touch
-      them are told which side is which: each half punches its own section's
-      surface, and the stock stays the lighter of the two so the strip reads
-      as film over both. --light-* are the scoped values, named in
-      styles/theme-light.css. */}
+  {/* Seams (PRD §5.12). Hero→About keeps the film perforation, told which
+      side is light (§5.16) so each half punches its own section's surface.
+      About→Skills is a drifting barcode and Experience→Projects a
+      clapperboard (LoopDivider.astro, increment 25). Skills→Video editing
+      and Video editing→Experience have none (owner's calls, increments 24
+      and 25). Projects→Contact, the checkered flag, is at the top of
+      Footer.astro: the footer is rendered by the layout, outside this
+      slot. */}
   <Hero />
   <Divider below="var(--light-bg)" stock="var(--light-stock)" />
   <About />
-  <Divider above="var(--light-bg)" stock="var(--light-stock)" />
+  <LoopDivider variant="barcode" />
   <SkillTree />
   <SkillConstellation />
-  <Divider />
   <ExperienceTimeline />
-  <Divider below="var(--light-bg)" stock="var(--light-stock)" />
+  <LoopDivider variant="clapper" />
   <ProjectsSection />
 </BaseLayout>

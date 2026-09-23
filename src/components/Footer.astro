@@ -9,10 +9,10 @@
 // (FooterCredits.astro); one more zone holds it complete, and the last
 // cross-fades to the contact screen. scripts/footer-scrub.ts owns the zones
 // and the keyboard reveal.
-import Divider from "./Divider.astro";
 import FooterContact from "./FooterContact.astro";
 import FooterCredits from "./FooterCredits.astro";
 import FooterStage from "./FooterStage.astro";
+import LoopDivider from "./LoopDivider.astro";
 import TopoBackdrop from "./TopoBackdrop.astro";
 
 // The credit, one line per entry, in the order they build up. Plain text —
@@ -21,9 +21,10 @@ import TopoBackdrop from "./TopoBackdrop.astro";
 const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapragada"];
 ---
 
-{/* The Projects→Contact seam (PRD §5.12). Outside the <footer> so the
-    landmark still starts at the contact content. */}
-<Divider />
+{/* The Projects→Contact seam (PRD §5.12): the checkered finish-line flag.
+    Outside the <footer> so the landmark still starts at the contact
+    content. */}
+<LoopDivider variant="checker" />
 
 <footer class="footer" id="contact" data-credits>
   {/* Without JavaScript nothing commits a zone, so the <noscript> style

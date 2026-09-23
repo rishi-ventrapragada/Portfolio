@@ -11,9 +11,10 @@
 // while that colour matches what it sits over. The strip is the film stock —
 // a raised surface, distinct from both — and the divider is two stacked
 // halves, the upper one punched in the section above's colour and the lower
-// one in the section below's. At a dark/light seam (Hero→About,
-// Projects→Contact once §5.13 lands) each half stays correct instead of one
-// of them dropping a dark band onto a light section.
+// one in the section below's. At a dark/light seam each half stays correct
+// instead of one of them dropping a dark band onto a light section. Since
+// increment 25 this is mounted at Hero→About only; LoopDivider.astro owns
+// the other seams.
 //
 // `above` / `below` name the section surface on each side; `stock` is the
 // strip itself. The defaults are right for every dark-to-dark seam.
