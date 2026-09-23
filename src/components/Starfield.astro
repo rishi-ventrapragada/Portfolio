@@ -17,9 +17,34 @@
 // can never paint into a neighbour, so the dividers stay the visible seam.
 import { layers } from "../lib/starfield-data";
 import StarfieldMeteors from "./StarfieldMeteors.astro";
+
+interface Props {
+  /** Which sky (increment 29). The stars are one shared set (so no extra
+   * bytes), but each variant mirrors it and starts the drift and the
+   * meteors at another point, so no two sections show the same sky. 0 is
+   * the boot overlay's and the hero's: those two must stay identical, so
+   * the overlay fades into the sky already underneath it. */
+  variant?: 0 | 1 | 2 | 3;
+}
+
+const { variant = 0 } = Astro.props;
+// [mirror x, mirror y, drift phase (share of a loop), meteor shift (s)].
+const VARIANTS = [
+  [1, 1, 0, 0],
+  [-1, 1, 0.37, 4],
+  [1, -1, 0.61, 7],
+  [-1, -1, 0.83, 2],
+] as const;
+const [fx, fy, phase, shift] = VARIANTS[variant];
 ---
 
-<div class="sky" data-sky data-offscreen-pause aria-hidden="true">
+<div
+  class="sky"
+  data-sky
+  data-offscreen-pause
+  aria-hidden="true"
+  style={`--flip-x: ${fx}; --flip-y: ${fy}; --phase: ${phase}; --meteor-shift: ${shift}s`}
+>
   {
     layers.map((layer) => (
       <div class="layer" data-layer={layer.name} style={`--drift: ${layer.drift}s; --layer-opacity: ${layer.opacity}`}>
@@ -75,7 +100,7 @@ import StarfieldMeteors from "./StarfieldMeteors.astro";
     position: absolute;
     inset: 0;
     width: 200%;
-    animation: drift var(--drift) linear infinite;
+    animation: drift var(--drift) linear calc(var(--drift) * var(--phase) * -1) infinite;
   }
 
   /* Half the track is one full repeat, so ending at -50% lands the copy
@@ -100,6 +125,12 @@ import StarfieldMeteors from "./StarfieldMeteors.astro";
     height: 1px;
     border-radius: 50%;
     color: var(--heading);
+    /* The variant's mirror, about the track's centre line (x 100cqw) and
+       the layer's middle (y 50cqh). A star at x and its seam copy at
+       x + 100cqw land at 200cqw − x and 100cqw − x: still exactly one
+       layer apart, so the loop stays seamless. */
+    transform: scale(var(--flip-x), var(--flip-y));
+    transform-origin: 100cqw 50cqh;
   }
 
   .stars[data-twinkle] {

@@ -50,7 +50,8 @@ import { meteors } from "../lib/starfield-data";
     );
     filter: drop-shadow(0 0 3px color-mix(in srgb, var(--heading) 70%, transparent));
     opacity: 0;
-    animation: meteor var(--dur) linear var(--delay) infinite;
+    /* --meteor-shift: the sky variant's offset (Starfield.astro). */
+    animation: meteor var(--dur) linear calc(var(--delay) - var(--meteor-shift, 0s)) infinite;
     will-change: transform, opacity;
   }
 
