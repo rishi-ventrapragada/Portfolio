@@ -1,6 +1,7 @@
 ---
-// PRD §5.8 — contact as a credits sequence. Still the <footer> landmark and
-// still #contact for the nav. A scroll track holds a sticky pin for its
+// PRD §5.8 — contact as a credits sequence. Still the <footer> landmark; the
+// nav's #contact is an anchor at the END of the track (increment 28), so the
+// link lands on the settled contact screen, not the first credit. A scroll track holds a sticky pin for its
 // whole distance; inside it two stages share one grid cell
 // (FooterStage.astro): the credits, then the contact screen.
 //
@@ -26,7 +27,7 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
     content. */}
 <LoopDivider variant="checker" />
 
-<footer class="footer" id="contact" data-credits>
+<footer class="footer" data-credits>
   {/* Without JavaScript nothing commits a zone, so the <noscript> style
       (the ExperienceTimeline.astro pattern) un-pins the section into a
       static block, un-stacks the stages into plain flow and shows every
@@ -38,10 +39,17 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
       [data-credits-stack] { display: block !important; }
       [data-credits-stage] { opacity: 1 !important; pointer-events: auto !important; transform: none !important; }
       [data-credit-line] { opacity: 1 !important; transform: none !important; }
+      [data-contact-anchor] { top: calc(100% - var(--pin-inner) - var(--nav-height)) !important; }
     </style>
   </noscript>
 
   <div class="track" data-credits-track>
+    {/* The nav's target. Exactly one viewport above the track's end — the
+        scroll position where the last zone has committed the contact
+        screen — so a click, a tap and the keyboard all land there. Without
+        JS the track is plain flow and this sits where the contact screen
+        starts instead (the <noscript> rule above). */}
+    <span class="anchor" id="contact" data-contact-anchor></span>
     <div class="pin" data-credits-pin>
       {/* Inside the pin, so the contours stay behind the credits for the
           whole scroll rather than travelling with the track. */}
@@ -84,7 +92,21 @@ const creditLines = ["Built, designed,", "Directed & edited by", "Rishi Ventrapr
      screen — five zones for three lines, 40vh each. */
   .track {
     --pin-length: 300vh;
+    position: relative;
     height: var(--pin-length);
+  }
+
+  /* scroll-margin 0, not the global nav allowance: the pin already clears
+     the bar, and landing 80px short would stop one zone early on a short
+     track. */
+  .anchor {
+    position: absolute;
+    top: calc(100% - 100dvh);
+    left: 0;
+    width: 1px;
+    height: 1px;
+    scroll-margin-top: 0;
+    pointer-events: none;
   }
 
   /* overflow: clip, not hidden: it clips the stack without making the pin a
