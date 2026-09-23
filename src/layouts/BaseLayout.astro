@@ -113,6 +113,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     transform: translateY(0);
   }
 
+  /* No slide under reduced motion: the link is simply there on focus. */
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link {
+      transition: none;
+    }
+  }
+
   /* body is only focusable as a script target, never as a visible focus ring. */
   body:focus {
     outline: none;

@@ -78,17 +78,13 @@ import { meteors } from "../lib/starfield-data";
     }
   }
 
-  /* Reduced motion: half speed and dimmed, never removed (the reasoning is in
-     Starfield.astro). The dim goes on the track, not the streak: the
-     keyframes own the streak's opacity, so a plain opacity there would be
-     overridden by the running animation. */
+  /* Reduced motion: no meteors at all (increment 28, CLAUDE.md §4). A
+     streak only exists while it travels, so with the animation removed it
+     rests on its base opacity: 0, invisible. The halved-speed exception
+     increment 22 kept is gone — decorative motion under reduce is none. */
   @media (prefers-reduced-motion: reduce) {
     .meteor {
-      animation-duration: calc(var(--dur) * 2);
-    }
-
-    .meteor-track {
-      opacity: 0.35;
+      animation: none;
     }
   }
 </style>

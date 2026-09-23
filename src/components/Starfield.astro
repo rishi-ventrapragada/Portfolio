@@ -131,15 +131,8 @@ import StarfieldMeteors from "./StarfieldMeteors.astro";
 
   /* --- Reduced motion --------------------------------------------------
      The drift freezes at frame 0 and the twinkle settles to its base
-     opacity, leaving a complete, still sky rather than an empty box.
-
-     Meteors are slowed by half and dimmed to 35% instead of being removed.
-     That is deliberate: a large share of mobile visitors have reduced
-     motion set as an OS-level battery default rather than as a vestibular
-     need, and deleting the streaks outright would silently take the
-     feature away from them. Halved and dimmed is the compromise the
-     original shipped, and it is preserved here; StarfieldMeteors.astro
-     owns that branch. */
+     opacity, leaving a complete, still sky rather than an empty box. The
+     meteors stop too (StarfieldMeteors.astro owns that branch). */
   @media (prefers-reduced-motion: reduce) {
     .track {
       animation: none;
