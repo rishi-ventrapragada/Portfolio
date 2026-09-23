@@ -14,26 +14,30 @@
 // below is all glyph. preserveAspectRatio stays at the default so the
 // letterforms scale uniformly, and lengthAdjust="spacing" only redistributes
 // the gaps between glyphs — never the letters themselves.
+import HeroCaption from "./HeroCaption.astro";
 ---
 
 {/* Sticky so it dissolves in place. data-wordmark is the script hook. */}
 <div class="wordmark-wrap" data-wordmark>
   <h1 class="visually-hidden">Rishi</h1>
-  <svg
-    class="wordmark"
-    viewBox="63 31 2055 735"
-    preserveAspectRatio="xMidYMid meet"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <text
-      x="0"
-      y="748"
-      textLength="2146"
-      lengthAdjust="spacing"
-      dominant-baseline="alphabetic">RISHI</text
+  <div class="letters">
+    <svg
+      class="wordmark"
+      viewBox="63 31 2055 735"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+      focusable="false"
     >
-  </svg>
+      <text
+        x="0"
+        y="748"
+        textLength="2146"
+        lengthAdjust="spacing"
+        dominant-baseline="alphabetic">RISHI</text
+      >
+    </svg>
+    <HeroCaption />
+  </div>
 </div>
 
 <script>
@@ -43,19 +47,15 @@
 </script>
 
 <style>
-  /* Sticky wrapper spans the viewport; the SVG inside it is centred and capped.
-     grid-area places it in the hero's single cell, under the subject
-     (z-index 2, Hero.astro).
-
-     Placed from the subject's head, not from the top (increment 28). The
-     subject is bottom-anchored, so its head sits at
-     100dvh − (1 − head) × H, where H is its painted height (Hero.astro
-     publishes the inputs). The letters are lowered until their bottom
-     --overlap of height crosses that line, whatever the viewport's shape;
-     before this the overlap ran from −170% to +57% across common screens.
-     The two targets are the two layouts that were approved: 56% from 640px
-     (1280×800), 26% below it (375×667). The floor keeps the letters clear of
-     the nav on short screens, where the head then rises further into them. */
+  /* Sticky wrapper spans the viewport; grid-area puts it in the hero's one
+     cell, under the subject (z-index 2, Hero.astro). Placed from the
+     subject's head, not the top (increment 28): the subject is
+     bottom-anchored, so its head sits at 100dvh − (1 − head) × H, H its
+     painted height (Hero.astro publishes the inputs), and the letters are
+     lowered until their bottom --overlap crosses that line at any viewport
+     shape (it ran −170% to +57% before). Targets are the two approved
+     layouts: 56% from 640px (1280×800), 26% below (375×667). The floor keeps
+     the letters clear of the nav on short screens. */
   .wordmark-wrap {
     --wm-w: clamp(320px, 72vw, 1100px);
     --wm-h: calc(var(--wm-w) * 735 / 2055);
@@ -79,14 +79,19 @@
 
   .wordmark {
     display: block;
-    /* 72vw centred: ~14% margin each side at 1440px. Sits between the original
-       22vw type and the edge-to-edge version. */
-    width: var(--wm-w);
-    margin-inline: auto;
+    width: 100%;
     /* Ratio matches the ink-box viewBox, so width drives height and the glyphs
        are never stretched. */
     height: auto;
     aspect-ratio: 2055 / 735;
+  }
+
+  /* 72vw centred: ~14% margin each side at 1440px. Sits between the original
+     22vw type and the edge-to-edge version. The caption is placed on it. */
+  .letters {
+    position: relative;
+    width: var(--wm-w);
+    margin-inline: auto;
   }
 
   .wordmark text {
