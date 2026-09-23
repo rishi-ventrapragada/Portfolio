@@ -92,6 +92,107 @@ the flash returns in the new colour. `global.css` carries a pointer comment
 next to `--bg`, but a comment is easy to miss in a bulk token edit — hence this
 entry.
 
+## 2026-09-23 — increment 25 (five-part batch)
+
+### Last milestone completed
+
+Five code commits on `main`, each built clean (0 errors / warnings / hints),
+pushed, aliased and verified on `rishi-ventrapragada.vercel.app`, plus this
+docs commit. Order A → B → C → E → D (E before D so the magnetic commit
+could include the résumé card).
+
+- `8566748` **dividers** — Video editing/Experience sprocket removed;
+  `LoopDivider.astro` barcode (About/Skills), clapper (Experience/Projects),
+  checker (Projects/Contact, owner picked 3 rows × 16px of three
+  screenshotted options). Hero/About keeps `Divider.astro`, untouched.
+- `33949b3` **contact** — credits scrim gone; text-shadow glow instead.
+- `3c9221e` **contact** — real GitHub / LinkedIn marks, plain envelope.
+- `d11c98b` **contact** — résumé is a fourth card.
+- `35f34aa` **contact** — magnetic hover on link cards.
+
+Owner decisions this session: credits glow = dark outline + faint
+off-white bloom (not a pure white glow, which fails AA); brand marks
+pinned white (both brands forbid recolouring), mail = plain envelope, not
+the unverified Gmail logo; résumé renders as a non-link `[TODO]` card while
+the PDF is missing; no magnetic effect on project links, nav, timeline
+clips or the accent toggle.
+
+### Decisions worth knowing before you touch this
+
+- **The loop is Starfield's 200% / −50% track, but the half is snapped to
+  whole tiles**: `--half: round(up, 100cqw, var(--tile-w))`. A plain
+  `100cqw` copy lands mid-tile at the wrap. Change a tile size and the
+  snap follows; keep `--tile-w` equal to the pattern's real period.
+- **Barcode tile is 90 bars / 390px.** 36 bars / 155px repeated visibly
+  nine times across 1280. Seeded (`barcode-data.ts`, seed 25).
+- **Credits glow: the ring is load-bearing.** `--halo` in
+  `FooterCredits.astro` is 20 zero-blur `--bg` offset copies (1.5px and
+  3px rings) + two blurs. Blur-only halos measured 3.27 (crimson): a
+  Gaussian is ~50% opaque at the stroke edge. Don't "simplify" it.
+- **Brand marks are trademarks, not just CC0 paths.** Simple Icons dropped
+  LinkedIn in v14; the path is from v13.21.0. GitHub and LinkedIn terms
+  both say white/black only, no recolour — the glyph is pinned to
+  `var(--fg)` in `ContactIcon.astro`. ASSETS.md has the terms.
+- **Résumé switches itself on.** `FooterContact.astro` checks
+  `import.meta.glob("/public/resume.pdf")` at build time. Drop the file in
+  `public/`, push, and the card becomes a magnetic link — no code change.
+  (`node:fs` isn't usable: no `@types/node`, and adding it needs asking.)
+- **Phone contact screen now centres above the © line** (`padding-bottom:
+  3.5rem` below 480px). Without it the résumé row touched © at 320×568.
+- **Magnetic is off under reduced motion** (reasoning in PRD §5.8 and the
+  `magnetic.ts` header). +443 B gz; page total 6,183 B gz of 40 KB.
+
+### Doc edits this session (CLAUDE.md §7)
+
+- **PRD §5.12** — rewritten: four seams, two kinds, pattern table, loop
+  snapping, reduced motion; old sprocket text kept for Hero/About.
+- **PRD §5.8** — contrast paragraph (glow, metric, numbers); contact
+  screen (brand marks, hover); résumé card; magnetic hover paragraph;
+  stage table row; isUrl paragraph.
+- **PRD §5.15** — "carry their own glow" paragraph.
+- **ASSETS.md** — new brand-marks entry; résumé entry reworded.
+- CLAUDE.md not touched.
+
+### Verified by measurement (local and live)
+
+- **A**: one `.divider` (before `#about`); barcode → `#skills`, clapper →
+  `#projects`, checker → `#contact`; nothing before `#experience`.
+  Frame-0 vs −50% screenshots byte-identical, all three, at 1280 / 1000 /
+  375. Reduced motion: `animation-name: none`, `transform: none`. No
+  horizontal overflow.
+- **B**: `::before` `content: none`. Worst within 2px of any glyph,
+  5 viewports: crimson **5.10**, violet **6.06**, name 12.66.
+- **C**: glyph `rgb(255,255,255)` at rest / hover / focus, both accents;
+  only SVG request `favicon.svg`; zero off-origin requests.
+- **E**: 331×80 at 1280 (= each contact card), dashed `<div>` while no PDF,
+  `<a>` with a throwaway PDF (deleted, never committed); © clearance
+  135 / 162 / 201 / 109 / 87 / 33px at 1280 / 1024 / 768 / 375 / 360 / 320.
+- **D**: 20,10px off centre → 4,2; corners → ±6 / ±5.6 on every link card;
+  spring-back ~450ms, one 0.58px overshoot; `reduce` and touch → `none`.
+
+### Harness notes
+
+- `Page.captureScreenshot` with `captureBeyondViewport: true` lays the page
+  out un-stuck — the footer pin renders blank. Use the default (false)
+  with document-space clip coordinates for anything inside a sticky pin.
+- For "near the glyph" contrast, dilate with a **Euclidean** radius. A 5×5
+  square reaches 2.83px on diagonals and false-fails pixels off corners.
+- Rendering glyphs `color: transparent` keeps their `text-shadow`s — a
+  clean way to see the ground under the text.
+
+### Still open
+
+- **Résumé PDF** — still pending from the owner (now self-activating).
+- **Barcode repeat** — 390px tile still repeats ~3× across 1280. Longer
+  tile = longer inline gradient; owner to judge live.
+- **Google brand terms** unverified; if a Gmail mark is ever wanted,
+  check them first.
+- Carried over: planned-frame contrast, Experience sky density, 320px nav.
+
+### Next milestone planned
+
+None queued. Waiting on the owner.
+
 ## 2026-09-23 — increment 24 (three-part batch)
 
 ### Last milestone completed
