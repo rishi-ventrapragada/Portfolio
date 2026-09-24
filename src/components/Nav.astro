@@ -2,7 +2,10 @@
 // PRD §5.1 — a fixed bar, transparent over the hero, solid from the moment
 // the hero's bottom edge reaches its own. Anchors only: no current-page
 // state, no hamburger. Four labels fit phones only by a type step-down
-// (SESSION.md, increment 13); a fifth needs a real overflow pattern.
+// (SESSION.md, increment 13); a fifth needs a real overflow pattern. The
+// progress hairline is NavProgress.astro.
+import NavProgress from "./NavProgress.astro";
+
 const links = [
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
@@ -29,14 +32,8 @@ const links = [
     </ul>
   </nav>
 
-  {/* Scroll progress (PRD §5.1). The fill grows left to right, but only
-      past the hero: inside it the bar would read as a broken near-empty
-      line, so it is hidden until [data-past-hero] (nav.ts) and its range
-      starts at the hero's bottom edge. aria-hidden: it duplicates what the
-      scrollbar already says. */}
-  <div class="progress" aria-hidden="true">
-    <span class="fill" data-progress-fill></span>
-  </div>
+  {/* Scroll progress (PRD §5.1), the bar's bottom hairline. */}
+  <NavProgress />
 </header>
 
 <script>
@@ -125,75 +122,29 @@ const links = [
     }
   }
 
-  /* --- Scroll progress (PRD §5.1) ---------------------------------------
-     The track is the bar's bottom hairline. No transition on the fill: it
-     tracks scroll 1:1, also under reduced motion — it never moves by itself.
-     Hidden over the hero with visibility/opacity, never `display: none`,
-     which would collapse the hairline out of layout. */
-  .progress {
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 2px;
-    background-color: var(--line);
-    visibility: hidden;
-    opacity: 0;
-    /* Hide: fade, then drop visibility. Show (below): visibility at once. */
-    transition:
-      opacity 300ms ease,
-      visibility 0s linear 300ms;
-  }
-
-  .nav[data-past-hero] .progress {
-    visibility: visible;
-    opacity: 1;
-    transition:
-      opacity 300ms ease,
-      visibility 0s linear 0s;
-  }
-
-  .fill {
-    display: block;
-    height: 100%;
-    background-color: var(--accent);
-    transform-origin: 0 50%;
-    transform: scaleX(var(--scroll-progress, 0));
-  }
-
-  @keyframes progress-grow {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
-  }
-
-  @supports (animation-timeline: scroll()) {
-    /* Longhands in their own rules, never the `animation` shorthand: folded
-       together the minifier emits `animation: ... scroll(root)` and browsers
-       drop the whole declaration (CLAUDE.md §4). The :where(.nav) prefix
-       keeps this rule from merging with the one below. */
-    :where(.nav) .fill {
-      animation-name: progress-grow;
-      animation-duration: 1ms; /* Overridden by the timeline. */
-      animation-timing-function: linear;
-      animation-fill-mode: both;
+  /* Narrowest phones (increment 32): at 320px even the step-down was 25px
+     too wide — the mark ran into SKILLS and Contact overran the screen by
+     1.4px — and up to 357px the two sat under 12px apart. Below 358px the
+     gutter, the gaps and the tracking tighten a notch more; measured, the
+     mark and the links are then 18.5px apart at 320 and at least 12 at
+     every width. */
+  @media (max-width: 357.98px) {
+    .nav-inner {
+      padding-inline: 1rem;
     }
 
-    /* Range starts at the hero's bottom (one viewport) rather than 0, so the
-       fill reads 0% exactly where the bar appears and still reaches 100% at
-       the document's end — the same end point as before, only the start
-       moved. Its own rule: animation-range folds into the shorthand too. */
-    .fill {
-      animation-timeline: scroll(root block);
-      animation-range: 100dvh 100%;
+    .mark,
+    .link {
+      letter-spacing: 0.02em;
+    }
+
+    .links {
+      gap: 0.5rem;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .nav,
-    .progress,
-    .nav[data-past-hero] .progress {
+    .nav {
       transition: none;
     }
   }
