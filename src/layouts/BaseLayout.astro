@@ -96,6 +96,12 @@ const ogAlt = "RISHI in large letters behind a photo of Sai Rishi Ventrapragada,
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:image:alt" content={ogAlt} />
 
+    {/* The star lists every sky paints. They stay in the head: moved to the
+        end of the body (increment 32), the live page on slow 4G painted the
+        boot overlay two frames before they were parsed, a starless sky. The
+        hero's preload above is requested first either way. */}
+    <StarfieldDefs />
+
     <Font cssVariable="--font-display-src" preload />
     <Font cssVariable="--font-mono-src" />
   </head>
@@ -119,12 +125,6 @@ const ogAlt = "RISHI in large letters behind a photo of Sai Rishi Ventrapragada,
       <slot />
     </main>
     {!bare && <Footer />}
-    {/* The star lists every sky paints (increment 32: moved from the
-        <head>, where 43 KB of them sat in front of everything the page
-        requests). Still parsed before the first paint, which waits on the
-        render-blocking stylesheet — measured, the boot overlay's first
-        painted frame has its stars on a hard reload and on slow 4G. */}
-    <StarfieldDefs />
   </body>
 </html>
 
