@@ -138,7 +138,7 @@ Two notes for whoever touches the tile next:
 | Source | Supplied by the owner (Sai Rishi Ventrapragada) — photograph of himself |
 | Licence | Owner's own material; no third-party rights |
 | Date | Added 2026-09-18 (increment 1) |
-| Size | 1.07 MB source (not deployed since increment 32); built to 470 / 660 / 923w WebP, 35 / 60 / 95 KB |
+| Size | 1.07 MB source (not deployed since increment 32); built to 470 / 660 / 923w AVIF, 16 / 25 / 40 KB (increment 32.1), and WebP, 35 / 60 / 95 KB |
 
 Transparent-background cutout used as the hero subject and LCP element
 (PRD §5.2). Logged here retroactively — it predates this file.

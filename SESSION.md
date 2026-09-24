@@ -110,6 +110,43 @@ placeholders, which CLAUDE.md §7 means for the owner, not for visitors.
 `About.astro` in place of the `.bio` block — one import and one line.
 Don't delete the dormant files as dead code.
 
+## 2026-09-24 — increment 32.1 (LCP follow-up)
+
+### Last milestone completed
+
+`6e9fd79` **perf** — the hero is a `<Picture>` with an AVIF set beside the
+WebP one (660w: 25 KB against 60), the head preload names the AVIF set
+(`type="image/avif"`, so browsers without AVIF skip it), and the display
+face is no longer preloaded (`font-display: swap` was already set). Built
+clean, pushed, aliased. Checked: the preload's URLs equal the
+`<source type="image/avif">` URLs; AVIF chosen with one hero request at
+375@2, 1280, 1920 and 844×390; the subject's box unchanged (330×426 /
+470×607); fonts load; 0 console messages; CLS 0.
+
+### Measured (live, 375px, DPR 2, 4× CPU + slow 4G, repeat visit, 7 runs)
+
+LCP 2128 / 2144 / 2188 / 2192 / 2292 / 2992 / 3140ms, **median 2.19s** —
+no better than increment 32's 2.15 (2.54 before it). The hero now finishes
+at ~1.52–1.63s (was ~1.85–1.9s) and transfer is 96.7 KB (was 131), but FCP
+is 1.84–2.50s (median 2.13) and LCP cannot come before it.
+
+### What is left (not chased, per the owner)
+
+- **The first paint is the bound.** Both render-blocking stylesheets
+  (BaseLayout 6.4 KB + index 5.9 KB — split since the 404 page shares
+  styles) land at ~1.42–1.50s; then, at 4× CPU, parsing the 164 KB HTML
+  (43 KB of it the star lists), style recalculation and the first layout of
+  the whole one-page DOM (~1,100 layout objects: four skies, the 52-node
+  graph, every section) take ~0.4–0.8s before anything paints. The audit
+  measured that first layout at 815ms.
+- **Levers, likely biggest first:** `content-visibility: auto` (with a
+  `contain-intrinsic-size`) on the sections below the hero, so their style
+  and layout skip the first frame; lighter star lists; one stylesheet
+  instead of two. Each touches structure or design, so it is the owner's
+  call.
+- **Network variance** explains the two slow runs (TTFB 199ms; a hero that
+  only started at 1.05s in run 2).
+
 ## 2026-09-24 — increment 32 (audit Bucket 1 and cleanup)
 
 ### Last milestone completed
