@@ -8,11 +8,15 @@
 //     through the graph: scripts/skills-keys.ts makes it one Tab stop with
 //     arrow-key focus, each focused item lighting its star;
 //   - without JS it is shown at every width (SkillsSection.astro).
+// Each hub wears its graph colour (increment 33): the chip, the spine and
+// the ticks take the hub's tone from lib/skills-data.ts, the same map the
+// graph paints with, so the list keeps the categories apart instead of
+// running every hub in the accent.
 // Every element carries its graph node's id (data-node). The centre's own
 // name, "Skills", is the first stop but visually hidden everywhere: the
 // section heading already says it.
 import { nodes } from "../lib/skills-layout";
-import { hubs } from "../lib/skills-data";
+import { hubs, toneVar } from "../lib/skills-data";
 import SkillChain from "./SkillChain.astro";
 
 const hubId = (h: number) => nodes.find((n) => n.kind === "hub" && n.hub === h)!.id;
@@ -25,7 +29,7 @@ const hubId = (h: number) => nodes.find((n) => n.kind === "hub" && n.hub === h)!
   <ul class="hubs">
     {
       hubs.map((hub, h) => (
-        <li class="group" data-planned={hub.learning ? "" : undefined}>
+        <li class="group" data-planned={hub.learning ? "" : undefined} style={`--tone: ${toneVar(hub.tone)}`}>
           <h3 class="label root" data-node={hubId(h)}>
             {hub.name}
           </h3>
@@ -45,21 +49,23 @@ const hubId = (h: number) => nodes.find((n) => n.kind === "hub" && n.hub === h)!
     list-style: none;
   }
 
-  /* The increment-19 root chip: solid accent, dark ink, uppercase mono,
-     sitting over its chain's spine. */
+  /* The increment-19 root chip: a solid fill, dark ink, uppercase mono,
+     sitting over its chain's spine. The fill is the hub's tone (increment
+     33; it was the accent for every hub): --on-accent on it measures
+     8.27:1 (periwinkle) to 16.74:1 (off-white). */
   .root {
     display: inline-block;
     margin: 0 0 0 1rem;
     padding: 0.625rem 1rem;
     color: var(--on-accent);
-    background-color: var(--accent);
-    border: 1px solid var(--accent);
+    background-color: var(--tone);
+    border: 1px solid var(--tone);
     border-radius: 4px;
   }
 
   /* Currently learning: outlined, dashed. */
   .group[data-planned] .root {
-    color: var(--accent);
+    color: var(--tone);
     background-color: var(--bg);
     border-style: dashed;
   }
