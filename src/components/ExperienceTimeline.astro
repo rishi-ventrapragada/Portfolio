@@ -5,7 +5,9 @@
 // Scrolling the track scrubs the timeline (scripts/experience-scrub.ts);
 // click, keyboard and hover still work (scripts/experience-timeline.ts).
 // Each clip is one moment; the monitor shows the committed one. Body
-// sentences are the owner's, verbatim. Clip keywords are words taken from
+// sentences are the owner's, verbatim, without the year the label above
+// already shows; the first two openings are the owner's picks from
+// alternatives offered in increment 33 (both began "Learnt"). Clip keywords are words taken from
 // those sentences, not new copy. KalaCart's cover is the projects
 // collection's real screenshot, reused through <Image> — no new asset. One
 // frame = ExperienceFrame.astro; ruler, tracks and playhead =
@@ -34,21 +36,21 @@ interface Moment {
 }
 
 const moments: Moment[] = [
-  { id: "web", year: "2025", keyword: "JavaScript", body: "2025 — Learnt C, HTML, CSS and JavaScript" },
-  { id: "python", year: "2025", keyword: "Python", body: "2025 — Learnt Python and MySQL" },
+  { id: "web", year: "2025", keyword: "JavaScript", body: "Started with C, HTML, CSS and JavaScript" },
+  { id: "python", year: "2025", keyword: "Python", body: "Moved on to Python and MySQL" },
   {
     id: "kalacart",
     year: "2026",
     keyword: "KalaCart",
-    body: "2026 — Built KalaCart: AI Market Linkage for Artisans",
+    body: "Built KalaCart: AI Market Linkage for Artisans",
     cover: kalacart.data.cover,
     coverAlt: `${kalacart.data.title} project cover`,
   },
   {
     id: "recurzn",
-    year: "Now",
+    year: "2026",
     keyword: "Recurzn",
-    body: "2026 — Building Recurzn, a cross-platform Self-Improvement App",
+    body: "Building Recurzn, a cross-platform Self-Improvement App",
     planned: true,
   },
 ];
