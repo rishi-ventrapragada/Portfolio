@@ -11,14 +11,10 @@
 // only an http(s) URL or a mailto: address becomes an <a>, anything else
 // (a "[TODO]" placeholder, CLAUDE.md §7) renders as visible mono text.
 // The résumé is a card of its own under the three (increment 25), outside
-// the guard: it links to /resume.pdf only if public/resume.pdf exists at
-// build time, and until then renders as a dashed "[TODO]" card that is not
-// a link, so the page never ships a 404.
+// the guard: a plain link to public/resume.pdf, the owner's file (committed
+// in increment 32; its build-time placeholder branch went in increment 33).
 import { isUrl } from "../lib/is-url";
 import ContactCard from "./ContactCard.astro";
-
-// A glob match is only a listing: nothing is imported unless it is called.
-const hasResume = Object.keys(import.meta.glob("/public/resume.pdf")).length > 0;
 
 const year = new Date().getFullYear();
 
@@ -48,7 +44,7 @@ const contacts = [
       }
     </ul>
     <div class="resume">
-      <ContactCard label="Résumé" icon="resume" href={hasResume ? "/resume.pdf" : undefined} prominent />
+      <ContactCard label="Résumé" icon="resume" href="/resume.pdf" prominent />
     </div>
   </div>
 
