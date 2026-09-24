@@ -4,7 +4,8 @@
 // Since increment 23 the links are rectangular button-cards with a
 // hand-authored glyph each (ContactCard.astro), under a display-size "Get in
 // touch", all dead centre; the © line is pinned to the stage's bottom edge,
-// out of the centring, and wears the credits' halo (increment 28).
+// out of the centring, and wears the shared .halo (utilities.css; increment
+// 28, when it was the credits').
 //
 // Contact values go through the shared isUrl guard (src/lib/is-url.ts):
 // only an http(s) URL or a mailto: address becomes an <a>, anything else
@@ -51,7 +52,7 @@ const contacts = [
     </div>
   </div>
 
-  <p class="meta copyright">&copy; {year} Rishi</p>
+  <p class="meta copyright halo">&copy; {year} Rishi</p>
 </div>
 
 <style>
@@ -156,20 +157,13 @@ const contacts = [
     }
   }
 
-  /* Straight on the backdrop like the credits, so it wears the same halo
-     (Footer.astro), plus a finer inner ring at 0.8px and 2.25px: on 11px
-     glyphs the halo's two rings alone left single gap pixels (3.84:1 worst
-     at 320×568). With both: 5.66:1 worst near any glyph, five viewports;
+  /* Straight on the backdrop, so it wears the .halo (utilities.css): with
+     its full ring set, 5.66:1 worst near any glyph over five viewports,
      3.16:1 with no halo at all (increment 28). */
   .copyright {
     position: absolute;
     inset-inline: 0;
     bottom: 2rem;
     margin: 0;
-    text-shadow:
-      var(--halo),
-      2.25px 0 0 var(--bg), 1.6px 1.6px 0 var(--bg), 0 2.25px 0 var(--bg), -1.6px 1.6px 0 var(--bg),
-      -2.25px 0 0 var(--bg), -1.6px -1.6px 0 var(--bg), 0 -2.25px 0 var(--bg), 1.6px -1.6px 0 var(--bg),
-      0.8px 0 0 var(--bg), -0.8px 0 0 var(--bg), 0 0.8px 0 var(--bg), 0 -0.8px 0 var(--bg);
   }
 </style>

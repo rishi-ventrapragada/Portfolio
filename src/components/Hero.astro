@@ -15,7 +15,9 @@ import Wordmark from "./Wordmark.astro";
     global.css, and nothing links here (the nav mark uses `#top`). The nav
     observes this box to hide its progress bar over the hero (PRD §5.1). */}
 <section class="hero" data-hero style={`--subject-ratio: ${heroRatio.toFixed(4)}`}>
-  <Starfield />
+  {/* Meteors fly only below the letters and their caption (increment 32),
+      behind the subject; the lane's top is the letters' box, below. */}
+  <Starfield meteorTop="calc(var(--letters-top) + var(--wm-h) + 3rem)" />
 
   <Wordmark />
 
@@ -46,6 +48,19 @@ import Wordmark from "./Wordmark.astro";
     --subject-w: min(88vw, 470px);
     --subject-max-h: 86dvh;
     --subject-head: 0.0394;
+    /* The letters' box, placed from the subject (Wordmark.astro explains
+       the maths) and published here since increment 32, where the sky can
+       read it too: its meteor lane starts below the letters. */
+    --wm-w: clamp(320px, 72vw, 1100px);
+    --wm-h: calc(var(--wm-w) * 735 / 2055);
+    --overlap: 0.56;
+    --letters-top: max(
+      calc(var(--nav-height) + 0.5rem),
+      calc(
+        100dvh - (1 - var(--subject-head)) * min(var(--subject-w) * var(--subject-ratio), var(--subject-max-h)) -
+          (1 - var(--overlap)) * var(--wm-h)
+      )
+    );
     position: relative;
     display: grid;
     min-height: 100dvh;
@@ -73,12 +88,16 @@ import Wordmark from "./Wordmark.astro";
     object-position: bottom center;
   }
 
-  /* Same 640px breakpoint as the wordmark's near-full-bleed switch: a taller
-     subject so the shoulders still reach up into the short mobile letters. */
+  /* 640px rather than the project's usual 768px: below it the 72vw cap
+     makes the wordmark too small to carry the composition, so it goes
+     near-full-bleed with a 26% overlap, and the subject grows taller so the
+     shoulders still reach up into the short mobile letters. */
   @media (max-width: 639px) {
     .hero {
       --subject-w: 88vw;
       --subject-max-h: 82dvh;
+      --wm-w: 88vw;
+      --overlap: 0.26;
     }
   }
 </style>

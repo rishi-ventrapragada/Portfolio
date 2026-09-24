@@ -3,15 +3,17 @@
 // Starfield, at the top of the pin since increment 30. Split from
 // ExperienceTimeline.astro for the CLAUDE.md §5 cap (increment 32). The sky
 // runs full-bleed and is bounded to this band — the monitor and timeline
-// below are opaque; only the text sits in the shell.
+// below are opaque; only the text sits in the shell. The same 160 stars in
+// a band this short sit densely, so the text wears the .halo (utilities.css,
+// increment 32): no star within 3px of a glyph.
 import Starfield from "./Starfield.astro";
 ---
 
 <div class="head">
   <Starfield variant={3} />
   <div class="shell head-text">
-    <p class="label eyebrow">Journey</p>
-    <h2 id="experience-heading" class="heading">Experience</h2>
+    <p class="label eyebrow halo">Journey</p>
+    <h2 id="experience-heading" class="heading halo">Experience</h2>
   </div>
 </div>
 

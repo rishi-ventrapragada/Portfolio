@@ -25,9 +25,15 @@ interface Props {
    * the boot overlay's and the hero's: those two must stay identical, so
    * the overlay fades into the sky already underneath it. */
   variant?: 0 | 1 | 2 | 3;
+  /** Increment 32: meteors cross only where no text is. `false` drops them
+   * (Skills: its graph and list leave no clear lane at any width); a CSS
+   * length starts their lane that far down the sky (the hero: below the
+   * wordmark and its caption). */
+  meteors?: boolean;
+  meteorTop?: string;
 }
 
-const { variant = 0 } = Astro.props;
+const { variant = 0, meteors = true, meteorTop } = Astro.props;
 // [mirror x, mirror y, drift phase (share of a loop), meteor shift (s)].
 const VARIANTS = [
   [1, 1, 0, 0],
@@ -43,7 +49,7 @@ const [fx, fy, phase, shift] = VARIANTS[variant];
   data-sky
   data-offscreen-pause
   aria-hidden="true"
-  style={`--flip-x: ${fx}; --flip-y: ${fy}; --phase: ${phase}; --meteor-shift: ${shift}s`}
+  style={`--flip-x: ${fx}; --flip-y: ${fy}; --phase: ${phase}; --meteor-shift: ${shift}s${meteorTop ? `; --meteor-top: ${meteorTop}` : ""}`}
 >
   {
     layers.map((layer) => (
@@ -63,7 +69,7 @@ const [fx, fy, phase, shift] = VARIANTS[variant];
     ))
   }
 
-  <StarfieldMeteors />
+  {meteors && <StarfieldMeteors />}
 </div>
 
 <style>

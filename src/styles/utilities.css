@@ -40,6 +40,27 @@
   border-style: dashed;
 }
 
+/* Text sitting straight on a moving backdrop — a starfield, the projector
+   beam — wears a solid 3px --bg outline (offset copies of the glyphs on
+   rings at 0.8, 1.5, 2.25 and 3px) and two soft falloffs, so no star,
+   meteor or mote ever runs up to a glyph: a star-free zone that follows the
+   letters, with no box behind them. The © line's recipe (increment 28,
+   which measured it: the two outer rings alone left single gap pixels on
+   11px glyphs), moved here from Footer.astro and FooterContact.astro in
+   increment 32 for the sky headings. First shadow paints on top. */
+.halo {
+  text-shadow:
+    1.5px 0 0 var(--bg), 1.1px 1.1px 0 var(--bg), 0 1.5px 0 var(--bg), -1.1px 1.1px 0 var(--bg),
+    -1.5px 0 0 var(--bg), -1.1px -1.1px 0 var(--bg), 0 -1.5px 0 var(--bg), 1.1px -1.1px 0 var(--bg),
+    3px 0 0 var(--bg), 2.6px 1.5px 0 var(--bg), 1.5px 2.6px 0 var(--bg), 0 3px 0 var(--bg),
+    -1.5px 2.6px 0 var(--bg), -2.6px 1.5px 0 var(--bg), -3px 0 0 var(--bg), -2.6px -1.5px 0 var(--bg),
+    -1.5px -2.6px 0 var(--bg), 0 -3px 0 var(--bg), 1.5px -2.6px 0 var(--bg), 2.6px -1.5px 0 var(--bg),
+    0 0 6px var(--bg), 0 0 12px var(--bg),
+    2.25px 0 0 var(--bg), 1.6px 1.6px 0 var(--bg), 0 2.25px 0 var(--bg), -1.6px 1.6px 0 var(--bg),
+    -2.25px 0 0 var(--bg), -1.6px -1.6px 0 var(--bg), 0 -2.25px 0 var(--bg), 1.6px -1.6px 0 var(--bg),
+    0.8px 0 0 var(--bg), -0.8px 0 0 var(--bg), 0 0.8px 0 var(--bg), 0 -0.8px 0 var(--bg);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

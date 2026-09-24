@@ -17,9 +17,14 @@ import { meteors } from "../lib/starfield-data";
 </div>
 
 <style>
+  /* The lane (increment 32): from --meteor-top (Starfield.astro's
+     meteorTop, 0 by default) to the sky's bottom. Every track starts at a
+     % of this box and falls to the right, so none crosses above it; the
+     clip only trims a streak's cap and glow. */
   .meteors {
     position: absolute;
-    inset: 0;
+    inset: var(--meteor-top, 0) 0 0 0;
+    overflow: clip;
   }
 
   /* The track holds a STATIC rotation and the streak inside it animates

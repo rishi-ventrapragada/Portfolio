@@ -21,15 +21,15 @@ import Starfield from "./Starfield.astro";
     </style>
   </noscript>
 
-  <Starfield variant={1} />
+  <Starfield variant={1} meteors={false} />
 
-  <p class="label eyebrow">Toolkit</p>
+  <p class="label eyebrow halo">Toolkit</p>
   {/* The hint (increment 32) is the keyboard route's instructions: the
       tree's description (skills-keys.ts), and on screen from 960px while
       the route has focus — nothing else says the arrows work. */}
   <div class="title">
-    <h2 id="skills-heading" class="heading">Skills</h2>
-    <p class="meta hint" id="skills-hint">Arrow keys move between skills · Home / End jump to the ends</p>
+    <h2 id="skills-heading" class="heading halo">Skills</h2>
+    <p class="meta hint halo" id="skills-hint">Arrow keys move between skills · Home / End jump to the ends</p>
   </div>
 
   <div class="body">
