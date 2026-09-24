@@ -1,8 +1,6 @@
 # Portfolio
 
-Personal portfolio of Sai Rishi Ventrapragada — a dark, editorial single-page site
-with a magazine-cover hero, built to show shipped work to recruiters, GDG organizers
-and hackathon teammates.
+Personal portfolio of Sai Rishi Ventrapragada 
 
 `PRD.md` is the product spec. `CLAUDE.md` is how the work gets done. `SESSION.md`
 carries the handoff between sessions. `ASSETS.md` logs every non-code asset.
