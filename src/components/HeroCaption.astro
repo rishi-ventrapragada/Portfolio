@@ -1,12 +1,15 @@
 ---
-// The hero's role-and-school caption (PRD §5.2, increment 29): a quieter
-// return of the caption layer increment 1.5 removed. Rendered by
+// The hero's caption (PRD §5.2, increment 29): a quieter return of the
+// caption layer increment 1.5 removed — the surname since increment 33 (it
+// was "CSE · Data Science · VJIT"), under the given name the letters spell.
+// aria-hidden: the h1's accessible name is already the full name, so a
+// screen reader would hear the surname twice. Rendered by
 // Wordmark.astro inside its .letters box, so it dissolves with the letters
 // and is positioned against them. Split out for the CLAUDE.md §5 line cap.
 // It sits on the sky, so it wears the .halo (utilities.css, increment 32).
 ---
 
-<p class="label caption halo">CSE · Data Science · VJIT</p>
+<p class="label caption halo" aria-hidden="true">Ventrapragada</p>
 
 <style>
   /* On the letters' right edge, clear of the subject: under them from
