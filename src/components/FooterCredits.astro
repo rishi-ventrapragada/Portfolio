@@ -29,10 +29,12 @@ const { lines } = Astro.props;
   /* Increment 30: back to the pre-increment-25 treatment, by the owner's
      call — a soft --bg scrim behind the block and one soft --bg shadow per
      line, not increment 25's outline rings and off-white bloom. The scrim
-     is a rounded panel blurred at the edges: it covers the whole text area
-     at full strength and reads as the backdrop thinning out around the
-     text, not as a box. Over the projector beam, measured with the dust
-     frozen, it keeps crimson at AA (PRD §5.8). */
+     is a rounded panel blurred at the edges, so it reads as the backdrop
+     thinning out around the text, not as a box. Increment 32: 70% --bg,
+     not 94 — the lightest that keeps every pixel within 2px of a credit
+     glyph at 4.5:1 over the beam (crimson worst 4.56, seven viewports,
+     seven dust frames; 68% dipped to 4.45), so about twice as much of the
+     beam still shows through at the name stage (PRD §5.8). */
   .credits {
     position: relative;
     display: grid;
@@ -56,7 +58,7 @@ const { lines } = Astro.props;
     inset: -2.5rem -3rem;
     z-index: -1;
     border-radius: 3rem;
-    background-color: color-mix(in srgb, var(--bg) 94%, transparent);
+    background-color: color-mix(in srgb, var(--bg) 70%, transparent);
     filter: blur(1.25rem);
     pointer-events: none;
     opacity: 0;
