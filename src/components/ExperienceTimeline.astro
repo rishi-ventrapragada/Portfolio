@@ -9,12 +9,13 @@
 // those sentences, not new copy. KalaCart's cover is the projects
 // collection's real screenshot, reused through <Image> — no new asset. One
 // frame = ExperienceFrame.astro; ruler, tracks and playhead =
-// ExperienceTrack.astro. Only the heading's text sits in the shell: its sky,
-// the monitor and the timeline run viewport edge to edge.
+// ExperienceTrack.astro; the heading band = ExperienceHead.astro. Only the
+// heading's text sits in the shell: its sky, the monitor and the timeline
+// run viewport edge to edge.
 import { getEntry } from "astro:content";
 import ExperienceFrame from "./ExperienceFrame.astro";
+import ExperienceHead from "./ExperienceHead.astro";
 import ExperienceTrack from "./ExperienceTrack.astro";
-import Starfield from "./Starfield.astro";
 
 const kalacart = await getEntry("projects", "kalacart");
 if (!kalacart) throw new Error("projects/kalacart is missing");
@@ -57,7 +58,8 @@ const moments: Moment[] = [
   {/* Without JavaScript nothing maps scroll to clips, so the <noscript>
       style (the BootPreloader.astro pattern) makes the track a normal
       content-height block with the increment-13.1 monitor height; flex:
-      none, or the flex basis would override that height. */}
+      none, or the flex basis would override that height. Short screens
+      get the same layout from the media query in the <style> below. */}
   <noscript>
     <style>
       [data-scrub] { height: auto !important; }
@@ -72,16 +74,8 @@ const moments: Moment[] = [
   <div class="scrub" data-scrub>
     <div class="pin" data-pin>
       {/* The heading band (increment 30: moved into the pin from above it,
-          where increment 14.1 had put it). The fifth Starfield (increment
-          24) is bounded to this band — the monitor and timeline below are
-          opaque — and runs full-bleed; only the text sits in the shell. */}
-      <div class="head">
-        <Starfield variant={3} />
-        <div class="shell head-text">
-          <p class="label eyebrow">Journey</p>
-          <h2 id="experience-heading" class="heading">Experience</h2>
-        </div>
-      </div>
+          where increment 14.1 had put it). */}
+      <ExperienceHead />
 
       {/* A black screen filling the pinned viewport above the timeline.
           Every frame is in the HTML, stacked in one grid cell, so a swap is a
@@ -111,56 +105,6 @@ const moments: Moment[] = [
      bar itself, below). */
   .experience {
     scroll-margin-top: 0;
-  }
-
-  /* The band runs from the pin's top edge to the monitor's: its top padding
-     is the nav allowance the pin used to carry, so the sky also fills the
-     strip behind the bar and has no bare edge above or below it. Kept
-     compact — every pixel here comes out of the monitor. Positioned so the
-     Starfield bounds itself to it; the text is lifted above the sky. */
-  .head {
-    position: relative;
-    flex: none;
-    padding-top: calc(var(--nav-height) + 1.25rem);
-    padding-bottom: 1.25rem;
-  }
-
-  .head-text {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Short landscape (≤500px tall, e.g. 844×390): the band would take the
-     monitor below its content, so eyebrow and heading share one row at a
-     smaller size (ExperienceFrame.astro shrinks its text to match). */
-  @media (max-height: 500px) {
-    .head {
-      padding-block: calc(var(--nav-height) + 0.5rem) 0.5rem;
-    }
-
-    .head-text {
-      display: flex;
-      align-items: baseline;
-      gap: 1rem;
-    }
-
-    .eyebrow {
-      margin: 0;
-    }
-
-    .heading {
-      font-size: 1.5rem;
-    }
-  }
-
-  .eyebrow {
-    margin: 0 0 0.5rem;
-    color: var(--accent);
-  }
-
-  .heading {
-    margin: 0;
-    font-size: var(--size-h2);
   }
 
   /* --pin-length is the one number to tune: the scroll distance the track
@@ -195,5 +139,34 @@ const moments: Moment[] = [
 
   .track-slot {
     flex: none;
+  }
+
+  /* Short screens (increment 32): below the height every frame needs, the
+     monitor clipped its sentence (0px tall at 400% zoom), so the section
+     takes the no-JS layout above — in flow, a 60vh / 340px monitor, the
+     clips still commit on click and focus. Each band's number is one step
+     above the tallest failing height, scanned every 4px (SESSION.md,
+     increment 32): 532 below 480px wide, 464 to 767, 524 to 959, 576
+     from 960 — above 500px the full heading band returns and the KalaCart
+     frame needed more room than it got. experience-scrub.ts reads the
+     pin's position and stands down while it is static. */
+  @media (max-height: 463.98px),
+    (max-height: 531.98px) and (max-width: 479.98px),
+    (max-height: 523.98px) and (min-width: 768px),
+    (max-height: 575.98px) and (min-width: 960px) {
+    .scrub {
+      height: auto;
+    }
+
+    .pin {
+      position: static;
+      height: auto;
+    }
+
+    .monitor {
+      flex: none;
+      height: 60vh;
+      min-height: 340px;
+    }
   }
 </style>

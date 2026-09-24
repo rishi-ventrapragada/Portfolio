@@ -1,0 +1,68 @@
+---
+// The Experience heading band (PRD §5.11): eyebrow and h2 over the fifth
+// Starfield, at the top of the pin since increment 30. Split from
+// ExperienceTimeline.astro for the CLAUDE.md §5 cap (increment 32). The sky
+// runs full-bleed and is bounded to this band — the monitor and timeline
+// below are opaque; only the text sits in the shell.
+import Starfield from "./Starfield.astro";
+---
+
+<div class="head">
+  <Starfield variant={3} />
+  <div class="shell head-text">
+    <p class="label eyebrow">Journey</p>
+    <h2 id="experience-heading" class="heading">Experience</h2>
+  </div>
+</div>
+
+<style>
+  /* The band runs from the pin's top edge to the monitor's: its top padding
+     is the nav allowance the pin used to carry, so the sky also fills the
+     strip behind the bar and has no bare edge above or below it. Kept
+     compact — every pixel here comes out of the monitor. Positioned so the
+     Starfield bounds itself to it; the text is lifted above the sky. */
+  .head {
+    position: relative;
+    flex: none;
+    padding-top: calc(var(--nav-height) + 1.25rem);
+    padding-bottom: 1.25rem;
+  }
+
+  .head-text {
+    position: relative;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0;
+    font-size: var(--size-h2);
+  }
+
+  /* Short landscape (≤500px tall, e.g. 844×390): the band would take the
+     monitor below its content, so eyebrow and heading share one row at a
+     smaller size (ExperienceFrame.astro shrinks its text to match). */
+  @media (max-height: 500px) {
+    .head {
+      padding-block: calc(var(--nav-height) + 0.5rem) 0.5rem;
+    }
+
+    .head-text {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .eyebrow {
+      margin: 0;
+    }
+
+    .heading {
+      font-size: 1.5rem;
+    }
+  }
+</style>

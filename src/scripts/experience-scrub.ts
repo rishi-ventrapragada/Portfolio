@@ -6,15 +6,29 @@
 // each frame so direction does not matter (the hero-dissolve.ts pattern).
 // Listeners are live only while the track is on screen. `section` is the
 // scroll track ([data-scrub]); since increment 30 the heading is inside it.
+// `pin` is its sticky child: on a short screen the section's CSS un-pins it
+// into the static layout (increment 32), and a static section is read in
+// flow, so scrolling must not change what it shows.
+export const isPinned = (pin: HTMLElement | null): boolean => !pin || getComputedStyle(pin).position === "sticky";
 
-export function initScrub(section: HTMLElement, ids: readonly string[], commit: (id: string) => void): void {
+export function initScrub(
+  section: HTMLElement,
+  ids: readonly string[],
+  commit: (id: string) => void,
+  pin: HTMLElement | null = null,
+): void {
   let zone = -1;
   let ticking = false;
 
   const update = () => {
     ticking = false;
-    // Pinned distance = section height − the 100dvh pin. Zero without the
-    // pin (the no-JS layout never runs this), so nothing to map.
+    // Forget the zone while static, so re-pinning (a rotation, a zoom
+    // change) commits wherever the scroll then is.
+    if (!isPinned(pin)) {
+      zone = -1;
+      return;
+    }
+    // Pinned distance = section height − the 100dvh pin.
     const distance = section.offsetHeight - innerHeight;
     if (distance <= 0) return;
     const top = section.getBoundingClientRect().top + scrollY;

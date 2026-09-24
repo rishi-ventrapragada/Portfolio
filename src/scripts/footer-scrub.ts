@@ -18,11 +18,12 @@
  *    — visibility would drop the contact links out of the focus order for
  *    every zone but the last, and no focus event could ever fire on them.
  */
-import { initScrub } from "./experience-scrub";
+import { initScrub, isPinned } from "./experience-scrub";
 
 export function initFooterStages(root: HTMLElement): void {
   const track = root.querySelector<HTMLElement>("[data-credits-track]");
   const stack = root.querySelector<HTMLElement>("[data-credits-stack]");
+  const pin = root.querySelector<HTMLElement>("[data-credits-pin]");
   if (!track || !stack) return;
 
   const stages = [...stack.querySelectorAll<HTMLElement>("[data-credits-stage]")];
@@ -40,7 +41,7 @@ export function initFooterStages(root: HTMLElement): void {
     for (const s of stages) s.toggleAttribute("data-active", s.dataset.creditsStage === stage);
   };
 
-  initScrub(track, zones, commit);
+  initScrub(track, zones, commit, pin);
 
   // A focused link inside a stuck sticky pin never scrolls into view on its
   // own — the browser scrolls the window, the pin absorbs it and the link
@@ -50,10 +51,12 @@ export function initFooterStages(root: HTMLElement): void {
   // stages hide with opacity, not visibility: the links stay focusable
   // throughout, so the event fires from any zone. The pin stays under
   // reduced motion (a zone change is discrete state, not parallax — the
-  // §5.11 rationale), so the jump is needed there too.
+  // §5.11 rationale), so the jump is needed there too. Un-pinned on a short
+  // screen (increment 32) the links are in flow and focus scrolls to them
+  // natively, so there is nothing to jump to.
   stack.addEventListener("focusin", (event) => {
     const target = event.target as HTMLElement;
-    if (!target.matches(":focus-visible")) return;
+    if (!target.matches(":focus-visible") || !isPinned(pin)) return;
     const end = track.getBoundingClientRect().top + scrollY + track.offsetHeight - innerHeight;
     if (scrollY < end) scrollTo({ top: end, behavior: "instant" });
   });

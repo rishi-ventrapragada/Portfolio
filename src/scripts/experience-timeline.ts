@@ -51,11 +51,13 @@ export function initExperience(root: HTMLElement): void {
   }
 
   // Scroll drives the same commit; a click or focus still wins at once and
-  // the next zone change takes over again.
+  // the next zone change takes over again. Not while the section is
+  // un-pinned on a short screen: there only click and focus commit.
   initScrub(
     root.querySelector<HTMLElement>("[data-scrub]") ?? root,
     clips.map((clip) => clip.dataset.clip ?? ""),
     commit,
+    root.querySelector<HTMLElement>("[data-pin]"),
   );
 
   // Scrub on hover only where a hover exists (CLAUDE.md §4): a touch pointer
