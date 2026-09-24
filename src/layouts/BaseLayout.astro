@@ -13,12 +13,23 @@ import StarfieldDefs from "../components/StarfieldDefs.astro";
 interface Props {
   title: string;
   description: string;
+  /** A page outside the one-page site (increment 32: the 404): no boot
+   * overlay, nav or credits — their anchors only exist on the home page —
+   * no canonical, and kept out of search results. */
+  bare?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, bare = false } = Astro.props;
 // Every absolute URL below derives from this one value, so changing `site`
-// in astro.config.mjs updates canonical, og:url and twitter:url together.
-const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+// in astro.config.mjs updates canonical, og:url, twitter:url and the share
+// image together.
+const site = Astro.site ?? Astro.url;
+const canonical = new URL(Astro.url.pathname, site).href;
+// public/og.png: 1200×630, generated once from the site's own assets (the
+// wordmark's outlines, the hero cutout, the star data) — recipe in
+// SESSION.md, increment 32.
+const ogImage = new URL("/og.png", site).href;
+const ogAlt = "RISHI in large letters behind a photo of Sai Rishi Ventrapragada, on a dark starry ground";
 ---
 
 <!doctype html>
@@ -58,8 +69,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
       }
     </style>
 
+    {/* The favicon set (increment 32): the SVG, PNGs for browsers that
+        want a raster, and the home-screen icon for iOS. One source,
+        generated once — ASSETS.md. */}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {bare ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0b0b0d" />
@@ -68,28 +85,40 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonical} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogAlt} />
 
     <Font cssVariable="--font-display-src" preload />
     <Font cssVariable="--font-mono-src" />
   </head>
   {/* tabindex="-1" so the preloader can move focus here on removal. */}
   <body tabindex="-1">
-    <BootPreloader />
-    <a class="skip-link label" href="#main">Skip to content</a>
+    {!bare && <BootPreloader />}
+    {
+      !bare && (
+        <a class="skip-link label" href="#main">
+          Skip to content
+        </a>
+      )
+    }
     {/* Without JavaScript nothing ever makes the nav solid, and a
         transparent bar leaves its white links on the light About and
         Projects sections at 1.1:1. So without JS the bar is solid
         everywhere (Nav.astro's own <style> is scoped, hence here). */}
     <noscript><style>[data-nav] { background-color: var(--bg-raised) !important; }</style></noscript>
-    <Nav />
+    {!bare && <Nav />}
     <main id="main">
       <slot />
     </main>
-    <Footer />
+    {!bare && <Footer />}
     {/* The star lists every sky paints (increment 32: moved from the
         <head>, where 43 KB of them sat in front of everything the page
         requests). Still parsed before the first paint, which waits on the

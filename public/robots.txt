@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rishi-ventrapragada.vercel.app/sitemap.xml

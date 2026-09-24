@@ -1,0 +1,78 @@
+---
+// The not-found page (PRD §3, increment 32): Vercel serves dist/404.html for
+// any unknown path, which until now answered with a plain-text NOT_FOUND. The
+// site's own ground and type — a sky, the crimson eyebrow, a display
+// heading — and one way out. A bare layout: the nav's anchors and the
+// credits only exist on the home page. The copy is the owner's.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Starfield from "../components/Starfield.astro";
+---
+
+<BaseLayout
+  title="Page not found — Sai Rishi Ventrapragada"
+  description="Portfolio of Sai Rishi Ventrapragada, CSE (Data Science) student at VJIT building with React, Astro and Supabase."
+  bare
+>
+  <section class="lost" aria-labelledby="lost-heading">
+    {/* Variant 2, the sky Skills' video-editing half used until increment
+        31: no other page shows it. */}
+    <Starfield variant={2} />
+    <div class="shell text">
+      <p class="label eyebrow">404</p>
+      <h1 id="lost-heading" class="heading">Page not found</h1>
+      <a class="label home" href="/">Back to the site</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* One screen, the content in the shell's left column like every section
+     heading on the site, set a little above centre. */
+  .lost {
+    position: relative;
+    display: grid;
+    align-items: center;
+    min-height: 100dvh;
+    padding-block: var(--rhythm) calc(var(--rhythm) * 1.5);
+    box-sizing: border-box;
+  }
+
+  .text {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .eyebrow {
+    margin: 0 0 1rem;
+    color: var(--accent);
+  }
+
+  .heading {
+    margin: 0 0 2rem;
+    font-size: clamp(2.25rem, 7vw, 4.5rem);
+  }
+
+  /* The project links' underline style (ProjectLinks.astro). */
+  .home {
+    display: inline-block;
+    padding-block: 0.25rem;
+    color: var(--fg);
+    border-bottom: 1px solid var(--line);
+    transition:
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .home:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home {
+      transition: none;
+    }
+  }
+</style>
