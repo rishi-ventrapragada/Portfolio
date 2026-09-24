@@ -8,9 +8,9 @@
 //
 // Increment 23: the credit lines ACCUMULATE. Each scroll zone adds one line
 // and keeps the ones before it, so the block assembles in place
-// (FooterCredits.astro). Since increment 30 there are six credit stages — a
-// blank screen, then one line per zone up to the name, which holds the
-// complete block — and the last zone cross-fades to the contact screen.
+// (FooterCredits.astro). One line per zone up to the name, which holds the
+// complete block (increment 33 dropped increment 30's blank first stage),
+// and the last zone cross-fades to the contact screen.
 // scripts/footer-scrub.ts owns the zones and the keyboard reveal.
 import FooterContact from "./FooterContact.astro";
 import FooterCredits from "./FooterCredits.astro";
@@ -66,7 +66,7 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
 
       {/* Both stages are in the HTML, stacked in one grid cell, so the swap
           is a cross-fade in a box that never moves. The credits stage is
-          active from the server with no line shown: the blank first stage. */}
+          active from the server with its first line shown (zone 0). */}
       <div class="stack" data-credits-stack data-lines={creditLines.length}>
         <FooterStage id="credits" active>
           <FooterCredits lines={creditLines} />
@@ -96,12 +96,12 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
   }
 
   /* --pin-length is the one number to tune: the scroll distance the track
-     occupies. The pin travels (--pin-length − 100dvh), split evenly into a
-     blank zone, one zone per credit line (the name's doubles as the hold)
-     and the contact screen — seven zones for five lines, 40vh each, the
-     same zone length as before increment 30. */
+     occupies. The pin travels (--pin-length − 100dvh), split evenly into
+     one zone per credit line (the name's doubles as the hold) and the
+     contact screen — six zones for five lines, 25vh each (increment 33;
+     40vh and a blank first zone before, 380vh). */
   .track {
-    --pin-length: 380vh;
+    --pin-length: 250vh;
     position: relative;
     height: var(--pin-length);
   }

@@ -5,9 +5,9 @@
 // replacing another. Every line is laid out from the start (hidden with
 // opacity), so the block is already its final size and centred — a line
 // arriving never pushes the others around. scripts/footer-scrub.ts sets
-// data-shown; none is shown from the server (the first stage is blank,
-// increment 30). The last line is the name, in --heading and larger; the
-// rest are accent.
+// data-shown; the server shows the first line, zone 0's state (increment
+// 33 — increment 30's first stage was blank). The last line is the name,
+// in --heading and larger; the rest are accent.
 interface Props {
   lines: readonly string[];
 }
@@ -18,7 +18,7 @@ const { lines } = Astro.props;
 <div class="credits">
   {
     lines.map((line, i) => (
-      <p class:list={["line", { name: i === lines.length - 1 }]} data-credit-line={i}>
+      <p class:list={["line", { name: i === lines.length - 1 }]} data-credit-line={i} data-shown={i === 0 ? "" : undefined}>
         {line}
       </p>
     ))
@@ -65,8 +65,9 @@ const { lines } = Astro.props;
     transition: opacity 480ms ease;
   }
 
-  /* The first stage is blank (increment 30), so the panel arrives with the
-     first line rather than sitting as a dark patch in the empty beam. */
+  /* The panel arrives with the first line rather than sitting as a dark
+     patch in an empty beam (increment 30). Since increment 33 the server
+     shows the first line, so in practice it is always up. */
   .credits:has(.line[data-shown])::before {
     opacity: 1;
   }
