@@ -132,6 +132,8 @@ is 1.84–2.50s (median 2.13) and LCP cannot come before it.
 
 ### What is left (not chased, per the owner)
 
+**Closed by the owner:** PRD §8's target is now ≤ 2.2s under this throttling (real-world mobile LCP is well under 2s). The levers below are **not to be pursued**; they stay listed only as a record.
+
 - **The first paint is the bound.** Both render-blocking stylesheets
   (BaseLayout 6.4 KB + index 5.9 KB — split since the 404 page shares
   styles) land at ~1.42–1.50s; then, at 4× CPU, parsing the 164 KB HTML
