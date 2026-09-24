@@ -5,8 +5,11 @@
 // render as links. `full` (the desktop detail panel) shows any other value
 // as mono text so the placeholder stays visible; `quick` (the always-visible
 // affordances on no-hover devices) simply skips it. The guard itself is
-// src/lib/is-url.ts, shared with the footer since increment 16.
+// src/lib/is-url.ts, shared with the footer since increment 16. Both
+// variants carry the new-tab cue (NewTab.astro, increment 32); the quick
+// row's arrow used to be its own, sighted-only.
 import { isUrl, linkAttrs } from "../lib/is-url";
+import NewTab from "./NewTab.astro";
 
 interface Props {
   links?: { live?: string; repo?: string };
@@ -28,7 +31,7 @@ const rows = [
           <li>
             <a class="label link" href={value} {...linkAttrs(value)}>
               {label}
-              {variant === "quick" && <span aria-hidden="true"> &#8599;</span>}
+              <NewTab href={value} />
             </a>
           </li>
         ) : (

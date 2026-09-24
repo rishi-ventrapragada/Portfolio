@@ -1,0 +1,35 @@
+---
+// The new-tab cue (increment 32) for any link linkAttrs() sends to a new
+// tab: a small arrow for the eye, hidden from assistive tech, and
+// "(opens in new tab)" for a screen reader, visually hidden. Renders
+// nothing for a link that stays in the tab (mailto:, in-page anchors), so a
+// component can pass every href through it.
+import { linkAttrs } from "../lib/is-url";
+
+interface Props {
+  href?: string;
+}
+
+const { href } = Astro.props;
+const newTab = linkAttrs(href).target === "_blank";
+---
+
+{
+  newTab && (
+    <>
+      <span class="arrow" aria-hidden="true">&#8599;</span>
+      <span class="visually-hidden">(opens in new tab)</span>
+    </>
+  )
+}
+
+<style>
+  /* Smaller than the link text and not a letter of it: no tracking, no
+     case change, sitting just off the word. */
+  .arrow {
+    margin-left: 0.3em;
+    font-size: 0.85em;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+</style>

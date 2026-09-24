@@ -8,8 +8,10 @@
 // href while its file is missing and then renders as a dashed placeholder
 // that is not a link, with `pending` as its visible address. Link cards are
 // magnetic on a fine pointer (scripts/magnetic.ts); the placeholder is not.
+// A card that opens a new tab says so (NewTab.astro, increment 32).
 import { linkAttrs } from "../lib/is-url";
 import ContactIcon from "./ContactIcon.astro";
+import NewTab from "./NewTab.astro";
 
 interface Props {
   label: string;
@@ -27,6 +29,11 @@ const { label, href, icon, pending = "[TODO]", prominent = false } = Astro.props
 const address = href
   ? href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "").replace(/^\//, "").replace(/\/$/, "")
   : pending;
+// Where a reader would break it (increment 32): before an address's @ and
+// after a path's slashes. At 320px the mail address broke as
+// "…@gmail.co / m"; <wbr> offers the clean break first, and
+// overflow-wrap: anywhere (below) is left only for a piece that cannot fit.
+const pieces = address.split(/(?=@)|(?<=\/)/);
 ---
 
 {
@@ -34,8 +41,11 @@ const address = href
     <a class:list={["card", { prominent }]} href={href} {...linkAttrs(href)} data-magnetic>
       <ContactIcon name={icon} />
       <span class="text">
-        <span class="label-text">{label}</span>
-        <span class="meta address">{address}</span>
+        <span class="label-text">
+          {label}
+          <NewTab href={href} />
+        </span>
+        <span class="meta address">{pieces.map((piece, i) => (i > 0 ? <><wbr />{piece}</> : piece))}</span>
       </span>
     </a>
   ) : (
