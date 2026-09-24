@@ -16,7 +16,7 @@ import { createStatusWriter } from "./boot-status";
 const STEPS = 24;
 
 /** Module load time, used as the origin for the creep below. */
-const navStart = performance.now();
+const moduleStart = performance.now();
 
 /**
  * True readiness, 0..1, from actual load state.
@@ -50,7 +50,7 @@ function readiness(): number {
   // leaves on the clock instead, so the number keeps inching up — it
   // approaches 1 without arriving, and `load` stays the only thing that
   // reaches 100%.
-  const creep = 1 - Math.exp(-(performance.now() - navStart) / 4000);
+  const creep = 1 - Math.exp(-(performance.now() - moduleStart) / 4000);
   return share + (0.99 - share) * creep;
 }
 
@@ -66,16 +66,21 @@ const toStep = (r: number) => Math.floor(r * STEPS);
  * @param minDwellMs the window the steps are paced across, on the fixed
  *   rhythm in boot-schedule.ts. An instant load still walks every step rather
  *   than flashing to 100%.
- * @param graceMs hard cap on the whole sequence. Armed at t=0, not after the
- *   dwell: a `load` that never fires must not strand the visitor behind the
- *   overlay (the increment 1.7 bug — do not move this back inside a callback).
+ * @param graceMs hard cap on the whole sequence, counted from navigation
+ *   start (increment 32) — on slow 3G the module itself only ran seconds in,
+ *   and a cap counted from there kept the overlay up 8.5s. Armed at once,
+ *   not after the dwell: a `load` that never fires must not strand the
+ *   visitor behind the overlay (the increment 1.7 bug — do not move this
+ *   back inside a callback).
  */
 export function runBootSequence(minDwellMs: number, graceMs: number): void {
   // The synchronous script in BootPreloader.astro has already removed the
   // overlay for repeat visits and reduced motion, so a miss here means there is
   // nothing to animate.
   const root = document.querySelector<HTMLElement>("[data-boot]");
-  if (!root) return;
+  if (!root || root.hasAttribute("data-out")) return;
+  // Tells the inline backstop in BootPreloader.astro that this cap is armed.
+  root.setAttribute("data-running", "");
 
   try {
     sessionStorage.setItem("boot-seen", "1");
@@ -146,8 +151,10 @@ export function runBootSequence(minDwellMs: number, graceMs: number): void {
     document.body.focus({ preventScroll: true });
   };
 
-  // A stalled asset must never strand the visitor. Armed immediately.
-  const cap = window.setTimeout(() => finish(false), graceMs);
+  // A stalled asset must never strand the visitor. Armed immediately, for
+  // whatever is left of the cap since navigation (performance.now() counts
+  // from the navigation's time origin).
+  const cap = window.setTimeout(() => finish(false), Math.max(0, graceMs - performance.now()));
 
   // Skippable at any time.
   const events = ["pointerdown", "keydown", "wheel", "touchstart", "scroll"] as const;

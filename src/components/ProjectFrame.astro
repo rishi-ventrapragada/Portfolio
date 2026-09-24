@@ -21,9 +21,11 @@ interface Props {
   /** Show the detail in place, on every device, instead of on hover
    * (ProjectsSection.astro decides: one real project). */
   open?: boolean;
+  /** A planned entry's slate shape: the sheet's first real cover. */
+  slateRatio: string;
 }
 
-const { entry, index, open = false } = Astro.props;
+const { entry, index, open = false, slateRatio } = Astro.props;
 const { title, summary, stack, status, links, cover } = entry.data;
 const planned = status === "planned";
 const number = `Frame ${String(index + 1).padStart(3, "0")}`;
@@ -37,10 +39,9 @@ const shown = hasDetail && open;
   {/* Planned only (increment 30): caution tape across the top is the whole
       "not shipped" signal; nothing on the frame is dimmed. */}
   {planned && <HazardTape />}
+  {planned && <PlannedCard title={title} ratio={slateRatio} />}
   {
-    planned ? (
-      <PlannedCard title={title} ratio={`${cover.width} / ${cover.height}`} />
-    ) : (
+    !planned && cover && (
       <div class="cover">
         {/* A screenshot sets its own ratio rather than being cropped. */}
         <Image
@@ -91,13 +92,11 @@ const shown = hasDetail && open;
     }
   }
 
-  /* Light scope (increment 24): the frame is black film lying on the paper
-     page — the page, its gutters and heading stay light. Existing tokens
-     re-pointed on the frame only, so the caption, the quick links and the
-     hover panel (all inside it) follow. The perforations punch through to
-     the paper, as real film does; kept #111214 they measured 1.1:1 on the
-     black. Ratios on --monitor-bg: ink 18.93, muted 7.18. --line is a
-     decorative edge, not text. */
+  /* Light scope (increment 24): the frame is black film on the paper page.
+     Existing tokens re-pointed on the frame only, so the caption, the quick
+     links and the hover panel inside it follow; the perforations punch
+     through to the paper, as real film does (black, they read 1.1:1 on the
+     frame). On --monitor-bg: ink 18.93, muted 7.18; --line is decorative. */
   :global([data-theme="light"]) .frame {
     --bg-raised: var(--monitor-bg);
     --heading: var(--light-bg);

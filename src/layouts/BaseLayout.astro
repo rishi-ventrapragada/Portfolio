@@ -26,6 +26,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* A page's earliest requests (increment 32: the hero's preload), ahead
+        of everything else in the head so the fetch starts with the first
+        bytes of the document. */}
+    <slot name="head" />
 
     {/* Critical paint styles, inline and first: global.css is bundled into an
         external stylesheet, so until that request resolves the document has no
@@ -69,8 +73,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    <StarfieldDefs />
-
     <Font cssVariable="--font-display-src" preload />
     <Font cssVariable="--font-mono-src" />
   </head>
@@ -88,6 +90,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
       <slot />
     </main>
     <Footer />
+    {/* The star lists every sky paints (increment 32: moved from the
+        <head>, where 43 KB of them sat in front of everything the page
+        requests). Still parsed before the first paint, which waits on the
+        render-blocking stylesheet — measured, the boot overlay's first
+        painted frame has its stars on a hard reload and on slow 4G. */}
+    <StarfieldDefs />
   </body>
 </html>
 

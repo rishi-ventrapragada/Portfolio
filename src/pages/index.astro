@@ -10,12 +10,23 @@ import About from "../components/About.astro";
 import SkillsSection from "../components/SkillsSection.astro";
 import ProjectsSection from "../components/ProjectsSection.astro";
 import ExperienceTimeline from "../components/ExperienceTimeline.astro";
+import { heroPreload, heroSizes } from "../lib/hero-image";
 ---
 
 <BaseLayout
   title="Sai Rishi Ventrapragada — Building for the web"
   description="Portfolio of Sai Rishi Ventrapragada, CSE (Data Science) student at VJIT building with React, Astro and Supabase."
 >
+  {/* The LCP element (PRD §8, increment 32): requested from the head at high
+      priority, the same renditions Hero.astro's <Image> picks from. */}
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    imagesrcset={heroPreload.srcSet.attribute}
+    imagesizes={heroSizes}
+    fetchpriority="high"
+  />
   {/* Seams (PRD §5.12). Hero→About keeps the film perforation, told which
       side is light (§5.16) so each half punches its own section's surface.
       About→Skills is a strip of film edge code (EdgeCode.astro, increment

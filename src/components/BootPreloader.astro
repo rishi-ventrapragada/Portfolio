@@ -53,7 +53,22 @@ import { statusFor } from "../scripts/boot-copy";
     // overlay flashes for one fade over a page that is still scrolling.
     if (seen || location.hash || matchMedia("(prefers-reduced-motion: reduce)").matches) {
       el.remove();
+      return;
     }
+    // The grace cap's backstop, 4000ms from navigation start (increment 32).
+    // The module below arms the real cap, but it is deferred until the whole
+    // document has arrived — about 5s on slow 3G — so until it has started
+    // (data-running) this fades the overlay out from wherever it stands.
+    setTimeout(() => {
+      if (!el.isConnected || el.hasAttribute("data-running")) return;
+      try {
+        sessionStorage.setItem("boot-seen", "1");
+      } catch {
+        /* Non-fatal: it may replay next load. */
+      }
+      el.setAttribute("data-out", "");
+      setTimeout(() => el.remove(), 400);
+    }, Math.max(0, 4000 - performance.now()));
   })();
 </script>
 
@@ -64,8 +79,8 @@ import { statusFor } from "../scripts/boot-copy";
   // scale to it): an instant load still walks every step rather than
   // flashing, and the whole overlay is gone in ~2.4s with the fade
   // (increment 29 — the owner's call; 6000 since increment 11 read as a
-  // wait). 4000ms grace cap so a stalled resource can never strand the
-  // visitor for long.
+  // wait). 4000ms grace cap, counted from navigation start (increment 32),
+  // so a stalled resource can never strand the visitor for long.
   runBootSequence(2000, 4000);
 </script>
 

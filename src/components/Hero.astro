@@ -1,9 +1,12 @@
 ---
 // Hero (PRD §5.2): 100dvh, two layers in one grid cell. Layer A, the wordmark
 // and its scroll dissolve, lives in Wordmark.astro (split for the CLAUDE.md §5
-// line cap). This file owns the section and Layer B, the subject cutout.
+// line cap). This file owns the section and Layer B, the subject cutout. Its
+// widths and sizes come from lib/hero-image.ts, which the head's preload
+// shares, so both name the same files.
 import { Image } from "astro:assets";
 import heroSubject from "../assets/hero-subject.png";
+import { heroRatio, heroSizes, heroWidths } from "../lib/hero-image";
 import Starfield from "./Starfield.astro";
 import Wordmark from "./Wordmark.astro";
 ---
@@ -11,7 +14,7 @@ import Wordmark from "./Wordmark.astro";
 {/* data-hero, not an id: every [id] inherits a 5rem scroll-margin from
     global.css, and nothing links here (the nav mark uses `#top`). The nav
     observes this box to hide its progress bar over the hero (PRD §5.1). */}
-<section class="hero" data-hero style={`--subject-ratio: ${(heroSubject.height / heroSubject.width).toFixed(4)}`}>
+<section class="hero" data-hero style={`--subject-ratio: ${heroRatio.toFixed(4)}`}>
   <Starfield />
 
   <Wordmark />
@@ -23,8 +26,8 @@ import Wordmark from "./Wordmark.astro";
     <Image
       src={heroSubject}
       alt="Sai Rishi Ventrapragada"
-      widths={[470, 923]}
-      sizes="(min-width: 768px) 470px, 88vw"
+      widths={heroWidths}
+      sizes={heroSizes}
       loading="eager"
       fetchpriority="high"
       decoding="sync"

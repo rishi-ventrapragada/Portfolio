@@ -18,10 +18,10 @@ const projects = defineCollection({
     z
       .object({
         title: z.string(),
-        // Optional so a planned entry can be title + year + placeholder cover
-        // and nothing else. The refinement below makes summary and stack
-        // required for every other status, so a shipped project can never
-        // silently render empty (CLAUDE.md §7).
+        // Optional so a planned entry can be a title and nothing else. The
+        // refinement below makes summary, stack and cover required for every
+        // other status, so a shipped project can never silently render empty
+        // (CLAUDE.md §7).
         summary: z.string().max(140).optional(),
         stack: z.array(z.string()).optional(),
         // Never printed (PRD §5.3); "planned" dims and dashes the frame.
@@ -36,12 +36,13 @@ const projects = defineCollection({
             repo: z.string().optional(),
           })
           .optional(),
-        cover: image(),
+        // A planned entry has none: its frame shows a slate (PRD §5.3).
+        cover: image().optional(),
         order: z.number(),
       })
       .superRefine((data, ctx) => {
         if (data.status === "planned") return;
-        for (const key of ["summary", "stack"] as const) {
+        for (const key of ["summary", "stack", "cover"] as const) {
           if (data[key] === undefined) {
             ctx.addIssue({
               code: "custom",
