@@ -159,6 +159,8 @@ export function initSkillsGraph(root: HTMLElement): void {
   graph.addEventListener("pointercancel", release);
 
   // --- Keyboard, resize, gates ---------------------------------------------
+  // "nearest" scrolls only when the node would be off-screen; its
+  // scroll-margin (SkillNode.astro) keeps it clear of the nav and the fold.
   const keys = initKeys(list, (id) => {
     sim.nodes.forEach((el, i) => el.toggleAttribute("data-focus", i === id));
     light(id === null || id === 0 ? null : nodeHub[id]);

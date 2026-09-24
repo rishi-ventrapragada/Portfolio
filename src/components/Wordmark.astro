@@ -5,7 +5,8 @@
 //
 // Rendered as inline SVG rather than a text node, because only textLength can
 // pin the glyphs to an exact width at every viewport. The visually hidden <h1>
-// carries the semantics while the SVG does the typography.
+// carries the semantics while the SVG does the typography — the full name
+// (increment 32), where the letters show only the first.
 //
 // The viewBox is the glyphs' painted ink box, measured off a real render
 // rather than taken from font metrics (getBBox and getExtentOfChar both report
@@ -19,7 +20,7 @@ import HeroCaption from "./HeroCaption.astro";
 
 {/* Sticky so it dissolves in place. data-wordmark is the script hook. */}
 <div class="wordmark-wrap" data-wordmark>
-  <h1 class="visually-hidden">Rishi</h1>
+  <h1 class="visually-hidden">Sai Rishi Ventrapragada</h1>
   <div class="letters">
     <svg
       class="wordmark"

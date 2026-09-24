@@ -24,7 +24,13 @@ import Starfield from "./Starfield.astro";
   <Starfield variant={1} />
 
   <p class="label eyebrow">Toolkit</p>
-  <h2 id="skills-heading" class="heading">Skills</h2>
+  {/* The hint (increment 32) is the keyboard route's instructions: the
+      tree's description (skills-keys.ts), and on screen from 960px while
+      the route has focus — nothing else says the arrows work. */}
+  <div class="title">
+    <h2 id="skills-heading" class="heading">Skills</h2>
+    <p class="meta hint" id="skills-hint">Arrow keys move between skills · Home / End jump to the ends</p>
+  </div>
 
   <div class="body">
     <SkillsGraph />
@@ -48,7 +54,7 @@ import Starfield from "./Starfield.astro";
   }
 
   .eyebrow,
-  .heading,
+  .title,
   .body {
     position: relative;
     z-index: 1;
@@ -59,8 +65,36 @@ import Starfield from "./Starfield.astro";
     color: var(--accent);
   }
 
-  .heading {
+  .title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
     margin: 0 0 2rem;
+  }
+
+  .heading {
+    margin: 0;
     font-size: var(--size-h2);
+  }
+
+  /* Below 960px the list is plain markup and there is no route; from 960px
+     the hint keeps its place (visibility, so nothing shifts) and shows
+     while focus is in the list. */
+  .hint {
+    display: none;
+    margin: 0;
+  }
+
+  @media (min-width: 960px) {
+    .hint {
+      display: block;
+      visibility: hidden;
+    }
+
+    .skills:has(.body:focus-within) .hint {
+      visibility: visible;
+    }
   }
 </style>

@@ -1,0 +1,56 @@
+---
+// The Experience timeline's playhead (PRD §5.11): a 2px --accent line over
+// every row with a flag in the ruler. Split from ExperienceTrack.astro for
+// the CLAUDE.md §5 cap (increment 32); rendered inside its positioned rows,
+// whose --head-w it reads. Sits on the first clip without JavaScript;
+// scripts/experience-playhead.ts moves it to the clip the monitor shows.
+---
+
+<div class="playhead" data-playhead aria-hidden="true"></div>
+
+<style>
+  /* Its left edge on the clip's left edge: head + 2px lane padding + the
+     1px the script adds. `left` is fixed; the script only ever changes the
+     transform. */
+  .playhead {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: 1;
+    width: 2px;
+    margin-left: -1px;
+    pointer-events: none;
+    background-color: var(--accent);
+    transform: translateX(calc(var(--head-w) + 3px));
+    transition: transform 200ms ease;
+  }
+
+  .playhead::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -5px;
+    border: 6px solid transparent;
+    border-top: 8px solid var(--accent);
+    border-bottom: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .playhead {
+      transition: none;
+    }
+  }
+
+  /* Forced colours repaint backgrounds as the page ground, so the line and
+     its flag vanished (increment 32): drawn in the system highlight. */
+  @media (forced-colors: active) {
+    .playhead {
+      forced-color-adjust: none;
+      background-color: Highlight;
+    }
+
+    .playhead::before {
+      border-top-color: Highlight;
+    }
+  }
+</style>

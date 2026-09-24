@@ -35,6 +35,12 @@ const { node: n, left, top } = Astro.props;
 </div>
 
 <style>
+  /* scroll-margin (increment 32): the keyboard scrolls a focused node into
+     view with block "nearest" (skills-graph.ts), and a zero-size box would
+     land on the viewport's very edge — under the fixed nav, or with its
+     ring and label below the fold. The margin clears the nav plus the
+     largest ring and a label line on the way in, and the fold on the way
+     out. */
   .node {
     --glow: 14px;
     --core: 2.5px;
@@ -42,6 +48,7 @@ const { node: n, left, top } = Astro.props;
     z-index: 1;
     width: 0;
     height: 0;
+    scroll-margin-block: calc(var(--nav-height) + 3rem) 3rem;
   }
 
   /* Hubs are larger and brighter than leaves; the centre larger still. */
@@ -120,6 +127,25 @@ const { node: n, left, top } = Astro.props;
     opacity: 0.25;
   }
 
+  /* Forced colours drop the gradient glow and repaint the core's fill as
+     the page ground, so every dot vanished (increment 32): the core is
+     drawn in the text colour and the keyboard ring in the highlight. */
+  @media (forced-colors: active) {
+    .core {
+      forced-color-adjust: none;
+      background-color: CanvasText;
+    }
+
+    .planned .core {
+      background: none;
+      border-color: CanvasText;
+    }
+
+    .ring {
+      forced-color-adjust: none;
+      border-color: Highlight;
+    }
+  }
 
   /* Draggable where a fine pointer can hold it (scripts/skills-graph.ts).
      Its own layer there, so moving it is a compositor-only change rather

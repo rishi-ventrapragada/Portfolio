@@ -3,9 +3,10 @@
 // and a decorative A1 track, on one horizontal scroller with sticky track
 // headers, plus the playhead. Every row is `header | lane`, and every lane is
 // the same four-column grid, so ruler ticks, clips and waveforms line up by
-// construction. One clip = ExperienceClip.astro; behaviour lives in
-// scripts/experience-timeline.ts.
+// construction. One clip = ExperienceClip.astro, the playhead
+// ExperiencePlayhead.astro; behaviour lives in scripts/experience-timeline.ts.
 import ExperienceClip from "./ExperienceClip.astro";
+import ExperiencePlayhead from "./ExperiencePlayhead.astro";
 
 interface Props {
   moments: { id: string; year: string; keyword: string; planned?: boolean }[];
@@ -66,9 +67,7 @@ const bars = (seed: number) => {
       </div>
     </div>
 
-    {/* Sits on the first clip without JavaScript; the script moves it to the
-        clip the monitor shows. */}
-    <div class="playhead" data-playhead aria-hidden="true"></div>
+    <ExperiencePlayhead />
   </div>
 </div>
 
@@ -164,37 +163,5 @@ const bars = (seed: number) => {
     width: 100%;
     height: 100%;
     fill: currentColor;
-  }
-
-  /* 2px --accent line over every row, flag in the ruler, its left edge on
-     the clip's left edge: head + 2px lane padding + the 1px the script adds.
-     `left` is fixed; the script only ever changes the transform. */
-  .playhead {
-    position: absolute;
-    inset-block: 0;
-    left: 0;
-    z-index: 1;
-    width: 2px;
-    margin-left: -1px;
-    pointer-events: none;
-    background-color: var(--accent);
-    transform: translateX(calc(var(--head-w) + 3px));
-    transition: transform 200ms ease;
-  }
-
-  .playhead::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -5px;
-    border: 6px solid transparent;
-    border-top: 8px solid var(--accent);
-    border-bottom: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .playhead {
-      transition: none;
-    }
   }
 </style>

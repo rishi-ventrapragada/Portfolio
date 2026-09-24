@@ -18,7 +18,9 @@ import SkillChain from "./SkillChain.astro";
 const hubId = (h: number) => nodes.find((n) => n.kind === "hub" && n.hub === h)!.id;
 ---
 
-<div class="list" data-skills-list>
+{/* The two ids name and describe the list while skills-keys.ts makes it
+    a tree (from 960px, with JS): the section heading and its key hint. */}
+<div class="list" data-skills-list data-labelledby="skills-heading" data-describedby="skills-hint">
   <p class="centre" data-node="0">Skills</p>
   <ul class="hubs">
     {

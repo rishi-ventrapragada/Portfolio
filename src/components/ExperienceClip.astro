@@ -68,12 +68,15 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
       filter: brightness(1.08);
     }
 
-    /* Pressed = the site's active state, as an inset --accent ring over
-       the bottom edge. */
+    /* Pressed = the site's active state, as an inset --accent ring with a
+       2px --timeline-bg band inside it (increment 32): crimson on the tone
+       fills measured only 1.9–2.0:1, under WCAG 1.4.11's 3:1, while the
+       dark band separates the ring from every fill by far more. The band
+       covers the bottom edge, so the edge shadow is gone while pressed. */
     .clip[aria-pressed="true"] {
       box-shadow:
         inset 0 0 0 2px var(--accent),
-        inset 0 -2px 0 var(--edge);
+        inset 0 0 0 4px var(--timeline-bg);
     }
   }
 
@@ -90,6 +93,14 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
     color: var(--fg);
     background-color: color-mix(in srgb, var(--tone) 50%, var(--timeline-bg));
     border-color: var(--tone);
+  }
+
+  /* Its fill is dark, so the band inside the pressed ring is the light ink
+     instead (the dark one measured 2.91:1 against it). */
+  .clip.planned[aria-pressed="true"] {
+    box-shadow:
+      inset 0 0 0 2px var(--accent),
+      inset 0 0 0 4px var(--fg);
   }
 
   .year {
@@ -112,6 +123,18 @@ const { id, year, keyword, tone, pressed, planned = false } = Astro.props;
   @media (prefers-reduced-motion: reduce) {
     .clip {
       transition: none;
+    }
+  }
+
+  /* Forced colours (Windows High Contrast) drop every box-shadow, which
+     left the four clips identical (increment 32): the pressed one gets a
+     3px border in the system highlight instead, its padding 2px smaller so
+     the label does not move. A border, not an outline: the focus ring is
+     the outline, and a focused clip is always the pressed one. */
+  @media (forced-colors: active) {
+    .clip[aria-pressed="true"] {
+      padding: calc(0.25rem - 2px) calc(0.5rem - 2px);
+      border: 3px solid Highlight;
     }
   }
 </style>
