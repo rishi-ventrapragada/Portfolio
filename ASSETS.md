@@ -31,10 +31,21 @@ owner's dialogue in the captions verbatim, and log the files here.
 
 ---
 
-## `public/resume.pdf` `[PENDING — FILE DOES NOT EXIST]`
+## `public/resume.pdf`
 
 | | |
 | --- | --- |
+| Source | Supplied by the owner — the final résumé |
+| Licence | Owner's own material |
+| Date | Added 2026-09-24 (increment 32) |
+| Size | 37 KB, one page, PDF 1.4 |
+
+The footer's résumé card checks for the file at build time
+(`import.meta.glob` in `FooterContact.astro`), so committing it turned the
+dashed "Résumé [TODO]" placeholder into a live link (new tab, measured) with
+no code change.
+
+--- | --- |
 | Source | To be supplied by the owner |
 | Licence | Owner's own material |
 | Date | Not yet added |
@@ -49,10 +60,17 @@ the card into a live link with no code change.
 
 ---
 
-## `src/content/projects/recurzn-cover.png` `[PLACEHOLDER]`
+## `src/content/projects/recurzn-cover.png` — removed (increment 32)
 
-| | |
-| --- | --- |
+The generated 1272 × 700 "RECURZN" placeholder (2026-09-20) is deleted. It
+had not been displayed since increment 29 (the planned frame shows a slate)
+and was kept only for its aspect ratio, but Astro shipped it in every build:
+an imported image that never goes through `<Image>` always deploys its
+original. A planned entry now carries no cover (PRD §5.3, §6); the slate
+takes the first real cover's shape. When Recurzn has a real screenshot, add
+it as the entry's `cover` and log it here.
+
+--- | --- |
 | Source | Generated locally, not obtained externally |
 | Licence | None required — no third-party material |
 | Date | 2026-09-20 |
@@ -120,7 +138,7 @@ Two notes for whoever touches the tile next:
 | Source | Supplied by the owner (Sai Rishi Ventrapragada) — photograph of himself |
 | Licence | Owner's own material; no third-party rights |
 | Date | Added 2026-09-18 (increment 1) |
-| Size | 1.07 MB source; built to 51 KB / 110 KB WebP |
+| Size | 1.07 MB source (not deployed since increment 32); built to 470 / 660 / 923w WebP, 35 / 60 / 95 KB |
 
 Transparent-background cutout used as the hero subject and LCP element
 (PRD §5.2). Logged here retroactively — it predates this file.
@@ -152,3 +170,57 @@ rules change.
 
 The **mail** glyph is a plain hand-drawn envelope, not the Gmail logo: Google's
 brand terms could not be verified (increment 25), so no Google mark is used.
+
+---
+
+## Space Grotesk 700 glyph outlines (in `public/og.png` and the favicon set)
+
+| | |
+| --- | --- |
+| Source | Space Grotesk, static weight-700 instance served by Google Fonts (`fonts.gstatic.com/s/spacegrotesk/v22/…`, TrueType) — the site's own display face |
+| Licence | SIL Open Font License 1.1 (Florian Karsten) — embedding outlines in images and icons is permitted |
+| Date | 2026-09-24 (increment 32) |
+
+The glyphs R, I, S and H were read out of the TTF as quadratic outlines by a
+one-off script in the session scratchpad (recipe in SESSION.md, increment 32)
+and drawn as SVG paths, so the favicon's R no longer depends on a system
+font and the share image needs no font at all. The font file itself is not in
+the repo; the page still loads the face through Astro's Fonts API.
+
+---
+
+## `public/og.png` — the share image
+
+| | |
+| --- | --- |
+| Source | Generated from this repo's own assets |
+| Licence | Owner's own material |
+| Date | 2026-09-24 (increment 32) |
+| Size | 1200 × 630, 267 KB |
+
+The og:image / twitter:image card: RISHI as Space Grotesk 700 outlines in
+`--heading`, 820px wide, behind the hero cutout (`src/assets/hero-subject.png`,
+470px tall, bottom-anchored, its head crossing the letters' lower half at the
+hero's 56% overlap), on `--bg` with the near / mid / far stars of
+`lib/starfield-data.ts` (same seeds). No text; the name is in og:title.
+Colours are read from `global.css` by the generator. Approved by the owner
+before commit. Regenerate (SESSION.md recipe) if the cutout or the tokens
+change.
+
+---
+
+## `public/favicon.svg`, `favicon-32.png`, `icon-192.png`, `apple-touch-icon.png`
+
+| | |
+| --- | --- |
+| Source | Generated from this repo's own assets (one SVG source) |
+| Licence | Owner's own material |
+| Date | 2026-09-24 (increment 32); the SVG's design dates from increment 1 |
+| Size | 622 B SVG; 432 B / 2.4 KB / 1.3 KB PNG |
+
+The increment-1 favicon — a 32px `#111214` rounded square with a `#ff3b5c`
+R, colours unchanged at the owner's request — with the R now a Space Grotesk
+700 path (it was a `<text>` in the system UI font) and its ink centred.
+The PNGs are that SVG rasterised: 32 and 192 with the rounded corners, and a
+180px full-bleed square for iOS, which rounds its own. Approved by the owner
+before commit.
