@@ -4,9 +4,9 @@
 // line cap). This file owns the section and Layer B, the subject cutout. Its
 // widths and sizes come from lib/hero-image.ts, which the head's preload
 // shares, so both name the same files.
-import { Image } from "astro:assets";
+import { Picture } from "astro:assets";
 import heroSubject from "../assets/hero-subject.png";
-import { heroRatio, heroSizes, heroWidths } from "../lib/hero-image";
+import { heroFormats, heroRatio, heroSizes, heroWidths } from "../lib/hero-image";
 import Starfield from "./Starfield.astro";
 import Wordmark from "./Wordmark.astro";
 ---
@@ -25,9 +25,11 @@ import Wordmark from "./Wordmark.astro";
       The PNG's own bottom ~4% fades to transparent, so it dissolves into the
       page instead of showing a cut edge. */}
   <div class="subject">
-    <Image
+    <Picture
       src={heroSubject}
       alt="Sai Rishi Ventrapragada"
+      formats={[...heroFormats]}
+      fallbackFormat="webp"
       widths={heroWidths}
       sizes={heroSizes}
       loading="eager"

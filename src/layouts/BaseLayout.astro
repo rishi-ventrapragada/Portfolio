@@ -102,7 +102,10 @@ const ogAlt = "RISHI in large letters behind a photo of Sai Rishi Ventrapragada,
         hero's preload above is requested first either way. */}
     <StarfieldDefs />
 
-    <Font cssVariable="--font-display-src" preload />
+    {/* No preload for the display face (increment 32.1): it competed with
+        the hero, the LCP element, on a slow link. It swaps in
+        (font-display: swap); the wordmark's textLength keeps its width. */}
+    <Font cssVariable="--font-display-src" />
     <Font cssVariable="--font-mono-src" />
   </head>
   {/* tabindex="-1" so the preloader can move focus here on removal. */}

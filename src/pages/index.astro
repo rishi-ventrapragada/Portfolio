@@ -18,13 +18,14 @@ import { heroPreload, heroSizes } from "../lib/hero-image";
   description="Portfolio of Sai Rishi Ventrapragada, CSE (Data Science) student at VJIT building with React, Astro and Supabase."
 >
   {/* The LCP element (PRD §8, increment 32): requested from the head at high
-      priority, the same renditions Hero.astro's <Image> picks from. */}
+      priority: the AVIF set Hero.astro's <Picture> offers first (32.1). */}
   <link
     slot="head"
     rel="preload"
     as="image"
     imagesrcset={heroPreload.srcSet.attribute}
     imagesizes={heroSizes}
+    type="image/avif"
     fetchpriority="high"
   />
   {/* Seams (PRD §5.12). Hero→About keeps the film perforation, told which
