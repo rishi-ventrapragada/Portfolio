@@ -61,7 +61,12 @@
     0.8px 0 0 var(--bg), -0.8px 0 0 var(--bg), 0 0.8px 0 var(--bg), 0 -0.8px 0 var(--bg);
 }
 
-.visually-hidden {
+/* Read by assistive tech, never drawn. -wide: the same from 960px only
+   (increment 32) — the skills list, which the graph stands in for from
+   there (SkillsList.astro). The hiding is written once for both; below
+   960px the -wide one is simply put back. */
+.visually-hidden,
+.visually-hidden-wide {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -71,4 +76,16 @@
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+@media (max-width: 959.98px) {
+  .visually-hidden-wide {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
 }

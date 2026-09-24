@@ -20,8 +20,8 @@ const hubId = (h: number) => nodes.find((n) => n.kind === "hub" && n.hub === h)!
 
 {/* The two ids name and describe the list while skills-keys.ts makes it
     a tree (from 960px, with JS): the section heading and its key hint. */}
-<div class="list" data-skills-list data-labelledby="skills-heading" data-describedby="skills-hint">
-  <p class="centre" data-node="0">Skills</p>
+<div class="list visually-hidden-wide" data-skills-list data-labelledby="skills-heading" data-describedby="skills-hint">
+  <p class="visually-hidden" data-node="0">Skills</p>
   <ul class="hubs">
     {
       hubs.map((hub, h) => (
@@ -62,28 +62,5 @@ const hubId = (h: number) => nodes.find((n) => n.kind === "hub" && n.hub === h)!
     color: var(--accent);
     background-color: var(--bg);
     border-style: dashed;
-  }
-
-  /* Visually hidden — still read, still focusable: the centre's name
-     always, the whole list from 960px, where the graph shows it (the
-     section's <noscript> rule reverses both for no-JS visitors). */
-  .centre {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  @media (min-width: 960px) {
-    .list {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
   }
 </style>

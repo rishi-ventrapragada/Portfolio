@@ -1,10 +1,10 @@
 ---
-// One comic panel for About.astro (PRD §5.6). A figure: the art block, then
-// a caption box laid over its top-left corner the way a comic caption sits
-// inside the panel. Both are placeholders until the owner supplies art and
+// One comic panel for AboutComic.astro (PRD §5.6; dormant since increment
+// 29). A figure: the art block, then a caption box laid over its top-left
+// corner the way a comic caption sits inside the panel. Both are placeholders until the owner supplies art and
 // dialogue (CLAUDE.md §7): the art is a solid fill from the small palette
 // with a mono tag, the caption is a visible [TODO]. The placement of the
-// establishing panel in the grid belongs to About.astro; this file only
+// establishing panel in the grid belongs to AboutComic.astro; this file only
 // carries the class.
 interface Props {
   n: number;
@@ -56,7 +56,7 @@ const { n, tone, establishing = false } = Astro.props;
     }
   }
 
-  /* Desktop: the grid's rows decide the height (About.astro). */
+  /* Desktop: the grid's rows decide the height (AboutComic.astro). */
   @media (min-width: 768px) {
     .panel {
       aspect-ratio: auto;

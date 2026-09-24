@@ -10,13 +10,14 @@
  * wide, 720 tall). The page places x and y as percentages of a box that is
  * never smaller, and all type in px, so a larger box only spreads nodes
  * apart: what passes here passes at every size. Three checks throw, which
- * fails the build: label boxes closer than 12px within a cluster or 24px
- * across clusters; any two links crossing; any link within 12px of a label
- * or dot it does not end at.
+ * fails the build (skills-checks.ts): label boxes closer than 12px within a
+ * cluster or 24px across clusters; any two links crossing; any link within
+ * 12px of a label or dot it does not end at.
  */
+import { ownCrossings, verify } from "./skills-checks";
 import { hubs, ring, type Tone } from "./skills-data";
-import { crosses, overlap, segBox } from "./skills-geometry";
-import { labelBox, textBox, type Box, type Kind, type Side } from "./skills-metrics";
+import { overlap, segBox } from "./skills-geometry";
+import { labelBox, type Box, type Kind, type Side } from "./skills-metrics";
 
 export const W = 864;
 export const H = 720;
@@ -87,15 +88,11 @@ const same = (p: GraphNode, q: GraphNode) => p.hub === q.hub || p.kind === "cent
 const give = (n: GraphNode) => (n.kind === "centre" ? 0 : n.kind === "hub" ? 0.15 : 1);
 const move = (n: GraphNode, dx: number, dy: number, f: number) => ((n.x += dx * f * give(n)), (n.y += dy * f * give(n)));
 
-/** Links that run through a node's own label (they all end at its dot). */
-const ownCrossings = (n: GraphNode, side: Side) => {
-  const tb = textBox({ ...n, side });
-  return links.filter((l) => (l.a === n.id || l.b === n.id) && segBox(nodes[l.a], nodes[l.b], tb).d < 3).length;
-};
 /** A hub's label goes where its own links are not: under it unless that
  * side is crossed, then over, then beside. */
+const own = (n: GraphNode, side: Side) => ownCrossings(nodes, links, n, side);
 const freeSide = (n: GraphNode): Side =>
-  (["below", "above", "start", "end"] as Side[]).reduce((best, s) => (ownCrossings(n, s) < ownCrossings(n, best) ? s : best), "below");
+  (["below", "above", "start", "end"] as Side[]).reduce((best, s) => (own(n, s) < own(n, best) ? s : best), "below");
 
 const STEPS = 1400;
 for (let step = 0; step < STEPS; step++) {
@@ -161,39 +158,6 @@ for (let step = 0; step < STEPS; step++) {
   }
 }
 
-// The guarantees, asserted and counted.
-const problems: string[] = [];
-let crossings = 0;
-let nearLabels = 0;
-for (let i = 0; i < nodes.length; i++) {
-  const b = box(nodes[i]);
-  if (b.l < 0 || b.t < 0 || b.r > W || b.b > H) problems.push(`${nodes[i].name} leaves the box`);
-  for (let j = i + 1; j < nodes.length; j++) {
-    const gap = same(nodes[i], nodes[j]) ? GAP_IN : GAP_OUT;
-    if (overlap(b, box(nodes[j]), gap)) problems.push(`${nodes[i].name} / ${nodes[j].name} closer than ${gap}px`);
-  }
-}
-links.forEach((l, i) => {
-  const [a, b] = [nodes[l.a], nodes[l.b]];
-  for (const m of links.slice(i + 1)) {
-    if ([m.a, m.b].some((e) => e === l.a || e === l.b)) continue;
-    if (crosses(a, b, nodes[m.a], nodes[m.b])) (crossings++, problems.push(`${b.name} link crosses ${nodes[m.b].name} link`));
-  }
-  for (const n of nodes) {
-    if (n === a || n === b || segBox(a, b, box(n)).d >= CLEAR) continue;
-    nearLabels++;
-    problems.push(`${b.name} link within ${CLEAR}px of ${n.name}`);
-  }
-});
-if (problems.length) throw new Error(`skills-layout: ${problems.length} problems — ${problems.join("; ")}`);
-
-/** What the build verified (all zero, or it would not have built), and how
- * many links run through their own hub's label (reported, not asserted:
- * the centre's eight spokes cannot all miss its label). */
-export const checks = {
-  overlaps: 0,
-  crossings,
-  nearLabels,
-  ownLabelCrossings: nodes.filter((n) => n.kind !== "leaf").map((n) => [n.name, ownCrossings(n, n.side)] as const),
-};
+// The guarantees, asserted and counted (skills-checks.ts).
+export const checks = verify(nodes, links, { W, H, gapIn: GAP_IN, gapOut: GAP_OUT, clear: CLEAR, same });
 export { nodes, links };

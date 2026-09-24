@@ -3,7 +3,6 @@
   "summary": "AI-powered market linkage platform connecting marginalized artisans directly to buyers — built for SIH 2026.",
   "stack": ["React 19", "TypeScript", "Tailwind CSS", "Supabase", "Vercel"],
   "status": "in-progress",
-  "year": 2026,
   "links": {
     "live": "https://kalacart-website.vercel.app/",
     "repo": "https://github.com/rishi-ventrapragada/KalaCart-Website"

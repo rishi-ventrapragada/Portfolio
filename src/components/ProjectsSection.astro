@@ -1,8 +1,8 @@
 ---
 // Projects section (PRD §5.3): a film-strip contact sheet. Reads the
 // collection, so adding an entry is the only work needed to add a frame.
-// `id="projects"` is the nav and skills anchor; the heading keeps its own id
-// for aria-labelledby. One frame = ProjectFrame.astro.
+// `id="projects"` is the nav's anchor; the heading keeps its own id for
+// aria-labelledby. One frame = ProjectFrame.astro.
 import { getCollection } from "astro:content";
 import { imageSize } from "../lib/image-size";
 import ProjectFrame from "./ProjectFrame.astro";

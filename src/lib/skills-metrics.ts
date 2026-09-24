@@ -65,7 +65,7 @@ export function nodeStyle(n: { id: number; kind: Kind; tone: Tone }, left: strin
     `--gap: ${t.gap}px`,
     `--size: ${t.size}px`,
     `--track: ${t.track}em`,
-    `--line: ${t.line}px`,
+    `--line-h: ${t.line}px`,
     `--dur: ${(2.8 + ((n.id * 37) % 23) / 6).toFixed(2)}s`,
     `--delay: ${(-((n.id * 53) % 41) / 7).toFixed(2)}s`,
   ].join("; ");

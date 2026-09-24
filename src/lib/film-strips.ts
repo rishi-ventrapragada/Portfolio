@@ -6,16 +6,7 @@
  * the rest of the site's generated art, so every build is identical.
  */
 
-/** Same PRNG family as starfield-data.ts and skills-layout.ts. */
-function mulberry32(a: number): () => number {
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+import { mulberry32 } from "./prng";
 
 export interface Rect {
   x: number;

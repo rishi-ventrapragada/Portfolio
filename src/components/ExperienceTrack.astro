@@ -7,6 +7,7 @@
 // ExperiencePlayhead.astro; behaviour lives in scripts/experience-timeline.ts.
 import ExperienceClip from "./ExperienceClip.astro";
 import ExperiencePlayhead from "./ExperiencePlayhead.astro";
+import { timecode } from "../lib/timecode";
 
 interface Props {
   moments: { id: string; year: string; keyword: string; planned?: boolean }[];
@@ -15,8 +16,6 @@ interface Props {
 const { moments } = Astro.props;
 // One palette entry per clip (global.css); the fourth is the planned one.
 const tones = ["amber", "sky", "mint", "periwinkle"];
-// Cosmetic ruler timecodes, 15 "seconds" per clip; not a clock.
-const stamp = (i: number) => `00:00:${String(i * 15).padStart(2, "0")}:00`;
 // A1 bars: 40 thin rects of varying height about the midline, from a tiny
 // seeded LCG so every build draws the same waveform. Decoration, not audio.
 const bars = (seed: number) => {
@@ -34,7 +33,7 @@ const bars = (seed: number) => {
     <div class="row ruler" aria-hidden="true">
       <div class="head"></div>
       <div class="lane">
-        {moments.map((_, i) => <div class="tick"><span class="meta">{stamp(i)}</span></div>)}
+        {moments.map((_, i) => <div class="tick"><span class="meta">{timecode(i)}</span></div>)}
       </div>
     </div>
 

@@ -21,11 +21,11 @@ const { text, side } = Astro.props;
      the letters, and no box. Leaves in --fg beside their dot. */
   .name {
     position: absolute;
-    top: calc(var(--line) / -2);
+    top: calc(var(--line-h) / -2);
     font-family: var(--font-mono);
     font-size: var(--size);
     letter-spacing: var(--track);
-    line-height: var(--line);
+    line-height: var(--line-h);
     white-space: nowrap;
     color: var(--fg);
     transition: opacity 200ms ease;

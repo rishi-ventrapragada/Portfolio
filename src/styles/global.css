@@ -41,7 +41,6 @@
   /* Accent — crimson, fixed (increment 29: the owner locked it; the violet
      alternative and its dev-only toggle were removed). */
   --accent: #ff3b5c;
-  --accent-soft: rgba(255, 59, 92, 0.18);
 
   /* Ink on a solid accent fill. Its own token, not --bg: this is "the colour
      that stays legible on the accent", and on a light surface those two part

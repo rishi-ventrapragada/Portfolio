@@ -6,6 +6,7 @@
 // ExperienceTimeline's fixed-height monitor; `data-active` (set by the server for the first, then by the
 // script) decides which one is visible. The timecode is decoration only.
 import { Image } from "astro:assets";
+import { timecode } from "../lib/timecode";
 
 interface Props {
   id: string;
@@ -20,7 +21,6 @@ interface Props {
 }
 
 const { id, index, year, body, active = false, cover, coverAlt } = Astro.props;
-const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
 ---
 
 <article
@@ -50,7 +50,7 @@ const timecode = `00:00:${String(index * 15).padStart(2, "0")}:00`;
       )
     }
   </div>
-  <span class="meta timecode" aria-hidden="true">{timecode}</span>
+  <span class="meta timecode" aria-hidden="true">{timecode(index)}</span>
 </article>
 
 <style>

@@ -26,7 +26,7 @@ const cells = Array.from({ length: CELLS }, (_, i) => i);
     width: clamp(120px, 20vw, 180px);
     aspect-ratio: 1;
     /* Darker than --bg so the unfilled box reads as a distinct object against
-       the noise texture behind it. The gaps show this colour too. */
+       the starfield behind it. The gaps show this colour too. */
     background-color: var(--boot-square-bg);
   }
 
@@ -44,8 +44,7 @@ const cells = Array.from({ length: CELLS }, (_, i) => i);
 
   /* The two newest cells carry the accent until the next step lands, then
      settle to --heading: a leading edge that shows where the fill is now, and
-     the one accent-switchable element on the boot screen (the old ring's job).
-     Chosen over a plain fill by eye, both built (increment 12). */
+     the one accent on the boot screen (the old ring's job). Chosen over a plain fill by eye, both built (increment 12). */
   .boot-cell[data-lead] {
     background-color: var(--accent);
   }

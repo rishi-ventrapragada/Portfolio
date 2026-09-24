@@ -10,7 +10,8 @@ interface Props {
   /** Token suffix: amber | sky | mint | periwinkle → `--word-<tone>`. */
   tone: string;
   pressed: boolean;
-  /** Not shipped yet: the shared `.planned` utility dims and dashes it. */
+  /** Not shipped yet: the shared `.planned` utility dashes its edge; the
+   * clip's own rule replaces the utility's fade (below). */
   planned?: boolean;
 }
 

@@ -41,7 +41,6 @@
   /* The crimson accent fails AA as text on this background (3.14), so the
      light scope carries a darkened variant: the same hue, not a new colour. */
   --accent: #c2183a; /* 5.43:1 on --bg, 6.02:1 on --bg-raised */
-  --accent-soft: rgba(194, 24, 58, 0.16);
 
   /* The ink on a solid accent fill flips with the theme: near-black wins on
      the bright dark-theme accents (5.38 on crimson) and loses on these

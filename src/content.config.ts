@@ -24,9 +24,9 @@ const projects = defineCollection({
         // (CLAUDE.md §7).
         summary: z.string().max(140).optional(),
         stack: z.array(z.string()).optional(),
-        // Never printed (PRD §5.3); "planned" dims and dashes the frame.
+        // Never printed (PRD §5.3); "planned" puts caution tape and a slate
+        // on the frame (HazardTape.astro, PlannedCard.astro).
         status: z.enum(["live", "in-progress", "archived", "planned"]),
-        year: z.number().optional(),
         // Plain strings, not URLs: a value may be a visibly marked "[TODO]"
         // placeholder per CLAUDE.md §7. ProjectLinks renders only real URLs
         // as hrefs and everything else as text.
