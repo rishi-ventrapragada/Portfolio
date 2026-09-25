@@ -84,8 +84,13 @@ const contacts = [
     margin: 0;
     font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 3.5rem);
+    /* No shadow (increment 34): like the credit lines (FooterCredits.astro),
+       a --bg box the width of the words, invisible on the --bg ground,
+       keeps the sky's stars out of them — one beside a stroke measured
+       2.78:1 at 320px. A centred grid item, so the box fits the text. */
+    padding-inline: 0.12em;
+    background-color: var(--bg);
     color: var(--heading);
-    text-shadow: 0 0 0.5rem var(--bg);
   }
 
   /* Three across from 960px, one column below: each card keeps a width

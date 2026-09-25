@@ -16,7 +16,7 @@ import FooterContact from "./FooterContact.astro";
 import FooterCredits from "./FooterCredits.astro";
 import FooterStage from "./FooterStage.astro";
 import LeaderStrip from "./LeaderStrip.astro";
-import ProjectorBeam from "./ProjectorBeam.astro";
+import Starfield from "./Starfield.astro";
 
 // The credit, one line per entry, in the order they build up (the owner's
 // copy, increment 30 — "And" spelled out). Plain text; the zones follow the
@@ -36,8 +36,8 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
       static block, un-stacks the stages into plain flow and shows every
       credit line: the assembled credits, then the contact screen. Short
       screens get the same layout from the media query in the <style>
-      below. The pin keeps clipping sideways: the scrim's negative inset
-      (FooterCredits.astro) would otherwise widen a phone's page. A contact
+      below. The pin keeps clipping sideways, so nothing in it can widen a
+      phone's page (increment 32 added it for a scrim since removed). A contact
       screen taller than its stage grows it, so the © line, pinned to the
       stage's bottom edge, gets room of its own below the résumé. */}
   <noscript>
@@ -46,7 +46,7 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
       [data-credits-pin] { position: static !important; height: auto !important; overflow: clip visible !important; }
       [data-credits-stack] { display: block !important; }
       [data-credits-stage] { opacity: 1 !important; pointer-events: auto !important; transform: none !important; }
-      [data-credit-line], .credits::before { opacity: 1 !important; transform: none !important; }
+      [data-credit-line] { opacity: 1 !important; transform: none !important; }
       [data-contact-anchor] { top: calc(100% - var(--pin-inner) - var(--nav-height)) !important; }
       [data-contact] { padding-bottom: 4.5rem !important; }
     </style>
@@ -60,9 +60,14 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
         starts instead (the <noscript> rule above). */}
     <span class="anchor" id="contact" data-contact-anchor></span>
     <div class="pin" data-credits-pin>
-      {/* Inside the pin, so the beam stays behind the credits for the
-          whole scroll rather than travelling with the track. */}
-      <ProjectorBeam />
+      {/* The site's sky (PRD §5.14), in place of increment 29's projector
+          beam (increment 34): the section ends in the same visual language
+          as Loading, Hero and Skills. Variant 3, the one no other section
+          shows. No meteors: the credits and then the cards fill the middle
+          of the pin, so there is no text-free lane (the Skills rule,
+          increment 32). Inside the pin, so it stays put for the whole
+          scroll rather than travelling with the track. */}
+      <Starfield variant={3} meteors={false} />
 
       {/* Both stages are in the HTML, stacked in one grid cell, so the swap
           is a cross-fade in a box that never moves. The credits stage is
@@ -131,7 +136,7 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
   }
 
   /* The stages (FooterStage.astro) all take grid-area 1 / 1 here. Lifted
-     above the projector beam, which sits at z-index 0 in the pin. */
+     above the sky, which sits at z-index 0 in the pin. */
   .stack {
     position: relative;
     z-index: 1;
@@ -154,7 +159,7 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
     :global([data-credits-pin]) { position: static !important; height: auto !important; overflow: clip visible !important; }
     :global([data-credits-stack]) { display: block !important; }
     :global([data-credits-stage]) { opacity: 1 !important; pointer-events: auto !important; transform: none !important; }
-    :global([data-credit-line]), :global(.credits::before) { opacity: 1 !important; transform: none !important; }
+    :global([data-credit-line]) { opacity: 1 !important; transform: none !important; }
     :global([data-contact-anchor]) { top: calc(100% - var(--pin-inner) - var(--nav-height)) !important; }
     :global([data-contact]) { padding-bottom: 4.5rem !important; }
   }

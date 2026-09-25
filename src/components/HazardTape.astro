@@ -1,36 +1,67 @@
 ---
-// Caution tape across the top of a planned project frame (PRD §5.3,
-// increment 30): the "still building this" signal, in place of any dimming —
-// the frame itself stays at full strength. Yellow-and-black diagonal bands,
-// construction-site tape, in the one hazard colour (--hazard). Decorative:
-// no text on it, hidden from assistive tech (the slate says "In production"
-// in real text).
+// Caution tape over a planned project's slate (PRD §5.3): the "still
+// building this" signal, in place of any dimming — the frame itself stays
+// at full strength. Yellow-and-black diagonal bands, construction-site
+// tape, in the one hazard colour (--hazard). Decorative: no text on it,
+// hidden from assistive tech (the slate says "In production" in real text).
 //
-// Laid on at a slight angle and overhanging the frame, like tape stuck
-// across it (the owner's pick over a flat band flush with the edges).
+// Increment 34: an X of two strips, each the full diagonal, corner to
+// corner, like a door taped shut — in place of increment 33's X of two
+// short strips and a third beside it, and increment 30's single band
+// across the top. Rendered by PlannedCard.astro over the slate, so the X
+// spans the picture area's diagonals at any size.
 ---
 
-<div class="tape" aria-hidden="true"></div>
+<div class="tape" aria-hidden="true">
+  <div class="strip down"></div>
+  <div class="strip up"></div>
+</div>
 
 <style>
-  /* Across the top sprocket strip, 8px past each side of the frame and
-     turned 1.5deg. The stops are softened by a pixel so the diagonals
-     render smooth rather than stair-stepped. The overhang stays inside the
-     page gutters (no horizontal overflow at 320px). */
+  /* The layer is the slate's box grown by the tape's overhang (still
+     inside the frame's 0.75rem side margin, so nothing leaves the frame at
+     320px). A size container, so each strip can be as long as a share of
+     its diagonal and turned to it: hypot() and atan2() of the container's
+     own width and height. */
   .tape {
     position: absolute;
-    inset-inline: -0.5rem;
-    top: 0.5rem;
+    inset: -0.375rem;
     z-index: 1;
-    height: 1.25rem;
+    container-type: size;
+    pointer-events: none;
+  }
+
+  /* Centred on the layer, then turned onto a diagonal. Exactly the
+     diagonal's length, so each strip's centre line ends in a corner of the
+     layer (the tape's overhang past the slate's corner) and its square ends
+     lap just over the edge, the way tape wraps a board. The stops are
+     softened by a pixel so the bands render smooth, not stair-stepped. */
+  .strip {
+    --diag: hypot(100cqw, 100cqh);
+    --tilt: atan2(100cqh, 100cqw);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--diag);
+    /* In proportion to the slate, so a phone's small one is not buried:
+       ~10px at 320, capped at 18px from about 768. */
+    height: clamp(0.625rem, 6.5cqh, 1.125rem);
     background: repeating-linear-gradient(
       -45deg,
-      var(--hazard) 0 11.5px,
-      var(--monitor-bg) 12.5px 23.5px,
-      var(--hazard) 24.5px 24.5px
+      var(--hazard) 0 10.5px,
+      var(--monitor-bg) 11.5px 21.5px,
+      var(--hazard) 22.5px 22.5px
     );
     box-shadow: 0 2px 6px var(--shadow);
-    transform: rotate(-1.5deg);
-    pointer-events: none;
+    translate: -50% -50%;
+  }
+
+  /* "\" top-left to bottom-right, "/" bottom-left to top-right. */
+  .down {
+    rotate: var(--tilt);
+  }
+
+  .up {
+    rotate: calc(-1 * var(--tilt));
   }
 </style>

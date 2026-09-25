@@ -110,6 +110,36 @@ placeholders, which CLAUDE.md §7 means for the owner, not for visitors.
 `About.astro` in place of the `.bio` block — one import and one line.
 Don't delete the dormant files as dead code.
 
+## 2026-09-25 — increment 34 (Contact skin)
+
+### Last milestone completed
+
+`contact:` one commit — owner picked **option B** (starfield) of two
+screenshotted backdrops (the other: plain `--bg`). PRD §3, §5.3, §5.8,
+§5.15 and §10 updated.
+
+- `ProjectorBeam.astro` deleted; Footer mounts `<Starfield variant={3}
+  meteors={false} />`.
+- Credit lines and "Get in touch": no text-shadow at all. Each is a `--bg`
+  box the width of its words (invisible on `--bg`, keeps stars out). Name:
+  weight 500, `min(1.1em, 8.2vw)`, 0.08em tracking, −0.08em end margin.
+- Tape: X of two full diagonals (`HazardTape.astro`, drawn by
+  `PlannedCard.astro`, no longer by `ProjectFrame.astro`). Below 360px the
+  slate's `dt` labels translate −0.625rem −0.25rem to clear the `/` arm.
+- Measured (6 viewports × 7 sky frames, every pixel within 2px of a glyph):
+  crimson 5.65, name 17.57, heading 17.57, zero under 4.5. Tape, on ink
+  pixels: TAKE 2px clear at 320, 5 at 340.
+
+### Still open
+
+- Known small tape overlaps: `\` arm grazes SCENE's tips by 3px at 1280;
+  TAKE's "—" by 2–14px between 359 and 480px (it sits at the X's centre).
+- The rest of the working tree (skills graph, experience files, AGENTS.md)
+  was already uncommitted before this increment and was **not** part of
+  this commit. Its status is the owner's call.
+- Probes: this session's scratchpad `h/` — `credits.mjs` (A/B contrast),
+  `heading.mjs`, `tapeink.mjs` (`CSS=` trials), `names.mjs`, `tape.mjs`.
+
 ## 2026-09-24 — increment 32.1 (LCP follow-up)
 
 ### Last milestone completed

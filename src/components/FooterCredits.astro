@@ -26,15 +26,15 @@ const { lines } = Astro.props;
 </div>
 
 <style>
-  /* Increment 30: back to the pre-increment-25 treatment, by the owner's
-     call — a soft --bg scrim behind the block and one soft --bg shadow per
-     line, not increment 25's outline rings and off-white bloom. The scrim
-     is a rounded panel blurred at the edges, so it reads as the backdrop
-     thinning out around the text, not as a box. Increment 32: 70% --bg,
-     not 94 — the lightest that keeps every pixel within 2px of a credit
-     glyph at 4.5:1 over the beam (crimson worst 4.56, seven viewports,
-     seven dust frames; 68% dipped to 4.45), so about twice as much of the
-     beam still shows through at the name stage (PRD §5.8). */
+  /* Increment 34: no shadow, ring or scrim of any kind. Increments 25–33
+     put a --bg edge on the letters to hold them off the projector beam;
+     the beam is gone (Footer.astro mounts the site's sky), and on --bg
+     the crimson is 5.65:1 and the name 17:1 with nothing added (PRD §5.8).
+     What the sky needs is ground, not an edge: each line is a box the
+     width of its words, filled with --bg. On a --bg ground the box itself
+     never shows; it only keeps stars out of the words, where a star beside
+     a stroke measured as low as 1.0:1. Between and around the lines the
+     sky shows as everywhere else. */
   .credits {
     position: relative;
     display: grid;
@@ -52,30 +52,12 @@ const { lines } = Astro.props;
     text-wrap: balance;
   }
 
-  .credits::before {
-    content: "";
-    position: absolute;
-    inset: -2.5rem -3rem;
-    z-index: -1;
-    border-radius: 3rem;
-    background-color: color-mix(in srgb, var(--bg) 70%, transparent);
-    filter: blur(1.25rem);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 480ms ease;
-  }
-
-  /* The panel arrives with the first line rather than sitting as a dark
-     patch in an empty beam (increment 30). Since increment 33 the server
-     shows the first line, so in practice it is always up. */
-  .credits:has(.line[data-shown])::before {
-    opacity: 1;
-  }
-
   .line {
+    justify-self: center;
     margin: 0;
+    padding-inline: 0.12em;
+    background-color: var(--bg);
     color: var(--accent);
-    text-shadow: 0 0 1.25rem var(--bg);
     opacity: 0;
     transform: translateY(0.5em);
     transition:
@@ -83,11 +65,18 @@ const { lines } = Astro.props;
       transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  /* The name reads larger than the stage lines (increment 30), capped by
-     the width so "Ventrapragada" alone still fits a 320px screen. */
+  /* The name is the credit, the lines above it are the roles (increment
+     34): the lighter weight and open tracking set it apart from their
+     heavy crimson, and it stays the largest line (1.1× theirs from 375px
+     up). Capped by the width so "Ventrapragada" alone still fits a 320px
+     screen (241px of 272). The negative end margin takes back the
+     tracking after the last letter, so the name centres on its glyphs. */
   .line.name {
     margin-top: 0.3em;
-    font-size: min(1.35em, 10.5vw);
+    margin-inline-end: -0.08em;
+    font-size: min(1.1em, 8.2vw);
+    font-weight: 500;
+    letter-spacing: 0.08em;
     color: var(--heading);
   }
 
@@ -98,8 +87,7 @@ const { lines } = Astro.props;
 
   /* Lines still accumulate one by one; they just land without moving. */
   @media (prefers-reduced-motion: reduce) {
-    .line,
-    .credits::before {
+    .line {
       transform: none;
       transition: none;
     }
