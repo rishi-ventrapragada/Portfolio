@@ -71,7 +71,8 @@ const creditLines = ["Built", "Designed", "Directed", "And edited by", "Rishi Ve
 
       {/* Both stages are in the HTML, stacked in one grid cell, so the swap
           is a cross-fade in a box that never moves. The credits stage is
-          active from the server with its first line shown (zone 0). */}
+          active from the server with no line shown yet: the first arrives
+          as the pin engages (footer-scrub.ts). */}
       <div class="stack" data-credits-stack data-lines={creditLines.length}>
         <FooterStage id="credits" active>
           <FooterCredits lines={creditLines} />

@@ -149,12 +149,22 @@ screenshotted backdrops (the other: plain `--bg`). PRD §3, §5.3, §5.8,
 - `skills-data.ts` / `skills-layout.ts` showed as modified with no diff
   (stat-dirty only); `git update-index --refresh` cleared them.
 
+### Third commit: credits blank until the pin engages (bug fix)
+
+BUILT showed as soon as the credits track entered the viewport, riding up
+under the countdown leader before the pin engaged (600px early at 1280).
+Cause: `initScrub` clamped negative progress to zone 0, and increment 33
+rendered line 0 as shown from the server. Fix: `initScrub`'s optional
+`before` id (footer passes `"before"` → no lines); server renders none.
+Zones and `--pin-length` unchanged; Experience untouched (passes no
+`before`). Re-verified with `h/regress.mjs` (walk down/up ±2px around
+every boundary, reduce, reload above the pin, Tab jump, nav link, no-JS,
+short screens) at 1280 / 375 / 320 / 1920; `h/seq.mjs` prints the walk.
+
 ### Still open
 
 - Known small tape overlaps: `\` arm grazes SCENE's tips by 3px at 1280;
   TAKE's "—" by 2–14px between 359 and 480px (it sits at the X's centre).
-- `AGENTS.md` (untracked, a Codex copy of CLAUDE.md with stale lines —
-  says @astrojs/react is installed) is still uncommitted. Owner's call.
 - Probes: this session's scratchpad `h/` — `credits.mjs` (A/B contrast),
   `heading.mjs`, `tapeink.mjs` (`CSS=` trials), `names.mjs`, `tape.mjs`.
 

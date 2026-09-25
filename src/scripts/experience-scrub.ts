@@ -8,7 +8,10 @@
 // scroll track ([data-scrub]); since increment 30 the heading is inside it.
 // `pin` is its sticky child: on a short screen the section's CSS un-pins it
 // into the static layout (increment 32), and a static section is read in
-// flow, so scrolling must not change what it shows.
+// flow, so scrolling must not change what it shows. `before` (increment
+// 34, the footer's): an id to commit while the track has not yet reached
+// the top of the viewport — the pin is not engaged, so the first zone is
+// not either. Without it that stretch clamps to the first zone.
 export const isPinned = (pin: HTMLElement | null): boolean => !pin || getComputedStyle(pin).position === "sticky";
 
 export function initScrub(
@@ -16,6 +19,7 @@ export function initScrub(
   ids: readonly string[],
   commit: (id: string) => void,
   pin: HTMLElement | null = null,
+  before?: string,
 ): void {
   let zone = -1;
   let ticking = false;
@@ -32,11 +36,12 @@ export function initScrub(
     const distance = section.offsetHeight - innerHeight;
     if (distance <= 0) return;
     const top = section.getBoundingClientRect().top + scrollY;
-    const progress = Math.min(Math.max((scrollY - top) / distance, 0), 1);
-    const next = Math.min(ids.length - 1, Math.floor(progress * ids.length));
+    const raw = (scrollY - top) / distance;
+    // -2: the "before" state, distinct from -1 (nothing committed yet).
+    const next = before !== undefined && raw < 0 ? -2 : Math.min(ids.length - 1, Math.floor(Math.min(Math.max(raw, 0), 1) * ids.length));
     if (next === zone) return;
     zone = next;
-    commit(ids[next]);
+    commit(next === -2 ? (before as string) : ids[next]);
   };
 
   const schedule = () => {

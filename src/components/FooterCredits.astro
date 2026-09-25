@@ -5,8 +5,10 @@
 // replacing another. Every line is laid out from the start (hidden with
 // opacity), so the block is already its final size and centred — a line
 // arriving never pushes the others around. scripts/footer-scrub.ts sets
-// data-shown; the server shows the first line, zone 0's state (increment
-// 33 — increment 30's first stage was blank). The last line is the name,
+// data-shown; the server shows none, the state before the pin engages
+// (increment 34 — increment 33 showed the first line, so it rode up into
+// view under the leader before any scroll into the pin), and the first
+// line arrives as the pin does. The last line is the name,
 // in --heading and larger; the rest are accent.
 interface Props {
   lines: readonly string[];
@@ -18,7 +20,7 @@ const { lines } = Astro.props;
 <div class="credits">
   {
     lines.map((line, i) => (
-      <p class:list={["line", { name: i === lines.length - 1 }]} data-credit-line={i} data-shown={i === 0 ? "" : undefined}>
+      <p class:list={["line", { name: i === lines.length - 1 }]} data-credit-line={i}>
         {line}
       </p>
     ))

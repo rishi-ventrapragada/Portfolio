@@ -2,12 +2,14 @@
  * Footer credits sequence (PRD §5.8). Two jobs, in its own file for the
  * CLAUDE.md §5 cap:
  *
- * 1. Scroll-zone commit, reusing experience-scrub.ts's initScrub unmodified:
- *    absolute scrollY each frame (direction-free, reversible), one rAF per
- *    event, equal zones — one per credit line, then one for the contact
- *    screen (increment 33: the blank first zone of increment 30 is gone,
- *    so the first line is already up as the pin engages; the name's zone
- *    is also the hold on the assembled block). commit(id)
+ * 1. Scroll-zone commit through experience-scrub.ts's initScrub: absolute
+ *    scrollY each frame (direction-free, reversible), one rAF per event,
+ *    equal zones — one per credit line, then one for the contact screen
+ *    (increment 33 dropped increment 30's blank first zone; the name's
+ *    zone is also the hold on the assembled block). Before the track
+ *    reaches the top, the "before" state shows no line at all (increment
+ *    34): the first arrives as the pin engages, not while the unpinned
+ *    track is still riding up under the leader. commit(id)
  *    is the single state owner. Since increment 23 the lines ACCUMULATE:
  *    each zone adds its line and keeps the ones before it, so the credits
  *    build into one block rather than replacing each other; scrolling back
@@ -35,14 +37,16 @@ export function initFooterStages(root: HTMLElement): void {
 
   const commit = (id: string) => {
     // Zone n shows lines 0..n. The contact zone leaves every line shown,
-    // so going back up from it lands on the whole block.
+    // so going back up from it lands on the whole block. "before" (index
+    // −1) shows none: the track has not reached the top yet, so the pin is
+    // not engaged and nothing of the sequence is up (increment 34).
     const zone = zones.indexOf(id);
     lines.forEach((line, i) => line.toggleAttribute("data-shown", i <= zone));
     const stage = id === "contact" ? "contact" : "credits";
     for (const s of stages) s.toggleAttribute("data-active", s.dataset.creditsStage === stage);
   };
 
-  initScrub(track, zones, commit, pin);
+  initScrub(track, zones, commit, pin, "before");
 
   // A focused link inside a stuck sticky pin never scrolls into view on its
   // own — the browser scrolls the window, the pin absorbs it and the link
