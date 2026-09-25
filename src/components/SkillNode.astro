@@ -6,7 +6,7 @@
 // (lib/skills-metrics.ts), passed in as custom properties, so the label
 // drawn here is the box the layout checked.
 import type { GraphNode } from "../lib/skills-layout";
-import { nodeStyle } from "../lib/skills-metrics";
+import { labelLines, nodeStyle } from "../lib/skills-metrics";
 import SkillLabel from "./SkillLabel.astro";
 
 interface Props {
@@ -31,7 +31,7 @@ const { node: n, left, top } = Astro.props;
 >
   <span class="star"><span class="glow"></span><span class="core"></span></span>
   <span class="ring"></span>
-  <SkillLabel text={n.kind === "leaf" ? n.name : n.name.toUpperCase()} side={n.side} />
+  <SkillLabel lines={labelLines(n.kind, n.name)} side={n.side} />
 </div>
 
 <style>
@@ -41,9 +41,12 @@ const { node: n, left, top } = Astro.props;
      ring and label below the fold. The margin clears the nav plus the
      largest ring and a label line on the way in, and the fold on the way
      out. */
+  /* Increment 33: every star about a third larger (was 14 / 2.5, 28 / 4.5,
+     40 / 6px), matching the larger type and collision discs in
+     lib/skills-metrics.ts. */
   .node {
-    --glow: 14px;
-    --core: 2.5px;
+    --glow: 18px;
+    --core: 3.5px;
     position: absolute;
     z-index: 1;
     width: 0;
@@ -53,13 +56,13 @@ const { node: n, left, top } = Astro.props;
 
   /* Hubs are larger and brighter than leaves; the centre larger still. */
   .node[data-kind="hub"] {
-    --glow: 28px;
-    --core: 4.5px;
+    --glow: 38px;
+    --core: 6.5px;
   }
 
   .node[data-kind="centre"] {
-    --glow: 40px;
-    --core: 6px;
+    --glow: 50px;
+    --core: 8px;
   }
 
   .star {

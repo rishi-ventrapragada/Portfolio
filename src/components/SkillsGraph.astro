@@ -32,6 +32,7 @@ const pctY = (y: number) => `${((y / H) * 100).toFixed(3)}%`;
           data-a={a}
           data-b={b}
           data-hub={nodes[b].hub}
+          data-spoke={a === 0 ? "" : undefined}
           data-learning={learning ? "" : undefined}
           style={`--tone: ${toneVar(nodes[b].tone)}`}
         />
@@ -72,27 +73,35 @@ const pctY = (y: number) => `${((y / H) * 100).toFixed(3)}%`;
     overflow: visible;
   }
 
-  /* Thin, soft: each link in its leaf's colour at low strength, the centre
-     spokes in off-white. Currently learning is dashed. */
+  /* Each link in its hub's colour. Increment 33: heavier, so a hub and
+     its leaves read as one branch rather than a scatter of dots — leaf
+     links 1.5px at 0.5 (were 1px at 0.32), the centre's spokes to each hub
+     2.5px at 0.42, the trunk each branch hangs from. Currently learning is
+     dashed. */
   .links line {
     stroke: var(--tone);
-    stroke-width: 1;
-    stroke-opacity: 0.32;
+    stroke-width: 1.5;
+    stroke-opacity: 0.5;
     transition: stroke-opacity 200ms ease;
   }
 
+  .links line[data-spoke] {
+    stroke-width: 2.5;
+    stroke-opacity: 0.42;
+  }
+
   .links line[data-learning] {
-    stroke-dasharray: 3 4;
+    stroke-dasharray: 4 5;
   }
 
   /* Hover or focus on a cluster: its links brighten, every other one
      recedes (scripts/skills-graph.ts sets data-hl and data-lit). */
   .graph[data-hl] .links line {
-    stroke-opacity: 0.1;
+    stroke-opacity: 0.12;
   }
 
   .graph[data-hl] .links line[data-lit] {
-    stroke-opacity: 0.8;
+    stroke-opacity: 0.9;
   }
 
   @media (prefers-reduced-motion: reduce) {
