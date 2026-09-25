@@ -142,9 +142,9 @@ const { id, index, year, body, active = false, cover, coverAlt } = Astro.props;
     }
   }
 
-  /* Short landscape: the monitor is under 200px tall once the heading band
-     sits in the pin (increment 30), so the sentence is capped by the
-     monitor's height as well and the padding tightens. */
+  /* Short landscape: the screen can be under 200px tall under the
+     monitor's heading row, so the sentence is capped by the screen's
+     height as well and the padding tightens. */
   @media (max-height: 500px) {
     .frame {
       padding-block: 0.75rem 2rem;

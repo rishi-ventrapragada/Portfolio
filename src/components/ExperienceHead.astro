@@ -1,38 +1,27 @@
 ---
-// The Experience heading band (PRD §5.11): eyebrow and h2 over the fifth
-// Starfield, at the top of the pin since increment 30. Split from
-// ExperienceTimeline.astro for the CLAUDE.md §5 cap (increment 32). The sky
-// runs full-bleed and is bounded to this band — the monitor and timeline
-// below are opaque; only the text sits in the shell. The same 160 stars in
-// a band this short sit densely, so the text wears the .halo (utilities.css,
-// increment 32): no star within 3px of a glyph.
-import Starfield from "./Starfield.astro";
+// The Experience heading (PRD §5.11): eyebrow and h2 in the monitor's
+// top-left corner, above the frames, for every clip. Increment 33 moved it
+// into the monitor from a band of its own above it (increment 30), and took
+// that band's Starfield away: the section is the editor alone, and it is
+// the one content section with no sky. On the black monitor there are no
+// stars to clear, so the text needs no .halo. ExperienceTimeline.astro
+// renders it; split for the CLAUDE.md §5 cap.
 ---
 
 <div class="head">
-  <Starfield variant={3} />
-  <div class="shell head-text">
-    <p class="label eyebrow halo">Journey</p>
-    <h2 id="experience-heading" class="heading halo">Experience</h2>
-  </div>
+  <p class="label eyebrow">Journey</p>
+  <h2 id="experience-heading" class="heading">Experience</h2>
 </div>
 
 <style>
-  /* The band runs from the pin's top edge to the monitor's: its top padding
-     is the nav allowance the pin used to carry, so the sky also fills the
-     strip behind the bar and has no bare edge above or below it. Kept
-     compact — every pixel here comes out of the monitor. Positioned so the
-     Starfield bounds itself to it; the text is lifted above the sky. */
+  /* Aligned with every other section's heading (the .shell's left edge
+     and top rhythm, compact); the frames fill the monitor below it. */
   .head {
-    position: relative;
     flex: none;
-    padding-top: calc(var(--nav-height) + 1.25rem);
-    padding-bottom: 1.25rem;
-  }
-
-  .head-text {
-    position: relative;
-    z-index: 1;
+    width: 100%;
+    max-width: var(--max-width);
+    margin-inline: auto;
+    padding: 1.25rem var(--gutter) 0;
   }
 
   .eyebrow {
@@ -45,18 +34,15 @@ import Starfield from "./Starfield.astro";
     font-size: var(--size-h2);
   }
 
-  /* Short landscape (≤500px tall, e.g. 844×390): the band would take the
-     monitor below its content, so eyebrow and heading share one row at a
-     smaller size (ExperienceFrame.astro shrinks its text to match). */
+  /* Short landscape (≤500px tall, e.g. 844×390): eyebrow and heading share
+     one row at a smaller size, so the frames keep their room
+     (ExperienceFrame.astro shrinks its text to match). */
   @media (max-height: 500px) {
     .head {
-      padding-block: calc(var(--nav-height) + 0.5rem) 0.5rem;
-    }
-
-    .head-text {
       display: flex;
       align-items: baseline;
       gap: 1rem;
+      padding-top: 0.5rem;
     }
 
     .eyebrow {

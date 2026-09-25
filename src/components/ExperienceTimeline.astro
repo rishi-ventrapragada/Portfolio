@@ -1,7 +1,7 @@
 ---
-// Experience section (PRD §5.11): a scroll track whose sticky pin holds the
-// heading (back inside the pin since increment 30), then an NLE-style
-// monitor and its timeline.
+// Experience section (PRD §5.11): a scroll track whose sticky pin holds an
+// NLE-style monitor — the heading in its top-left corner since increment
+// 33 — and its timeline.
 // Scrolling the track scrubs the timeline (scripts/experience-scrub.ts);
 // click, keyboard and hover still work (scripts/experience-timeline.ts).
 // Each clip is one moment; the monitor shows the committed one. Body
@@ -11,9 +11,9 @@
 // those sentences, not new copy. KalaCart's cover is the projects
 // collection's real screenshot, reused through <Image> — no new asset. One
 // frame = ExperienceFrame.astro; ruler, tracks and playhead =
-// ExperienceTrack.astro; the heading band = ExperienceHead.astro. Only the
-// heading's text sits in the shell: its sky, the monitor and the timeline
-// run viewport edge to edge.
+// ExperienceTrack.astro; the heading = ExperienceHead.astro. Only the
+// heading's text sits in the shell: the monitor and the timeline run
+// viewport edge to edge. No Starfield (increment 33 removed increment 24's).
 import { getEntry } from "astro:content";
 import ExperienceFrame from "./ExperienceFrame.astro";
 import ExperienceHead from "./ExperienceHead.astro";
@@ -66,25 +66,25 @@ const moments: Moment[] = [
     <style>
       [data-scrub] { height: auto !important; }
       [data-pin] { position: static !important; height: auto !important; }
-      [data-monitor] { flex: none !important; height: 60vh !important; min-height: 340px !important; }
+      [data-monitor] { flex: none !important; height: 60vh !important; min-height: 400px !important; }
     </style>
   </noscript>
 
   {/* The scroll track; .pin sticks inside it for the whole distance (the
-      Wordmark.astro technique) and holds the heading, the monitor and the
-      timeline. */}
+      Wordmark.astro technique) and holds the monitor and the timeline. */}
   <div class="scrub" data-scrub>
     <div class="pin" data-pin>
-      {/* The heading band (increment 30: moved into the pin from above it,
-          where increment 14.1 had put it). */}
-      <ExperienceHead />
-
-      {/* A black screen filling the pinned viewport above the timeline.
-          Every frame is in the HTML, stacked in one grid cell, so a swap is a
+      {/* A black monitor filling the pinned viewport above the timeline:
+          the heading in its corner (increment 33 — it was a band of its own
+          above the monitor, on a sky), then the screen. Every frame is in
+          the HTML, stacked in the screen's one grid cell, so a swap is a
           cross-fade inside a box that never changes size. The first is
           active from the server, so the section reads without JavaScript. */}
       <div class="monitor" data-monitor>
-        {moments.map((moment, i) => <ExperienceFrame {...moment} index={i} active={i === 0} />)}
+        <ExperienceHead />
+        <div class="screen" data-screen>
+          {moments.map((moment, i) => <ExperienceFrame {...moment} index={i} active={i === 0} />)}
+        </div>
       </div>
 
       <div class="track-slot">
@@ -117,26 +117,38 @@ const moments: Moment[] = [
     height: var(--pin-length);
   }
 
-  /* The full viewport; the heading band's top padding clears the fixed
-     nav, which is opaque past the hero. */
+  /* The full viewport; its top padding clears the fixed nav, which is
+     opaque past the hero (the heading band carried it until increment 33).
+     The strip behind the bar is the monitor's black, so no page ground
+     shows between them. */
   .pin {
     position: sticky;
     top: 0;
     display: flex;
     flex-direction: column;
     height: 100dvh;
+    padding-top: var(--nav-height);
+    background-color: var(--monitor-bg);
+  }
+
+  /* --monitor-bg is the site's one pure-black surface (PRD §4.2): the
+     heading (ExperienceHead.astro), then the screen. */
+  .monitor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background-color: var(--monitor-bg);
   }
 
   /* The frames (ExperienceFrame.astro) all take grid-area 1 / 1 here and
-     size their cover in cqh against this box, hence the size container.
-     --monitor-bg is the site's one pure-black surface (PRD §4.2). */
-  .monitor {
+     size their cover in cqh against this box, hence the size container. */
+  .screen {
     flex: 1;
     display: grid;
     min-height: 0;
-    overflow: hidden;
     container-type: size;
-    background-color: var(--monitor-bg);
   }
 
   .track-slot {
@@ -145,17 +157,19 @@ const moments: Moment[] = [
 
   /* Short screens (increment 32): below the height every frame needs, the
      monitor clipped its sentence (0px tall at 400% zoom), so the section
-     takes the no-JS layout above — in flow, a 60vh / 340px monitor, the
-     clips still commit on click and focus. Each band's number is one step
-     above the tallest failing height, scanned every 4px (SESSION.md,
-     increment 32): 532 below 480px wide, 464 to 767, 524 to 959, 576
-     from 960 — above 500px the full heading band returns and the KalaCart
-     frame needed more room than it got. experience-scrub.ts reads the
+     takes the no-JS layout above — in flow, a 60vh / 400px monitor (340
+     before the heading moved into it), the clips still commit on click and
+     focus. Each band's number is one step above the tallest failing
+     height, scanned every 4px with the pin forced on (increment 33): 512
+     below 480px wide, 444 to 767, 348 from 768 — re-measured in
+     increment 34 (PRD §5.11: 31px spare at 348, none clipped down to
+     300px), and kept with no extra margin by the owner's call. The
+     heading band and its sky gone, the monitor has far more room than in
+     increment 32 (532 / 464 / 524 / 576). experience-scrub.ts reads the
      pin's position and stands down while it is static. */
-  @media (max-height: 463.98px),
-    (max-height: 531.98px) and (max-width: 479.98px),
-    (max-height: 523.98px) and (min-width: 768px),
-    (max-height: 575.98px) and (min-width: 960px) {
+  @media (max-height: 347.98px),
+    (max-height: 511.98px) and (max-width: 479.98px),
+    (max-height: 443.98px) and (max-width: 767.98px) {
     .scrub {
       height: auto;
     }
@@ -168,7 +182,7 @@ const moments: Moment[] = [
     .monitor {
       flex: none;
       height: 60vh;
-      min-height: 340px;
+      min-height: 400px;
     }
   }
 </style>

@@ -130,13 +130,31 @@ screenshotted backdrops (the other: plain `--bg`). PRD §3, §5.3, §5.8,
   crimson 5.65, name 17.57, heading 17.57, zero under 4.5. Tape, on ink
   pixels: TAKE 2px clear at 320, 5 at 340.
 
+### Second commit: increment 33 parts 5 and 10 (owner approved)
+
+`skills:` / `experience:` — the work that sat uncommitted in the tree.
+- Skills: nodes and labels ~⅓ larger (`TYPE` in `skills-metrics.ts`),
+  heavier links (leaf 1.5px @0.5, centre spokes 2.5px @0.42), hub names
+  over 14 chars on two lines (`labelLines`). Build asserts 0 overlaps.
+- Experience: heading in the monitor's top-left (`ExperienceHead.astro`
+  inside `.monitor`, frames in `.screen`), its Starfield removed — which
+  also frees variant 3 for Contact (between the two pushes the live page
+  briefly had variant 3 twice). Short-screen thresholds 512 / 444 / 348.
+- The approved "safety margin on the 1280×352 monitor height" was not in
+  the code. Re-measured (`h/expscan.mjs`, `h/exptc.mjs`, pin forced on):
+  no frame clips anywhere down to 300px; 31px spare at 348, frame counter
+  ≥63px clear. **Owner kept 348, no margin** — recorded in PRD §5.11.
+  (`.inner`'s grid box overlaps the counter below ~352 at ≥768; the real
+  elements don't — measure ink/elements, not `.inner`.)
+- `skills-data.ts` / `skills-layout.ts` showed as modified with no diff
+  (stat-dirty only); `git update-index --refresh` cleared them.
+
 ### Still open
 
 - Known small tape overlaps: `\` arm grazes SCENE's tips by 3px at 1280;
   TAKE's "—" by 2–14px between 359 and 480px (it sits at the X's centre).
-- The rest of the working tree (skills graph, experience files, AGENTS.md)
-  was already uncommitted before this increment and was **not** part of
-  this commit. Its status is the owner's call.
+- `AGENTS.md` (untracked, a Codex copy of CLAUDE.md with stale lines —
+  says @astrojs/react is installed) is still uncommitted. Owner's call.
 - Probes: this session's scratchpad `h/` — `credits.mjs` (A/B contrast),
   `heading.mjs`, `tapeink.mjs` (`CSS=` trials), `names.mjs`, `tape.mjs`.
 
