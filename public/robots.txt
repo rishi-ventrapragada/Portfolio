@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rishi-ventrapragada.vercel.app/sitemap.xml
+Sitemap: https://sairishi.me/sitemap.xml
