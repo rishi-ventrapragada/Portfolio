@@ -8,6 +8,12 @@ Things that outlive any one session. Read before refactoring.
 
 ### Set the Vercel alias after every major deployment
 
+**Since 2026-09-27 the live site is `https://sairishi.me`** — a real project
+domain (apex primary, `www` 308 → apex), so it follows production on its own
+and needs no alias. This entry now only keeps the **old** URL current, so
+links shared before the move don't serve a stale build. Verify live checks on
+`sairishi.me` first; the alias second.
+
 The owner approved this as a standing action on 2026-09-19. After a push that
 deploys real user-visible work, wait for the build to reach `Ready`, then:
 
@@ -27,8 +33,9 @@ branch `main`, and every deployment in the history before increment 8 has
 `vercel --prod`.**
 
 The real reason the alias is manual: `rishi-ventrapragada.vercel.app` is **not
-a domain on the project**. The only project domain is the auto-assigned
-`*.vercel.app` one, which *does* auto-follow production. The vanity URL is a bare alias pointing at one specific deployment
+a domain on the project**. The project domains are `sairishi.me`,
+`www.sairishi.me` and the auto-assigned `*.vercel.app` one, which all
+auto-follow production. The vanity URL is a bare alias pointing at one specific deployment
 id, so nothing moves it but a hand-run `vercel alias set`. A green build and a
 live deployment URL still do **not** mean the vanity URL moved. This has gone
 stale twice (increments 1.6 and again through 1.9→5).
@@ -39,10 +46,10 @@ auto-assigned one does, and retire this whole entry. Owner's call.
 
 The local Vercel CLI is authenticated as `rishi-ventrapragada` and this works.
 (The Vercel **MCP connector** is signed in to a different
-account and cannot see this project. Don't use it here.)
-
-A custom domain added in the dashboard tracks production automatically and would
-retire this whole entry.
+account and cannot see this project. Don't use it here.) Domain settings can
+be changed from the CLI: `vercel api -X PATCH
+/v9/projects/<projectId>/domains/<name>?teamId=<orgId> --input -` with a JSON
+body (ids in `.vercel/project.json`).
 
 ### Nav capacity — four links fit on phones only by a step-down (increment 13)
 
@@ -109,6 +116,26 @@ placeholders, which CLAUDE.md §7 means for the owner, not for visitors.
 **When real panel art and captions exist**, render `<AboutComic />` in
 `About.astro` in place of the `.bio` block — one import and one line.
 Don't delete the dormant files as dead code.
+
+## 2026-09-27 — custom domain sairishi.me
+
+### Last milestone completed
+
+`chore: move site URL to sairishi.me` (`c8cf9f5`): `site` in
+`astro.config.mjs`, plus `public/robots.txt` and `public/sitemap.xml`, which
+hard-code the origin and do **not** follow `Astro.site` — change them together.
+
+- Git: GitHub now blocks pushes that expose the gmail address. This repo's
+  local `user.email` is the noreply
+  `234424784+rishi-ventrapragada@users.noreply.github.com` (owner's call);
+  global config untouched. Earlier commits keep the gmail author.
+- Vercel domains (owner's call): apex `sairishi.me` primary, `www` 308 → apex
+  (was the reverse). Old alias moved to the `c8cf9f5` deploy.
+- Verified live: `sairishi.me/`, `/sitemap.xml`, `/robots.txt`, `/og.png` all
+  200 with 0 redirects. `www` and `http://` → apex in one hop. Canonical,
+  `og:url`, `twitter:url`, sitemap `<loc>` and robots `Sitemap:` all
+  `https://sairishi.me/`. `/about/` → `/#about` still works. Old
+  `rishi-ventrapragada.vercel.app` serves 200 with the sairishi.me canonical.
 
 ## 2026-09-25 — increment 34 (Contact skin)
 
